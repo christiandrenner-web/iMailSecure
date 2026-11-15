@@ -6,13 +6,13 @@ Datenschutz-Leitsätze. `CLAUDE.md` verweist nur hierher.
 
 ## Projekt
 
-Datenschutzfreundlicher E-Mail-Client für iOS (SwiftUI, IMAP/SMTP über SwiftMail).
+Datenschutzfreundlicher E-Mail-Client für **iOS 18+** und **macOS 15+** (SwiftUI, IMAP/SMTP über SwiftMail).
 Vorbild und Messlatte: **FairEmail** von Marcel Bokhorst.
-Ziel ist keine „E-Mail-App mit Privacy-Feature", sondern **Privacy als Architektur**.
+Ziel ist keine „E-Mail-App mit Privacy-Feature“, sondern **Privacy als Architektur**.
 
-- Pfad: `~/XCODE/iMailSecure`
-- App-Target: `iMailSecure` (iOS, Bundle-ID `io.imailsecure.app`)
-- Projektdatei: `project.yml` ist die **Quelle der Wahrheit** (XcodeGen).
+- Pfad: `~/XCODE/iMailSecure` (Ordner **intern** „Fair-iMail“, nach außen **ausschließlich „iMail Secure“**)
+- App-Targets: `iMailSecure` (iOS, Bundle-ID `io.imailsecure.app`) + `iMailSecure-macOS` (macOS, Bundle-ID `io.imailsecure.app.macos`)
+- Projektdatei: `project.yml` ist die **Quelle der Wahrheit** (XcodeGen, Multi-Target).
   `iMailSecure.xcodeproj` ist generiert — nicht von Hand editieren, außer es geht nicht anders,
   und dann `project.yml` nachziehen.
 
@@ -44,7 +44,7 @@ Ziel ist keine „E-Mail-App mit Privacy-Feature", sondern **Privacy als Archite
     Begründung, warum nicht.
 11. **Datenschutz ist nie kostenpflichtig.** Die Bezahlversion verkauft Bequemlichkeit
     (mehrere Konten, mehr Ordner, gemeinsamer Posteingang), niemals Sicherheit. HTML-Blocker,
-    Tracking-Schutz, Zertifikat-Pinning und „keine Telemetrie" bleiben in der kostenlosen
+    Tracking-Schutz, Zertifikat-Pinning und „keine Telemetrie“ bleiben in der kostenlosen
     Version. Details: `MONETIZATION.md`.
 
 ## Kontext & Antworten (Token sparen)
@@ -55,10 +55,10 @@ Ziel ist keine „E-Mail-App mit Privacy-Feature", sondern **Privacy als Archite
   Keine Prosa, keine Wiederholung des Auftrags.
 - **Ein Fehler pro Antwort.** Mehrere Befunde → nach Schwere (K/H/M/N) trennen.
 - **Nach jedem Fix:** Build/Test laut Hook ausführen, Ergebnis in `STATE.md` eintragen.
-  „Behoben" ohne Build-Log ist unzulässig.
+  „Behoben“ ohne Build-Log ist unzulässig.
 - **Kaltstart:** bei > 60 % Kontext oder nach 3 erledigten Punkten `STATE.md` aktualisieren
   und Kaltstart anfordern. `STATE.md` max. 40 Zeilen; erledigte Zeilen nach
-  „Zuletzt erledigt" (max. 3), ältere löschen.
+  „Zuletzt erledigt“ (max. 3), ältere löschen.
 - **Nicht raten:** fehlt Datei/Zeile/Log, gezielt nachfragen statt Code erfinden.
 
 ## Rollen & Delegation
@@ -82,13 +82,17 @@ Ziel ist keine „E-Mail-App mit Privacy-Feature", sondern **Privacy als Archite
 # Vor dem Anfangen
 git status                      # muss clean sein, sonst erst committen
 
-# Bauen
+# Bauen (iOS)
 xcodebuild -scheme iMailSecure \
   -destination 'platform=iOS Simulator,name=iPad Pro 13-inch (M5)' build
 
-# Testen
+# Testen (iOS)
 xcodebuild -scheme iMailSecure \
   -destination 'platform=iOS Simulator,name=iPad Pro 13-inch (M5)' test
+
+# Bauen (macOS, geplant)
+xcodebuild -scheme iMailSecure-macOS \
+  -destination 'platform=macOS' build
 
 # Projektdatei neu erzeugen (nach Änderungen an project.yml)
 xcodegen generate
@@ -104,14 +108,15 @@ xcodegen generate
   mit Datum und wer es gemacht hat.
 - **Keine Dateien löschen oder umbenennen**, ohne vorher zu prüfen, wer sie benutzt
   (`grep`/Graph).
-- Nach dem Bauen: **Build-Warnungen ernst nehmen**, nicht „später".
+- Nach dem Bauen: **Build-Warnungen ernst nehmen**, nicht „später“.
 
 ## Verboten
 
 - `sudo`-Aufrufe, die das Projekt oder Toolchains verändern.
 - Secrets, Zertifikate, `.p12`, `.mobileprovision`, `.env` committen.
 - Neue Netzwerk-Endpunkte ohne TLS und ohne Dokumentation im Code.
-- „Nur mal schnell" `project.yml` und `pbxproj` auseinanderlaufen lassen.
+- „Nur mal schnell“ `project.yml` und `pbxproj` auseinanderlaufen lassen.
+- **Projektname „Fair-iMail“ nach außen verwenden** — ausschließlich **„iMail Secure“** in Doku, UI, Website, App Store, Commits.
 
 ## Offene Architekturentscheidungen
 
@@ -122,20 +127,24 @@ xcodegen generate
 | S5 | OAuth 2.0 (Google/Outlook) vs. nur App-Passwörter | offen |
 | S6 | Entwürfe lokal speichern (verschlüsselt) | offen |
 | C1 | PGP/S/MIME: Drittbibliothek ja/nein | offen |
-| L1 | Lizenz: source-available, nicht-kommerziell | ✅ entschieden (Option B, 2026-11-01) |
+| L1 | Lizenz: **Dual Licensing** (Noncommercial + Commercial) | ✅ entschieden (2026-11-15) |
 | M1 | Monetarisierung: Free-Tier + Pro-Abo (StoreKit 2, Trial über Apple) | ✅ entschieden (2026-11-02) |
+| macOS | macOS 15+ Target vorbereiten (gemeinsame Codebasis) | 🟡 geplant |
 
 ## Lizenz
 
-**PolyForm Noncommercial 1.0.0** (`LICENSE`): Quellcode einsehbar, keine
-kommerzielle Nutzung durch Dritte. Das ist **kein Open Source** — weder in der
-Doku noch in der App so nennen. Beiträge nur mit `CLA.md` mergen. Der
-Rechteinhaber (Christian Renner) darf selbst kommerziell vertreiben.
+**Dual Licensing** (entschieden 2026-11-15):
+
+- **Nicht-kommerziell:** [PolyForm Noncommercial 1.0.0](LICENSE-NONCOMMERCIAL.md) — Quellcode einsehbar, keine kommerzielle Nutzung durch Dritte
+- **Kommerziell:** [iMail Secure Commercial License](LICENSE-COMMERCIAL.md) — entgeltlich (Pro Seat, Enterprise Flat, Lifetime, Revenue Share)
+- Übersicht: [LICENSE.md](LICENSE.md)
+
+**Das ist kein Open Source** — weder in der Doku noch in der App so nennen. Korrekt: „Source-Available“, „Dual Licensed“, „Quellcode einsehbar“.
+
+Beiträge nur mit [CLA.md](CLA.md) mergen — räumt kommerzielle Verwertung & Relizenzierung ein.
 
 Pflichten daraus:
-
-- Bei Veröffentlichung des Codes die Lizenz mitliefern (PolyForm § Notices).
-- In App Store Connect eine eigene EULA hinterlegen, sonst gilt Apples
-  Standard-EULA und die Nicht-kommerziell-Klausel greift nicht.
-- Fremden Code ohne CLA nicht übernehmen — er wäre nicht kommerziell
-  verwertbar.
+- Bei Veröffentlichung des Codes die jeweilige Lizenz mitliefern (PolyForm § Notices / Commercial License § 5 Attribution).
+- In App Store Connect **eigene EULA** hinterlegen (sonst gilt Apples Standard-EULA und die Nicht-kommerziell-Klausel greift nicht).
+- Fremden Code ohne CLA nicht übernehmen — er wäre nicht kommerziell verwertbar.
+- **Projektname nach außen: ausschließlich „iMail Secure“**.

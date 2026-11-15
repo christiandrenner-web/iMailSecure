@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+
+  <!-- ─── App Identity ─────────────────────────────────────────── -->
+  <key>CFBundleIdentifier</key>
+  <string>io.imailsecure.app.macos</string>
+
+  <key>CFBundleName</key>
+  <string>iMail Secure</string>
+
+  <key>CFBundleDisplayName</key>
+  <string>iMail Secure</string>
+
+  <key>CFBundleVersion</key>
+  <string>1</string>
+
+  <key>CFBundleShortVersionString</key>
+  <string>1.0.0</string>
+
+  <key>CFBundlePackageType</key>
+  <string>APPL</string>
+
+  <key>CFBundleExecutable</key>
+  <string>$(EXECUTABLE_NAME)</string>
+
+  <key>CFBundleDevelopmentRegion</key>
+  <string>de</string>
+
+  <key>CFBundleInfoDictionaryVersion</key>
+  <string>6.0</string>
+
+  <!-- ─── Supported Platforms ──────────────────────────────────── -->
+  <key>LSMinimumSystemVersion</key>
+  <string>15.0</string>
+
+  <key>LSRequiresIPhoneOS</key>
+  <false/>
+
+  <key>NSPrincipalClass</key>
+  <string>NSApplication</string>
+
+  <key>NSMainNibFile</key>
+  <string>MainMenu</string>
+
+  <!-- ─── SwiftUI Scene (macOS 14+) ────────────────────────────── -->
+  <key>NSApplicationSceneManifest</key>
+  <dict>
+    <key>NSApplicationSupportsMultipleScenes</key>
+    <true/>
+  </dict>
+
+  <!-- ─── App Transport Security ───────────────────────────────── -->
+  <key>NSAppTransportSecurity</key>
+  <dict>
+    <key>NSAllowsArbitraryLoads</key>
+    <false/>
+  </dict>
+
+  <!-- ─── Privacy Usage Descriptions (App Store Pflicht) ──────── -->
+  <key>NSFaceIDUsageDescription</key>
+  <string>iMail Secure kann Touch ID verwenden, um deine E-Mails zu schützen.</string>
+
+  <!-- ─── Background Modes ─────────────────────────────────────── -->
+  <key>NSSupportsAutomaticGraphicsSwitching</key>
+  <true/>
+
+  <!-- ─── Launch Screen / Window ───────────────────────────────── -->
+  <key>NSHumanReadableCopyright</key>
+  <string>© 2026 Christian Renner – iMail Secure</string>
+
+  <!-- ─── Encryption ───────────────────────────────────────────── -->
+  <key>ITSAppUsesNonExemptEncryption</key>
+  <false/>
+
+  <!-- ─── Document Types (für .eml Import) ─────────────────────── -->
+  <key>CFBundleDocumentTypes</key>
+  <array>
+    <dict>
+      <key>CFBundleTypeName</key>
+      <string>E-Mail Nachricht</string>
+      <key>CFBundleTypeRole</key>
+      <string>Viewer</string>
+      <key>LSHandlerRank</key>
+      <string>Default</string>
+      <key>LSItemContentTypes</key>
+      <array>
+        <string>com.apple.mail.emlx</string>
+        <string>public.mime-message</string>
+        <string>public.eml</string>
+      </array>
+    </dict>
+  </array>
+
+</dict>
+</plist>

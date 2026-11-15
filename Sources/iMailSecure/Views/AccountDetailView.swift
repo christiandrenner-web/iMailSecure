@@ -23,7 +23,7 @@ struct AccountDetailView: View {
             Section {
                 TextField("Server", text: $account.imapHost)
                     .autocorrectionDisabled()
-                    .textInputAutocapitalization(.never)
+                    .platformNoAutocapitalization()
 
                 Picker("Sicherheit", selection: $account.imapSecurity) {
                     ForEach(ConnectionSecurity.allCases, id: \.self) { mode in
@@ -53,7 +53,7 @@ struct AccountDetailView: View {
             Section {
                 TextField("Server", text: $account.smtpHost)
                     .autocorrectionDisabled()
-                    .textInputAutocapitalization(.never)
+                    .platformNoAutocapitalization()
 
                 Picker("Sicherheit", selection: $account.smtpSecurity) {
                     ForEach(ConnectionSecurity.allCases, id: \.self) { mode in
@@ -114,7 +114,7 @@ struct AccountDetailView: View {
             }
         }
         .navigationTitle(account.displayName)
-        .navigationBarTitleDisplayMode(.inline)
+        .inlineNavigationTitle()
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
                 Button("Speichern") { save() }

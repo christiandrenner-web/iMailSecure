@@ -14,6 +14,8 @@ struct iMailSecureApp: App {
     /// → verhindert dass Mail-Inhalte im App-Umschalter sichtbar sind
     @State private var isObscured = false
 
+    @Environment(\.scenePhase) private var scenePhase
+
     var body: some Scene {
         WindowGroup {
             ContentView()
@@ -31,19 +33,13 @@ struct iMailSecureApp: App {
                 }
                 // Sichtschutz-Overlay
                 .overlay(privacyOverlay)
-                // Hintergrund → Inhalt verbergen
-                .onReceive(
-                    NotificationCenter.default.publisher(
-                        for: UIApplication.willResignActiveNotification)
-                ) { _ in
-                    withAnimation(.easeIn(duration: 0.15)) { isObscured = true }
-                }
-                // Vordergrund → Inhalt wieder zeigen
-                .onReceive(
-                    NotificationCenter.default.publisher(
-                        for: UIApplication.didBecomeActiveNotification)
-                ) { _ in
-                    withAnimation(.easeOut(duration: 0.15)) { isObscured = false }
+                // Szene wechselt (Hintergrund, inaktiv, aktiv) → Inhalt
+                // verbergen bzw. wieder zeigen. scenePhase gibt es auf iOS
+                // und macOS gleichermaßen.
+                .onChange(of: scenePhase) { _, newPhase in
+                    withAnimation(.easeInOut(duration: 0.15)) {
+                        isObscured = newPhase != .active
+                    }
                 }
         }
     }

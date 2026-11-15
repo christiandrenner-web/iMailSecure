@@ -1,8 +1,22 @@
 # AUDIT_NOTES.md — iMail Secure
 **Erstellt:** 2026-10-31  
-**Auditor:** Claude (Anthropic) – pedantischer IT-Security-Auditor, Orientierung an FairEmail (Marcel Bockhorst)  
+**Auditor:** Claude (Anthropic) – pedantischer IT-Security-Auditor, Orientierung an FairEmail (Marcel Bokhorst)  
 **Projektpfad:** `/Users/christianrenner/XCODE/iMailSecure/iMailSecure.xcodeproj`  
 **Graph:** 312 Knoten, 574 Kanten, 15 Communities (graphify-out/graph.json)
+
+---
+
+## Änderungen 2026-11-15 (Dual Licensing Finalisierung)
+
+- **L1 entschieden (Dual Licensing):** Option B (PolyForm Noncommercial) erweitert um **eigene Commercial License** (`LICENSE-COMMERCIAL.md`).
+  - Nicht-kommerziell: PolyForm Noncommercial 1.0.0 (`LICENSE-NONCOMMERCIAL.md`)
+  - Kommerziell: iMail Secure Commercial License (`LICENSE-COMMERCIAL.md`) — 4 Modelle (Pro Seat, Enterprise Flat, Lifetime, Revenue Share)
+  - Übersicht: `LICENSE.md`
+- **Projektname nach außen:** Ausdrücklich **nur „iMail Secure“** — Ordnername „Fair-iMail“ ist intern, taucht nirgendwo in Doku/UI/Website/App Store auf.
+- **macOS Target:** `project.yml` um `iMailSecure-macOS` Target erweitert (macOS 15+, Bundle-ID `io.imailsecure.app.macos`), neue Resource-Dateien `Info-macOS.plist`, `iMailSecure-macOS.entitlements`.
+- **Domain/Email:** `fairimail.io` → **`imailsecure.app`** (Registrierung offen). E-Mail: `license@imailsecure.app` (iCloud+ Custom Domain, Setup offen).
+- **Marke:** DPMA Anmeldung „iMail Secure“ (Klasse 9 + 42) vorbereitet — günstigste Variante: Klasse 9 nur = 190 €.
+- **README.md, LICENSING.md, CLA.md, AGENTS.md, CLAUDE.md, MONETIZATION.md, project.yml** vollständig auf Dual Licensing, iMail Secure, macOS aktualisiert.
 
 ---
 
@@ -67,9 +81,9 @@ Konzept gut, Umsetzung unvollständig. Viele Schutzfunktionen existieren als UI-
 - **Betroffene Dateien:** `iMailSecure.xcodeproj/project.pbxproj`, `Package.resolved`
 
 ### N4 (M) Logging enthält sensitive Inhalte
-- `logger.info("Sende '\(draft.subject)' via \(account.smtpHost):\(account.smtpPort)")` → Betreff + Host in Konsole.
-- `logger.info("MDN gesendet für: \(message.subject)")` → Betreff in Konsole.
-- `logger.info("INBOX: \(total) Nachrichten")` → unkritisch, aber Pattern setzt sich fort.
+- `logger.info("Sende '\\(draft.subject)' via \\(account.smtpHost):\\(account.smtpPort)")` → Betreff + Host in Konsole.
+- `logger.info("MDN gesendet für: \\(message.subject)")` → Betreff in Konsole.
+- `logger.info("INBOX: \\(total) Nachrichten")` → unkritisch, aber Pattern setzt sich fort.
 - **Fix:** In Release-Builds (`#if DEBUG`) nur Ereignisse ohne Inhalte loggen; Betreff, Adressen, Hostnamen heraushalten.
 - **Betroffene Dateien:** `MailSyncEngine.swift`, `SMTPManager.swift`
 
@@ -99,9 +113,9 @@ Konzept gut, Umsetzung unvollständig. Viele Schutzfunktionen existieren als UI-
 
 ### D2 (H) Externe Inhalte: Schalter ohne Wirkung
 - `loadRemoteImages` und `confirmExternalLinks` in `SettingsView` → kein Konsument im Code.
-- **Fix:** Standard = blockiert; `WKWebView` mit nicht-persistentem Datenspeicher + Content-Rule-Liste (block `http(s)://` in `<img>`, `<link>`, `srcset`, CSS); pro Mail-Button „Externe Inhalte laden"; Absender-Freigabeliste.
+- **Fix:** Standard = blockiert; `WKWebView` mit nicht-persistentem Datenspeicher + Content-Rule-Liste (block `http(s)://` in `<img>`, `<link>`, `srcset`, CSS); pro Mail-Button „Externe Inhalte laden“; Absender-Freigabeliste.
 - **Betroffene Dateien:** `SettingsView.swift`, `MessageDetailView.swift` (neuer WebView-Wrapper)
-- **Status 2026-11-01:** Stufe 1+2 umgesetzt — Text ist Standard, „HTML anzeigen" rendert in
+- **Status 2026-11-01:** Stufe 1+2 umgesetzt — Text ist Standard, „HTML anzeigen“ rendert in
   `HTMLMessageView` mit deaktiviertem JavaScript, nicht-persistentem Datenspeicher und einer
   Content-Rule-Liste, die jede `http(s)`-Anfrage blockiert (fail-closed bei Kompilierfehler).
   `HTMLSanitizer` entfernt Skripte, `on*`-Handler, `<base>`, Formulare, Meta-Refresh und
@@ -111,7 +125,7 @@ Konzept gut, Umsetzung unvollständig. Viele Schutzfunktionen existieren als UI-
   entweder nur für eine Message-ID (nicht persistiert) oder dauerhaft für eine
   **Absender-Adresse** (`UserDefaults`, normalisiert). Bewusst nicht pro Domain: ein
   kompromittierter Absender würde sonst die ganze Domain freischalten. Freigabe erfolgt
-  über einen Dialog in der Mail („Nur für diese Mail" / „Immer für <Adresse>"), Widerruf
+  über einen Dialog in der Mail („Nur für diese Mail“ / „Immer für <Adresse>“), Widerruf
   einzeln oder komplett in den Einstellungen. In Stufe 3 entfällt nur die
   Content-Rule-Liste; JavaScript bleibt aus, Skripte/Formulare/Event-Handler/`ping`
   bleiben entfernt. Der Wechsel blockiert↔freigegeben erzeugt über `.id(...)` eine neue
@@ -279,7 +293,7 @@ Konzept gut, Umsetzung unvollständig. Viele Schutzfunktionen existieren als UI-
 | D3 | ✅ erledigt | URL.trackingStripped mit 15 Tracking-Parametern; URL.domainMismatch für Link-Prüfung |
 | D4 | ✅ erledigt | Pfad-Sanitizer, UUID-Unterordner, .completeFileProtection, Cleanup nach Share-Sheet-Dismiss |
 | D5 | ✅ erledigt | Absender-Badge: Warnung wenn Anzeigename-Domain ≠ Absender-Domain |
-| D6 | ✅ erledigt | Subject-Heuristik entfernt; nur noch Content-Type-Marker im Body akzeptiert. **2026-11-01:** Test korrigiert + Regressionstest „Betreff allein löst keine MDN aus" ergänzt |
+| D6 | ✅ erledigt | Subject-Heuristik entfernt; nur noch Content-Type-Marker im Body akzeptiert. **2026-11-01:** Test korrigiert + Regressionstest „Betreff allein löst keine MDN aus“ ergänzt |
 | S1 | ✅ erledigt | AfterFirstUnlockThisDeviceOnly, kSecAttrSynchronizable=false, atomares Update-oder-Anlegen |
 | S2 | ✅ erledigt | Datei mit .completeFileProtection + isExcludedFromBackup; Migration von UserDefaults |
 | S3 | ✅ erledigt | shouldMigrate VOR loadPersistentStores; kein fatalError; .completeFileProtection auf Store |
@@ -287,7 +301,7 @@ Konzept gut, Umsetzung unvollständig. Viele Schutzfunktionen existieren als UI-
 | S5 | 🔴 offen | OAuth 2.0 – Entscheid ausstehend |
 | S6 | 🔴 offen | Entwürfe werden nicht gespeichert |
 | C1 | 🔴 offen | PGP/S/MIME – Entscheid Krypto-Bibliothek ausstehend |
-| L1 | ✅ entschieden | PolyForm Noncommercial 1.0.0 (`LICENSE`), keine GPL-Reste; juristische Prüfung von `LICENSE`, `CLA.md` und AGB steht aus |
+| L1 | ✅ entschieden | **Dual Licensing** (PolyForm Noncommercial + Commercial License); juristische Prüfung von `LICENSE-NONCOMMERCIAL.md`, `LICENSE-COMMERCIAL.md`, `CLA.md` und AGB steht aus |
 
 ---
 
@@ -297,7 +311,7 @@ Konzept gut, Umsetzung unvollständig. Viele Schutzfunktionen existieren als UI-
 - **N2:** Zertifikat-Pinning greift jetzt auch beim SMTP-Versand (`SMTPManager.sendEmail`),
   nicht nur beim IMAP-Sync. Der zuvor ungepinnte Versandpfad war eine offene Lücke.
 - **`resetPin` an die UI gebunden:** `AccountDetailView` zeigt gespeicherte Fingerabdrücke
-  (IMAP/SMTP) und bietet „Zertifikat zurücksetzen" mit Bestätigungsdialog. Vorher war die
+  (IMAP/SMTP) und bietet „Zertifikat zurücksetzen“ mit Bestätigungsdialog. Vorher war die
   Funktion toter Code — nach einer Zertifikatserneuerung wäre das Konto nicht mehr nutzbar.
 - **`project.yml`:** SwiftMail auf dieselbe Revision wie `Package.swift` gepinnt
   (`29a1df6c…`); ein `xcodegen generate` hebt den Pin nicht mehr auf.
@@ -325,10 +339,10 @@ Konzept gut, Umsetzung unvollständig. Viele Schutzfunktionen existieren als UI-
   Remote-Bilder, `cid:`/`data:`-Ausnahmen, `<iframe>`/`<form>`, `javascript:`, Meta-Refresh,
   CSS-`@import`/`url()`, Doku-Wrapper, Content-Rule-JSON). Gesamt **23 Tests, 0 Fehler**.
 - **Privacy-Manifest korrigiert:** `NSPrivacyCollectedDataTypes` enthielt `EmailAddress`.
-  Nach Apples Definition („Daten verlassen das Gerät und sind für den Entwickler zugänglich")
+  Nach Apples Definition („Daten verlassen das Gerät und sind für den Entwickler zugänglich“)
   ist das falsch — die App spricht nur mit dem selbst konfigurierten Mailserver. Eintrag
-  entfernt, Datenschutzlabel ist damit „Keine Daten erfasst". **Fachlich gegenprüfen.**
-- **README:** „Offline-fähig (Core Data)" entfernt — `CoreDataService` hat keinen Aufrufer,
+  entfernt, Datenschutzlabel ist damit „Keine Daten erfasst“. **Fachlich gegenprüfen.**
+- **README:** „Offline-fähig (Core Data)“ entfernt — `CoreDataService` hat keinen Aufrufer,
   die Aussage war falsch.
 - **L1 entschieden (Option B: source-available, nicht-kommerziell):** GPLv3 + App-Store-Ausnahme
   (Option A) wieder verworfen, weil sie bei jeder Weitergabe eine Veröffentlichung erzwungen
@@ -338,7 +352,7 @@ Konzept gut, Umsetzung unvollständig. Viele Schutzfunktionen existieren als UI-
   `APP_STORE_GUIDE.md` und die Lizenzangabe in `SettingsView` angepasst.
   **Wichtig:** Das ist kein Open Source; die Bezeichnung darf nicht verwendet werden. Im
   App Store ist eine eigene EULA nötig, sonst gilt Apples Standard-EULA.
-  `APP_STORE_GUIDE.md` enthielt außerdem „Crashlytics/Sentry einbinden" — das widerspricht
+  `APP_STORE_GUIDE.md` enthielt außerdem „Crashlytics/Sentry einbinden“ — das widerspricht
   Leitsatz 1 und wurde entfernt.
 - **D2 Stufe 3 umgesetzt (2026-11-01):** `RemoteContentPolicy` (Freigabe pro Message-ID
   oder pro Absender-Adresse, persistiert in `UserDefaults`, widerrufbar). `HTMLSanitizer
@@ -357,7 +371,7 @@ Konzept gut, Umsetzung unvollständig. Viele Schutzfunktionen existieren als UI-
   Introductory Offer (kein eigener Timer). `Entitlement.swift` (Tier, Produkt-IDs,
   Feature-Tabelle, reine Ableitungsfunktionen), `SubscriptionManager.swift`
   (StoreKit 2, kein Backend, Keychain-Cache), `PaywallView.swift`. Gates:
-  „Konto hinzufügen" in `SettingsView` und zweite Sicherung in
+  „Konto hinzufügen“ in `SettingsView` und zweite Sicherung in
   `AccountSetupView.saveAccount()`. `iMailSecure.storekit` für lokale Tests im
   Schema hinterlegt. **Leitsatz 11 ergänzt:** Datenschutz ist nie kostenpflichtig.
   Details in `MONETIZATION.md`.
@@ -395,13 +409,13 @@ Konzept gut, Umsetzung unvollständig. Viele Schutzfunktionen existieren als UI-
 ## Änderungen 2026-11-11 (OpenCode)
 
 - **`defaultRequestMDN` wirkt jetzt (STATE #1):** Der Schalter „Lesebestätigung
-  standardmäßig anfordern" schrieb bisher nur `@AppStorage`; kein Codepfad las den Wert.
+  standardmäßig anfordern“ schrieb bisher nur `@AppStorage`; kein Codepfad las den Wert.
   `ComposeViewModel` übernimmt die Vorgabe beim Öffnen **und** nach dem Senden eines
   Entwurfs über `makeDraft(defaults:)`. Der Schlüssel kommt ausschließlich aus
   `AppConstants.UserDefaultsKeys.defaultRequestMDN`, auch in `SettingsView`.
   `UserDefaults` ist injizierbar, damit Tests die echten Einstellungen nicht verändern.
 - **STATE #2 und #3 geschlossen:** `AUDIT_NOTES` führt `SettingsView` nicht mehr als
-  „Schalter ohne Wirkung"; die L1-Zeile nennt jetzt PolyForm Noncommercial 1.0.0 statt
+  „Schalter ohne Wirkung“; die L1-Zeile nennt jetzt PolyForm Noncommercial 1.0.0 statt
   der veralteten GPL-Option.
 - **103 Tests, 0 Fehler** (4 neue `ComposeViewModelTests`: Vorgabe an/aus, Änderung nach
   dem Senden, kein Übernehmen von Empfänger/Betreff in den frischen Entwurf).
@@ -422,7 +436,7 @@ Konzept gut, Umsetzung unvollständig. Viele Schutzfunktionen existieren als UI-
   landen nicht im App-Bundle. `PrivacyInfo.xcprivacy` bleibt unverändert gültig.
 - **TLS explizit statt Port-Heuristik:** `ConnectionSecurity+SwiftMail` übersetzt
   `implicit` → `.implicitTLS`, `startTLS` → `.startTLS` (erzwungen). Für SMTP war
-  `.automatic` auf Port 587 nur „STARTTLS, falls angeboten"; jetzt bricht der
+  `.automatic` auf Port 587 nur „STARTTLS, falls angeboten“; jetzt bricht der
   Versand ab, wenn der Server STARTTLS nicht anbietet. TLS-Mindestversion bleibt
   1.2, Zertifikatsprüfung `.fullVerification`, TOFU-Pinning unverändert.
 - **Ordner umbenennen/löschen:** `MailSyncEngine.renameFolder(_:toLeaf:)` und
@@ -454,7 +468,7 @@ Konzept gut, Umsetzung unvollständig. Viele Schutzfunktionen existieren als UI-
   lieferte 404. Guideline 3.1.2 verlangt bei Abos einen funktionierenden Link
   auf die Nutzungsbedingungen.
 - **Konsistenz:** Support-FAQ nennt jetzt 1 Konto frei / mehrere Konten mit Pro
-  (vorher stand dort „Ja" ohne Einschränkung) und beantwortet Preis und
+  (vorher stand dort „Ja“ ohne Einschränkung) und beantwortet Preis und
   Kündigungsweg. AGB-Link in Navigation und Footer aller Seiten.
 - **Weiterhin nötig:** eigene EULA in App Store Connect. Die Website-AGB ersetzt
   sie nicht (siehe `LICENSING.md` 3.1).
@@ -481,9 +495,9 @@ APPEND, MOVE in den Papierkorb, UID EXPUNGE.
    `Sent`/`Gesendet`, `Trash`/`Gel&APY-scht` parallel. `MailFolder` merkt sich
    jetzt `hasSpecialUse`; `MailFolder.preferred` wählt für Rollenabfragen den
    ausgezeichneten Ordner, die Liste hängt bei Duplikaten den Servernamen an.
-   Ohne diese Regel konnte „Löschen" im leeren `Trash` statt im gefüllten
+   Ohne diese Regel konnte „Löschen“ im leeren `Trash` statt im gefüllten
    `Gel&APY-scht` landen.
-3. **Namens-Fallback kannte „Gelöscht" nicht.** `trashNames` ergänzt
+3. **Namens-Fallback kannte „Gelöscht“ nicht.** `trashNames` ergänzt
    `gelöscht`, `junkNames` ergänzt `spamverdacht` (GMX-Bezeichnungen).
 
 **119 Tests, 0 Fehler** (10 neue: 6 `ModifiedUTF7Tests`, 4 in `MailFolderTests`).
@@ -493,8 +507,8 @@ APPEND, MOVE in den Papierkorb, UID EXPUNGE.
 ### Nachtrag: `\All` als Systemrolle
 
 Gmail liefert `[Gmail]/All Mail` mit dem Attribut `\All`. Ohne eigene Rolle
-galt der Ordner als „eigener Ordner" und wäre in der Gratisversion hinter der
-Paywall gelandet. Neu: `MailFolderRole.all` („Alle Nachrichten"), Icon
+galt der Ordner als „eigener Ordner“ und wäre in der Gratisversion hinter der
+Paywall gelandet. Neu: `MailFolderRole.all` („Alle Nachrichten“), Icon
 `tray.full.fill`, Special-Use `\All` und Namens-Fallback `all mail` /
 `alle nachrichten` / `alle mails`. **121 Tests, 0 Fehler.**
 
@@ -503,4 +517,4 @@ Paywall gelandet. Neu: `MailFolderRole.all` („Alle Nachrichten"), Icon
 sondern fehlende Autorisierung: Google akzeptiert für IMAP nur ein
 App-Passwort (2-Faktor-Anmeldung nötig) und verlangt aktiviertes IMAP.
 
-*Letzte Aktualisierung: 2026-11-12 (OpenCode) — siehe Änderungsprotokoll oben*
+*Letzte Aktualisierung: 2026-11-15 (Dual Licensing Finalisierung) — siehe Änderungsprotokoll oben*

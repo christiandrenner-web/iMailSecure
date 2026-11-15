@@ -1,8 +1,8 @@
-# MONETIZATION.md — Free, Pro und Abo
+# MONETIZATION.md — Free, Pro, Enterprise & Commercial Licensing (iMail Secure)
 
-**Stand:** 2026-11-03 · **Status:** umgesetzt
+**Stand:** 2026-11-15 · **Status:** Dual Licensing finalisiert, App Store Produkte teilweise offen
 
-*Keine Rechtsberatung. Preise, AGB und EULA vor dem Livegang prüfen lassen.*
+*Keine Rechtsberatung. Preise, AGB, EULA und Commercial License vor dem Livegang prüfen lassen.*
 
 ---
 
@@ -10,148 +10,164 @@
 
 | Frage | Antwort |
 |---|---|
-| Modell | Freemium: dauerhaft nutzbare Gratisversion + Pro-Abo |
-| Testphase | **7 Tage gratis über Apples Introductory Offer** — kein eigener Trial-Code |
-| Preis | 2,99 €/Monat, 24,99 €/Jahr, **39,99 € Lifetime** (Apple-Kleinstunternehmer: 15 % Provision) |
-| Pro-Inhalt | Mehrere Konten, alle Server-Ordner, eigene Ordner anlegen/umbenennen/löschen, gemeinsamer Posteingang |
-| Nie Pro | Datenschutzfunktionen (siehe Leitsatz 11 in `AGENTS.md`) |
-| Technik | StoreKit 2, Prüfung auf dem Gerät, **kein Backend**, keine Drittanbieter-SDKs |
-| Datenweitergabe | keine an den Entwickler; Zahlungsdaten verarbeitet ausschließlich Apple |
+| **Lizenzmodell** | **Dual Licensing** — Noncommercial (Privat, kostenlos) + Commercial (Firmen, entgeltlich) |
+| **App Store (iOS/macOS)** | Free Tier + Pro-Abo (StoreKit 2) + Lifetime (Non-Consumable) |
+| **Direktvertrieb (B2B)** | Enterprise Flat (299 €/Jahr), Revenue Share (15 % Netto-Umsatz) |
+| **Testphase** | **7 Tage gratis** über Apples Introductory Offer (App Store) |
+| **Preise (App Store)** | 2,99 €/Monat, 24,99 €/Jahr, **39,90 € Lifetime** (Apple-Kleinstunternehmer: 15 % Provision) |
+| **Preise (Direkt)** | Enterprise Flat 299 €/Jahr (unbegrenzt Nutzer), Revenue Share 15 % |
+| **Pro-Inhalt (App Store)** | Mehrere Konten, alle Server-Ordner, eigene Ordner anlegen/umbenennen/löschen, gemeinsamer Posteingang |
+| **Nie Pro** | Datenschutzfunktionen (Leitsatz 11 `AGENTS.md`) — **auch in Commercial License** |
+| **Technik** | StoreKit 2 (App Store) + License Key (Direkt) — **kein Backend**, keine Drittanbieter-SDKs |
+| **Datenweitergabe** | Keine an Entwickler; Zahlungsdaten: Apple (App Store) / Stripe/LemonSqueezy (Direkt) |
 
 ---
 
-## 1. Warum kein selbstgebauter 7-Tage-Timer
+## 1. Dual Licensing — Zwei Vertriebswege
 
-Apple kennt eine „Gratis-Testphase" nur als **Introductory Offer** am Abo. Ein eigener Timer
-in der App wäre:
+### 1.1 App Store (B2C / KMU < 10 Seats)
+- **Free Tier:** 1 Konto, alle Datenschutz-Features, Systemordner
+- **Pro Seat (Abo):** 2,99 €/Monat oder 24,99 €/Jahr pro Nutzer
+- **Lifetime Seat:** 39,90 € einmalig pro Nutzer
+- **Introductory Offer:** 7 Tage gratis (Apple-gemanagt)
+- **Family Sharing:** Ja (bis 5 Familienmitglieder)
+- **Plattformen:** iOS 18+ & macOS 15+ (universal purchase geplant)
 
-- **umgehbar** (App löschen, neu installieren),
-- **doppelte Logik** (Trial, Free-Tier und Abo müssen konsistent bleiben),
-- **erklärungsbedürftig im Review**, weil es wie eine nachträgliche Paywall aussieht.
+### 1.2 Direktvertrieb (B2B / Enterprise / Reseller)
+| Modell | Zielgruppe | Preis | Vertrieb |
+|---|---|---|---|
+| **Enterprise Flat** | Unternehmen, Behörden, Teams | 299 €/Jahr (unbegrenzt Nutzer *einer* Org) | License Key per E-Mail (`license@imailsecure.app`) |
+| **Revenue Share** | SaaS-Anbieter, Hosting, MSP | 15 % Netto-Umsatz | Einzelvertrag + Reporting |
+| **Pro Seat (Direkt)** | Firmen ohne App Store (z. B. MDM) | 29,90 €/Jahr/Nutzer | License Key + Volume Discount |
 
-Mit dem Introductory Offer steht im Kaufdialog „7 Tage gratis", Apple beendet die Testphase
-selbst, und die App kennt nur zwei Zustände: `free` oder `pro`. Der Code enthält deshalb
-**keine** Trial-Logik.
-
-Einzustellen in App Store Connect → Abonnements → Produkt → **Einführungsangebot**:
-Typ „Kostenlose Testphase", Dauer 1 Woche, für alle Neukunden.
-
-**Lifetime (neu):** Non-Consumable `io.imailsecure.pro.lifetime` 39,99 € anlegen.
-**Family Sharing:** In App Store Connect → Abonnement-Gruppe → „Familienfreigabe"
-aktivieren; für das Lifetime-Produkt zusätzlich beim Produkt selbst. Gilt für bis zu
-fünf Familienmitglieder, auch für den Einmalkauf.
+**Volume Discount (Direkt):** Ab 10 Seats 10 %, ab 50 Seats 20 %.
 
 ---
 
-## 2. Free vs. Pro
+## 2. Free vs. Pro vs. Enterprise (Feature-Matrix)
 
-| Kostenlos, dauerhaft | Pro / Lifetime |
-|---|---|
-| 1 Konto | beliebig viele Konten |
-| Posteingang und Systemordner (Gesendet, Entwürfe, Papierkorb, Spam, Archiv) | alle Server-Ordner einschließlich eigener |
-| Lesen, Senden, Antworten, Weiterleiten | eigene Ordner anlegen, umbenennen, löschen |
-| Text- und HTML-Anzeige auf Knopfdruck | gemeinsamer Posteingang |
-| externe Inhalte blockiert, Freigabe pro Mail/Absender | später: Signaturen, kontenübergreifende Suche |
-| Tracking-Parameter entfernen, Links bestätigen | |
-| TLS + Zertifikat-Pinning, Keychain | |
-| Anhänge, Suche im Posteingang, MDN | |
+| Feature | Free | Pro (App Store) | Enterprise (Direkt) |
+|---|---|---|---|
+| Konten | 1 | Unbegrenzt | Unbegrenzt |
+| Server-Ordner | Posteingang + System | Alle + eigene | Alle + eigene |
+| Eigene Ordner anlegen | ❌ | ✅ | ✅ |
+| Gemeinsamer Posteingang | ❌ | ✅ | ✅ |
+| Datenschutz-Features (Pinning, HTML-Blocker, etc.) | ✅ | ✅ | ✅ |
+| Support | Community (GitHub Issues) | E-Mail (`support@`) | Priority E-Mail + SLA (optional) |
+| Updates | Automatisch (App Store) | Automatisch | Automatisch (App Store) oder manuell |
+| Lizenzverwaltung | Apple ID | Apple ID | Eigenes License Key Portal (geplant) |
 
-**Familienfreigabe:** Pro-Abos und Lifetime lassen sich mit der Apple-Familie teilen
-(bis zu fünf Mitglieder). Das ist kein eigener Code: StoreKit liefert die geteilten
-Käufe über `Transaction.currentEntitlements`, die App behandelt sie wie eigene.
-
-**Ordnergrenze:** Systemordner bleiben frei, damit ein Konto auch ohne Abo vollständig
-nutzbar ist. Nur eigene Ordner und der gemeinsame Posteingang verlangen Pro. Eigene Ordner
-lassen sich anlegen, umbenennen und löschen. Systemordner sind bewusst gesperrt: Ihre Rolle
-bestimmt Posteingang, Papierkorb-Ziel und den Free/Pro-Fallback — ein umbenannter
-Posteingang würde diese Logik brechen.
-
-**Regel:** Pro ist Bequemlichkeit, nicht Sicherheit. Eine Privacy-App, die ihre
-Schutzfunktionen hinter ein Abo legt, wäre unglaubwürdig — und würde das einzige Argument
-entwerten, das sie von anderen Mail-Apps unterscheidet.
-
-Die Tabelle im Code ist `Feature` in `Sources/iMailSecure/Models/Entitlement.swift`. Neue
-Pro-Funktionen werden **dort** ergänzt; Gates fragen `subscription.canUse(_:)`, nie ein
-verstreutes `if isPro`. Solange eine Funktion nicht gebaut ist, gehört sie nicht in die
-Liste — die Paywall darf nichts bewerben, was es nicht gibt.
+**Wichtig:** Datenschutz-Features sind **niemals** hinter Paywall (Leitsatz 11 `AGENTS.md`).
 
 ---
 
-## 3. Technik
+## 3. Technische Umsetzung
 
+### 3.1 App Store (StoreKit 2)
+```swift
+// Sources/iMailSecure/Models/Entitlement.swift
+enum Tier: String, Codable { case free, pro, enterprise }
+
+struct Entitlement {
+    static let proMonthly = "io.imailsecure.pro.monthly"
+    static let proYearly  = "io.imailsecure.pro.yearly"
+    static let lifetime   = "io.imailsecure.pro.lifetime"
+    static let enterprise = "io.imailsecure.enterprise.yearly" // zukünftig
+}
 ```
-SubscriptionManager   StoreKit 2: Produkte, Kauf, Wiederherstellen, Transaktions-Listener
-Entitlement           reine Funktionen: Produkt-IDs → Tier, Kontolimit, Feature-Tabelle
-PaywallView           erscheint nur am Ort des Bedarfs
+- `SubscriptionManager`: StoreKit 2 Listener, `Transaction.currentEntitlements` Prüfung on-device
+- **Kein Backend** — Apple signiert Transaktionen
+- Paywall lädt Produkte **erst bei Bedarf** (kein Netzwerk bei App-Start)
+- Offline-Fallback: letzter bekannter Status im Keychain (`fail-closed` → `free`)
+
+### 3.2 Direktvertrieb (License Key)
+- **Enterprise / Revenue Share:** separater License Key (AES-256 signiert, Ed25519)
+- Key enthält: Tier, Organisation, Gültigkeit, Seat-Limit, Features
+- Prüfung: `LicenseValidator.verify(key:)` → lokal, kein Netzwerk
+- Key-Verwaltung: initial manuell per E-Mail, später Self-Service-Portal (geplant)
+
+### 3.3 Code-Gates (zentral in `Entitlement.swift`)
+```swift
+extension Entitlement {
+    func canUse(_ feature: Feature) -> Bool { ... }
+    var maxAccounts: Int { tier == .free ? 1 : Int.max }
+}
 ```
-
-- **Kein Backend.** Apple signiert jede Transaktion; `Transaction.currentEntitlements`
-  prüft sie auf dem Gerät. Es gibt keine Nutzerdaten beim Entwickler, das Datenschutzlabel
-  bleibt „Keine Daten erfasst".
-- **Offline:** Der zuletzt bekannte Zustand liegt im Keychain. Ohne gespeicherten Zustand
-  gilt `free` (fail-closed).
-- **Produkte werden erst geladen, wenn die Paywall geöffnet wird** — kein Netzwerkaufruf
-  beim App-Start.
-- **Produkt-IDs:** `io.imailsecure.pro.monthly`, `io.imailsecure.pro.yearly`
-  (eine Subscription Group, damit Jahres-/Monatsabo sich gegenseitig ablösen).
-- **Lifetime:** `io.imailsecure.pro.lifetime` (Non-Consumable, eigene Produkt-ID,
-  **nicht** in der Abo-Gruppe — einmalig kaufen, dauerhaft Pro).
-- **Testen ohne Developer-Account:** `iMailSecure.storekit` ist im Schema hinterlegt.
-  Produkte, Kauf, Kündigung und Rückerstattung lassen sich im Simulator durchspielen.
-
-### Gates im Code
-
-| Datei | Wirkung |
+| Datei | Gate |
 |---|---|
-| `SettingsView` | „Konto hinzufügen" öffnet bei erreichtem Limit die Paywall |
-| `AccountSetupView.saveAccount()` | zweite Sicherung, falls das Sheet offen bleibt |
-| `SubscriptionManager.canAddAccount(currentCount:)` | einzige Entscheidung über das Kontolimit |
-| `FolderListView` | gemeinsamer Posteingang und eigene Ordner öffnen bei Free die Paywall |
-| `InboxView` / `MailStore.selection` | die Nachrichtenliste folgt der Ordnerauswahl |
-| `MainTabView` | fragt bei mehreren Konten, von welchem gesendet wird |
-
-### Verhalten beim Downgrade / Lifetime
-
-Läuft das Abo aus, wird **nichts gelöscht**. Zusatzkonten bleiben gespeichert und lesbar,
-aber sie werden nicht mehr synchronisiert. Ordner und Nachrichten bleiben erhalten. Ein
-Abo-Ende darf nie Datenvernichtung bedeuten — das wäre ein Support-Alptraum und ein
-Review-Risiko.
-
-**Lifetime-Kauf** = dauerhaft `pro` Tier. Kein Ablauf, keine Wiederherstellung nötig
-(Non-Consumable bleibt in `Transaction.currentEntitlements`).
+| `SettingsView` | „Konto hinzufügen“ → Paywall bei Limit |
+| `AccountSetupView.saveAccount()` | Zweite Sicherung |
+| `FolderListView` | Gemeinsamer Posteingang / eigene Ordner → Paywall |
+| `MainTabView` | Multi-Account: Versand-Konto wählen |
 
 ---
 
-## 4. Pflichten im App Store
+## 4. Verhalten bei Lizenzende / Downgrade
 
-1. **Produkte in App Store Connect** anlegen:
-   - Abo-Gruppe „iMail Secure Pro": `monthly` 2,99 €, `yearly` 24,99 €
-   - Introductory Offer 1 Woche hinterlegen
-   - **Non-Consumable**: `io.imailsecure.pro.lifetime` 39,99 €
-   - **Familienfreigabe** für die Abo-Gruppe aktivieren
-2. **Nutzungsbedingungen** (EULA) hinterlegen — sonst gilt Apples Standard-EULA und die
-   Nicht-kommerziell-Klausel der PolyForm-Lizenz greift gegenüber App-Store-Nutzern nicht
-   (siehe `LICENSING.md`, Abschnitt 3.1).
-3. **`terms.html` auf der Website** veröffentlichen. StoreKit-Abos verlangen laut
-   Guideline 3.1.2 einen funktionierenden Link auf die Nutzungsbedingungen — **in der App und
-   in den Metadaten**. Veröffentlicht am 2026-11-12 als **Entwurf**; die anwaltliche Prüfung
-   steht noch aus (siehe `terms.html`, Badge „Entwurf").
-4. **„Käufe wiederherstellen"** ist Pflicht und in den Einstellungen und in der Paywall
-   vorhanden.
-5. **Preis, Laufzeit, Auto-Verlängerung** müssen im App Store und in der Paywall sichtbar
-   sein (die Paywall liest sie aus StoreKit).
-6. **Apple-Kleinstunternehmerprogramm** beantragen: 15 % statt 30 % bei unter 1 Mio. USD
-   Jahresumsatz.
-7. **Datenschutzerklärung** um den Hinweis ergänzen, dass Abos über Apple laufen und
-   Zahlungsdaten nicht beim Entwickler anfallen.
+| Szenario | Verhalten |
+|---|---|
+| Abo läuft aus (App Store) | Zusatzkonten **lesbar**, **nicht mehr syncbar** — keine Datenlöschung |
+| Lifetime / Enterprise endet | Gleich — Daten bleiben, Sync stoppt |
+| Revenue Share Vertrag ende | Gleich — Daten bleiben, Sync stoppt |
+| Key ungültig / widerrufen | 14 Tage Grace Period (Read-Only), dann `free` Tier |
+
+**Regel:** Lizenzende = **keine Datenvernichtung**. Export-Funktion (EML, JSON) immer verfügbar.
 
 ---
 
-## 5. Offen
+## 5. App Store Pflichten (Guideline 3.1.2, 5.2, 5.3)
 
-- [x] Preise angehoben: 2,99 € / 24,99 € + Lifetime 39,99 €
+| Pflicht | Status | Hinweis |
+|---|---|---|
+| Produkte anlegen (Monthly, Yearly, Lifetime) | 🔴 Offen | App Store Connect |
+| Introductory Offer (7 Tage) | 🔴 Offen | App Store Connect |
+| Family Sharing (Abo-Gruppe + Lifetime) | 🔴 Offen | App Store Connect |
+| **Eigene EULA hinterlegen** | 🔴 **Kritisch** | Text aus `LICENSE-COMMERCIAL.md` + Noncommercial-Hinweis |
+| `terms.html` (Nutzungsbedingungen) verlinken | 🟡 Entwurf online | Anwaltsprüfung offen |
+| „Käufe wiederherstellen“ | ✅ Implementiert | Settings + Paywall |
+| Preise/Laufzeit/Auto-Renew sichtbar | ✅ Via StoreKit | Paywall liest aus StoreKit |
+| Apple-Kleinstunternehmer (15 %) | 🟡 Geplant | < 1 Mio. USD/Jahr |
+| Datenschutzerklärung: Apple-Zahlung | 🟡 Offen | Ergänzen |
+| **Universal Purchase (iOS + macOS)** | 🟡 Geplant | Same Bundle ID Suffix |
+
+---
+
+## 6. B2B-Vertrieb (Direkt) — Prozess
+
+1. **Anfrage** an `license@imailsecure.app`
+2. **Angebot** innerhalb 2 Werktage (PDF, Preise, Laufzeit, SLA optional)
+3. **Vertragsschluss** per E-Mail-Bestätigung oder DocuSign/Signatur.it
+4. **License Key** Generierung (Skript) → Versand per E-Mail
+5. **Rechnung** (Stripe/LemonSqueezy oder manuell) — USt. nach § 19 UStG (Kleinunternehmer) oder Regelbesteuerung
+6. **Support** per E-Mail, SLA nur bei Enterprise-Flat (optional)
+
+**Revenue Share:** Monatliches Reporting (Netto-Umsatz × 15 %) → Rechnung.
+
+---
+
+## 7. Preise — Begründung & Anpassung
+
+| Modell | Preis | Begründung |
+|---|---|---|
+| Pro Monthly | 2,99 € | Psychologische Schwelle < 3 €, konkurrenzfähig (Spark, Edison, etc.) |
+| Pro Yearly | 24,99 € | ~30 % Rabatt, Cashflow-Vorteil |
+| Lifetime | 39,90 € | ~13 × Monthly — „No-Brainer“ für Power-User |
+| Enterprise Flat | 299 €/Jahr | < 10 Seats = günstiger als Pro, > 10 = deutliche Ersparnis |
+| Revenue Share | 15 % | Standard für Embedded/White-Label-ähnliche Nutzung |
+
+**Preisanpassung:** 60 Tage Vorankündigung, Bestandsabo läuft zu alten Konditionen weiter.
+
+---
+
+## 8. Offen (Stand 2026-11-15)
+
 - [ ] Produkte + Introductory Offer + Lifetime in App Store Connect anlegen
-- [ ] Familienfreigabe in App Store Connect aktivieren
-- [x] `terms.html` entworfen und veröffentlicht (Entwurf, juristische Prüfung offen)
-- [ ] EULA in App Store Connect hinterlegen
-- [ ] Steuer- und Bankdaten in App Store Connect hinterlegen (Voraussetzung für Auszahlung)
+- [ ] Family Sharing aktivieren
+- [ ] **EULA in App Store Connect** hinterlegen (Text finalisieren)
+- [ ] Steuer- & Bankdaten in App Store Connect
+- [ ] Apple-Kleinstunternehmer beantragen
+- [ ] `license@imailsecure.app` (iCloud+ Custom Domain) einrichten
+- [ ] `imailsecure.app` Domain registrieren
+- [ ] License Key Generator für Enterprise/Revenue Share bauen (Swift, CLI)
+- [ ] Self-Service-Portal (später, nach erstem B2B-Kunden)
+- [ ] Universal Purchase (iOS + macOS) konfigurieren

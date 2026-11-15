@@ -77,7 +77,7 @@ struct FolderListView: View {
                 }
             }
             .navigationTitle("Ordner")
-            .navigationBarTitleDisplayMode(.inline)
+            .inlineNavigationTitle()
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Fertig") { dismiss() }
@@ -294,7 +294,7 @@ struct CreateFolderView: View {
                 Section {
                     TextField("Ordnername", text: $name)
                         .accessibilityIdentifier("folder.nameField")
-                        .textInputAutocapitalization(.never)
+                        .platformNoAutocapitalization()
                         .autocorrectionDisabled()
                 } footer: {
                     if let selectedAccount {
@@ -310,7 +310,7 @@ struct CreateFolderView: View {
                 }
             }
             .navigationTitle("Ordner anlegen")
-            .navigationBarTitleDisplayMode(.inline)
+            .inlineNavigationTitle()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Abbrechen") { dismiss() }
@@ -371,7 +371,7 @@ struct RenameFolderView: View {
                 Section {
                     TextField("Ordnername", text: $name)
                         .accessibilityIdentifier("folder.renameField")
-                        .textInputAutocapitalization(.never)
+                        .platformNoAutocapitalization()
                         .autocorrectionDisabled()
                 } footer: {
                     Text("Der Ordner wird auf dem Server von \(account.email) umbenannt. Nachrichten bleiben erhalten.")
@@ -385,7 +385,7 @@ struct RenameFolderView: View {
                 }
             }
             .navigationTitle("Ordner umbenennen")
-            .navigationBarTitleDisplayMode(.inline)
+            .inlineNavigationTitle()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Abbrechen") { dismiss() }

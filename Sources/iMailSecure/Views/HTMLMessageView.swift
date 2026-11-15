@@ -17,11 +17,17 @@
 //
 // Schlägt das Kompilieren der Regel-Liste fehl, wird bewusst *nicht*
 // gerendert (fail-closed) und `failed` auf true gesetzt.
+//
+// iOS und macOS teilen sich den Coordinator (WKNavigationDelegate/WKUIDelegate);
+// nur die Einbettung unterscheidet sich (UIViewRepresentable vs.
+// NSViewRepresentable) und damit auch die Höhenmessung.
 
 import SwiftUI
 import WebKit
 
+#if os(iOS)
 struct HTMLMessageView: UIViewRepresentable {
+    typealias Coordinator = HTMLMessageCoordinator
 
     let html: String
     /// Stufe 3: externe Inhalte für diese Mail/Absender freigegeben.
@@ -66,140 +72,207 @@ struct HTMLMessageView: UIViewRepresentable {
         webView.navigationDelegate = nil
         webView.uiDelegate = nil
     }
+}
+#elseif os(macOS)
+struct HTMLMessageView: NSViewRepresentable {
+    typealias Coordinator = HTMLMessageCoordinator
 
-    // MARK: – Content-Rule-Liste
+    let html: String
+    /// Stufe 3: externe Inhalte für diese Mail/Absender freigegeben.
+    var allowRemote: Bool = false
+    @Binding var contentHeight: CGFloat
+    @Binding var failed: Bool
+    let onExternalLink: (URL) -> Void
 
-    /// Blockiert jede ausgehende http(s)-Anfrage. Absichtlich ohne
-    /// Ausnahmen: Bilder aus der Mail selbst kommen über cid: und werden
-    /// nicht vom Netzwerk geladen.
-    ///
-    /// Wird nur in Stufe 2 installiert. In Stufe 3 (`allowRemote`) verzichtet
-    /// die App bewusst auf die Regel-Liste.
+    func makeCoordinator() -> Coordinator {
+        Coordinator(contentHeight: $contentHeight, failed: $failed,
+                    allowRemote: allowRemote, onExternalLink: onExternalLink)
+    }
+
+    func makeNSView(context: Context) -> WKWebView {
+        let configuration = WKWebViewConfiguration()
+        configuration.websiteDataStore = .nonPersistent()
+        configuration.defaultWebpagePreferences.allowsContentJavaScript = false
+        configuration.preferences.javaScriptCanOpenWindowsAutomatically = false
+        configuration.suppressesIncrementalRendering = true
+        configuration.mediaTypesRequiringUserActionForPlayback = .all
+
+        let webView = WKWebView(frame: .zero, configuration: configuration)
+        webView.navigationDelegate = context.coordinator
+        webView.uiDelegate = context.coordinator
+        // NSView kennt kein isOpaque/backgroundColor; WKWebView zeichnet den
+        // Hintergrund über diesen Schlüssel.
+        webView.setValue(false, forKey: "drawsBackground")
+
+        context.coordinator.attach(to: webView)
+        context.coordinator.load(HTMLSanitizer.sanitize(html, allowRemoteResources: allowRemote))
+        return webView
+    }
+
+    func updateNSView(_ webView: WKWebView, context: Context) {}
+
+    static func dismantleNSView(_ webView: WKWebView, coordinator: Coordinator) {
+        coordinator.detach()
+        webView.stopLoading()
+        webView.navigationDelegate = nil
+        webView.uiDelegate = nil
+    }
+}
+#endif
+
+// MARK: – Content-Rule-Liste
+
+/// Blockiert jede ausgehende http(s)-Anfrage. Absichtlich ohne
+/// Ausnahmen: Bilder aus der Mail selbst kommen über cid: und werden
+/// nicht vom Netzwerk geladen.
+///
+/// Wird nur in Stufe 2 installiert. In Stufe 3 (`allowRemote`) verzichtet
+/// die App bewusst auf die Regel-Liste.
+extension HTMLMessageView {
     static let contentBlockerJSON = """
-    [{
-      "trigger": {
-        "url-filter": "^https?://",
-        "resource-type": ["document", "image", "style-sheet", "script",
-                          "font", "media", "raw", "svg-document", "popup"]
-      },
-      "action": { "type": "block" }
-    }]
-    """
+[{
+  "trigger": {
+    "url-filter": "^https?://",
+    "resource-type": ["document", "image", "style-sheet", "script",
+                      "font", "media", "raw", "svg-document", "popup"]
+  },
+  "action": { "type": "block" }
+}]
+"""
 
     static let contentBlockerIdentifier = "io.imailsecure.block-remote"
+}
 
-    // MARK: – Coordinator
+// MARK: – Coordinator
 
-    final class Coordinator: NSObject, WKNavigationDelegate, WKUIDelegate {
-        private let contentHeight: Binding<CGFloat>
-        private let failed: Binding<Bool>
-        private let allowRemote: Bool
-        private let onExternalLink: (URL) -> Void
+final class HTMLMessageCoordinator: NSObject, WKNavigationDelegate, WKUIDelegate {
+    private let contentHeight: Binding<CGFloat>
+    private let failed: Binding<Bool>
+    private let allowRemote: Bool
+    private let onExternalLink: (URL) -> Void
 
-        private weak var webView: WKWebView?
-        private var heightObservation: NSKeyValueObservation?
-        private var isInstallingRules = false
-        private var didAllowInitialLoad = false
+    private weak var webView: WKWebView?
+    private var heightObservation: NSKeyValueObservation?
+    private var isInstallingRules = false
+    private var didAllowInitialLoad = false
 
-        init(contentHeight: Binding<CGFloat>, failed: Binding<Bool>,
-             allowRemote: Bool, onExternalLink: @escaping (URL) -> Void) {
-            self.contentHeight = contentHeight
-            self.failed = failed
-            self.allowRemote = allowRemote
-            self.onExternalLink = onExternalLink
-        }
+    init(contentHeight: Binding<CGFloat>, failed: Binding<Bool>,
+         allowRemote: Bool, onExternalLink: @escaping (URL) -> Void) {
+        self.contentHeight = contentHeight
+        self.failed = failed
+        self.allowRemote = allowRemote
+        self.onExternalLink = onExternalLink
+    }
 
-        func attach(to webView: WKWebView) {
-            self.webView = webView
-            heightObservation = webView.scrollView.observe(\.contentSize, options: [.new]) {
-                [weak self] scrollView, _ in
-                let height = scrollView.contentSize.height
-                guard height > 0, let self else { return }
-                DispatchQueue.main.async {
-                    if abs(self.contentHeight.wrappedValue - height) > 1 {
-                        self.contentHeight.wrappedValue = height
-                    }
+    func attach(to webView: WKWebView) {
+        self.webView = webView
+        #if os(iOS)
+        heightObservation = webView.scrollView.observe(\.contentSize, options: [.new]) {
+            [weak self] scrollView, _ in
+            let height = scrollView.contentSize.height
+            guard height > 0, let self else { return }
+            DispatchQueue.main.async {
+                if abs(self.contentHeight.wrappedValue - height) > 1 {
+                    self.contentHeight.wrappedValue = height
                 }
             }
         }
+        #endif
+    }
 
-        func detach() {
-            heightObservation?.invalidate()
-            heightObservation = nil
-            webView = nil
+    func detach() {
+        heightObservation?.invalidate()
+        heightObservation = nil
+        webView = nil
+    }
+
+    /// Kompiliert zuerst die Regel-Liste und lädt erst danach das HTML.
+    /// In Stufe 3 entfällt die Regel-Liste — der Nutzer hat zugestimmt.
+    func load(_ html: String) {
+        guard !isInstallingRules, let webView else { return }
+        isInstallingRules = true
+
+        guard !allowRemote else {
+            webView.loadHTMLString(html, baseURL: nil)
+            return
         }
 
-        /// Kompiliert zuerst die Regel-Liste und lädt erst danach das HTML.
-        /// In Stufe 3 entfällt die Regel-Liste — der Nutzer hat zugestimmt.
-        func load(_ html: String) {
-            guard !isInstallingRules, let webView else { return }
-            isInstallingRules = true
-
-            guard !allowRemote else {
+        WKContentRuleListStore.default().compileContentRuleList(
+            forIdentifier: HTMLMessageView.contentBlockerIdentifier,
+            encodedContentRuleList: HTMLMessageView.contentBlockerJSON
+        ) { [weak self, weak webView] list, _ in
+            DispatchQueue.main.async {
+                guard let self, let webView else { return }
+                guard let list else {
+                    // Fail-closed: lieber kein HTML als ungeprüftes HTML.
+                    self.failed.wrappedValue = true
+                    return
+                }
+                webView.configuration.userContentController.add(list)
                 webView.loadHTMLString(html, baseURL: nil)
-                return
             }
+        }
+    }
 
-            WKContentRuleListStore.default().compileContentRuleList(
-                forIdentifier: HTMLMessageView.contentBlockerIdentifier,
-                encodedContentRuleList: HTMLMessageView.contentBlockerJSON
-            ) { [weak self, weak webView] list, _ in
-                DispatchQueue.main.async {
-                    guard let self, let webView else { return }
-                    guard let list else {
-                        // Fail-closed: lieber kein HTML als ungeprüftes HTML.
-                        self.failed.wrappedValue = true
-                        return
-                    }
-                    webView.configuration.userContentController.add(list)
-                    webView.loadHTMLString(html, baseURL: nil)
+    // MARK: Navigation
+
+    #if os(macOS)
+    /// macOS kennt kein KVO auf contentSize wie UIScrollView. Die Höhe kommt
+    /// deshalb nach dem Laden aus dem Dokument selbst.
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        webView.evaluateJavaScript("document.body.scrollHeight") { [weak self] result, _ in
+            guard let self, let number = result as? NSNumber else { return }
+            let height = CGFloat(truncating: number)
+            guard height > 0 else { return }
+            DispatchQueue.main.async {
+                if abs(self.contentHeight.wrappedValue - height) > 1 {
+                    self.contentHeight.wrappedValue = height
                 }
             }
         }
+    }
+    #endif
 
-        // MARK: Navigation
+    func webView(_ webView: WKWebView,
+                 decidePolicyFor navigationAction: WKNavigationAction,
+                 decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+        // Erste Navigation ist das loadHTMLString aus load(_:).
+        if !didAllowInitialLoad {
+            didAllowInitialLoad = true
+            decisionHandler(.allow)
+            return
+        }
 
-        func webView(_ webView: WKWebView,
-                     decidePolicyFor navigationAction: WKNavigationAction,
-                     decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
-            // Erste Navigation ist das loadHTMLString aus load(_:).
-            if !didAllowInitialLoad {
-                didAllowInitialLoad = true
-                decisionHandler(.allow)
-                return
-            }
+        decisionHandler(.cancel)
 
-            decisionHandler(.cancel)
+        guard navigationAction.navigationType == .linkActivated,
+              let url = navigationAction.request.url else { return }
+        onExternalLink(url)
+    }
 
-            guard navigationAction.navigationType == .linkActivated,
-                  let url = navigationAction.request.url else { return }
+    /// target="_blank" und window.open: nie ein neues WebView.
+    func webView(_ webView: WKWebView,
+                 createWebViewWith configuration: WKWebViewConfiguration,
+                 for navigationAction: WKNavigationAction,
+                 windowFeatures: WKWindowFeatures) -> WKWebView? {
+        if let url = navigationAction.request.url {
             onExternalLink(url)
         }
+        return nil
+    }
 
-        /// target="_blank" und window.open: nie ein neues WebView.
-        func webView(_ webView: WKWebView,
-                     createWebViewWith configuration: WKWebViewConfiguration,
-                     for navigationAction: WKNavigationAction,
-                     windowFeatures: WKWindowFeatures) -> WKWebView? {
-            if let url = navigationAction.request.url {
-                onExternalLink(url)
-            }
-            return nil
-        }
+    /// Keine JS-Dialoge (JS ist aus, aber defense in depth).
+    func webView(_ webView: WKWebView,
+                 runJavaScriptAlertPanelWithMessage message: String,
+                 initiatedByFrame frame: WKFrameInfo,
+                 completionHandler: @escaping () -> Void) {
+        completionHandler()
+    }
 
-        /// Keine JS-Dialoge (JS ist aus, aber defense in depth).
-        func webView(_ webView: WKWebView,
-                     runJavaScriptAlertPanelWithMessage message: String,
-                     initiatedByFrame frame: WKFrameInfo,
-                     completionHandler: @escaping () -> Void) {
-            completionHandler()
-        }
-
-        func webView(_ webView: WKWebView,
-                     runJavaScriptConfirmPanelWithMessage message: String,
-                     initiatedByFrame frame: WKFrameInfo,
-                     completionHandler: @escaping (Bool) -> Void) {
-            completionHandler(false)
-        }
+    func webView(_ webView: WKWebView,
+                 runJavaScriptConfirmPanelWithMessage message: String,
+                 initiatedByFrame frame: WKFrameInfo,
+                 completionHandler: @escaping (Bool) -> Void) {
+        completionHandler(false)
     }
 }

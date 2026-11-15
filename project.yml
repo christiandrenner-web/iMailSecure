@@ -1,4 +1,4 @@
-# project.yml – XcodeGen Konfiguration für iMail Secure
+# project.yml – XcodeGen Konfiguration für iMail Secure (iOS + macOS)
 # Installiere XcodeGen: brew install xcodegen
 # Erstelle Projekt:     xcodegen generate --spec project.yml
 
@@ -7,18 +7,15 @@ options:
   bundleIdPrefix: io.imailsecure
   deploymentTarget:
     iOS: "18.0"
+    macOS: "15.0"
   defaultConfig: Debug
   xcodeVersion: "16.0"
   generateEmptyDirectories: true
-  # XcodeGen schreibt storeKitConfiguration nur in die Launch-Action; das
-  # Skript ergänzt sie in der Test-Action, damit UI-Tests echte Testprodukte
-  # sehen (siehe Tools/patch-storekit-testaction.py).
   postGenCommand: "python3 Tools/patch-storekit-testaction.py"
 
 settings:
   base:
     SWIFT_VERSION: "5.9"
-    PRODUCT_BUNDLE_IDENTIFIER: io.imailsecure.app
     MARKETING_VERSION: "1.0.0"
     CURRENT_PROJECT_VERSION: "1"
     INFOPLIST_FILE: Sources/iMailSecure/Resources/Info.plist
@@ -36,6 +33,7 @@ settings:
       SWIFT_OPTIMIZATION_LEVEL: "-O"
 
 targets:
+  # MARK: - iOS Target
   iMailSecure:
     type: application
     platform: iOS
@@ -43,13 +41,13 @@ targets:
       - path: Sources/iMailSecure
         excludes:
           - "**/.DS_Store"
+          - "Resources/Info*.plist"     # kommen über INFOPLIST_FILE ins Bundle
+          - "Resources/*.entitlements"  # gehören in die Signatur
       # Nur für StoreKit-Tests im Simulator: Die App muss die Konfiguration
       # im Bundle haben, damit SKTestSession sie dem UI-Test zuordnen kann.
       # Der Post-Build-Schritt entfernt sie aus Release-Builds.
       - path: iMailSecure.storekit
         buildPhase: resources
-    resources:
-      - Sources/iMailSecure/Resources
     dependencies:
       - package: SwiftMail
       - package: swift-log
@@ -57,6 +55,7 @@ targets:
     settings:
       base:
         PRODUCT_NAME: iMailSecure
+        PRODUCT_BUNDLE_IDENTIFIER: io.imailsecure.app
     postBuildScripts:
       - name: StoreKit-Testkonfiguration aus Release entfernen
         script: |
@@ -64,6 +63,31 @@ targets:
             rm -f "${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/iMailSecure.storekit"
           fi
 
+  # MARK: - macOS Target (geplant)
+  iMailSecure-macOS:
+    type: application
+    platform: macOS
+    sources:
+      - path: Sources/iMailSecure
+        excludes:
+          - "**/.DS_Store"
+          - "Resources/Info*.plist"
+          - "Resources/*.entitlements"
+    dependencies:
+      - package: SwiftMail
+      - package: swift-log
+        product: Logging
+    settings:
+      base:
+        PRODUCT_NAME: iMailSecure-macOS
+        PRODUCT_BUNDLE_IDENTIFIER: io.imailsecure.app.macos
+        INFOPLIST_FILE: Sources/iMailSecure/Resources/Info-macOS.plist
+        CODE_SIGN_ENTITLEMENTS: Sources/iMailSecure/Resources/iMailSecure-macOS.entitlements
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        SUPPORTS_MACCATALYST: NO
+        LS_MINIMUM_SYSTEM_VERSION: "15.0"
+
+  # MARK: - iOS Tests
   iMailSecureTests:
     type: bundle.unit-test
     platform: iOS
@@ -90,11 +114,22 @@ targets:
         TEST_TARGET_NAME: iMailSecure
         GENERATE_INFOPLIST_FILE: YES
 
+  # MARK: - macOS Tests (geplant)
+  iMailSecure-macOSTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - Tests/iMailSecureTests  # gemeinsame Tests
+    dependencies:
+      - target: iMailSecure-macOS
+    settings:
+      base:
+        BUNDLE_LOADER: "$(TEST_HOST)"
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/iMailSecure-macOS.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/iMailSecure-macOS"
+
 packages:
   SwiftMail:
     url: https://github.com/Cocoanetics/SwiftMail.git
-    # Gleicher Pin wie in Package.swift – verhindert, dass ein Resolve
-    # stillschweigend auf einen neueren main-Stand springt.
     revision: 88c45cbd31b347b373f7c87e197be63eb95efbc2  # 1.16.0
   swift-log:
     url: https://github.com/apple/swift-log.git
@@ -111,14 +146,28 @@ schemes:
     test:
       config: Debug
       storeKitConfiguration: iMailSecure.storekit
-      # Sprache der Testhülle festnageln: Sonst hängen Unit-Tests, die deutsche
-      # Beschriftungen prüfen, von der Systemsprache des Simulators ab — nach
-      # einem Screenshot-Lauf steht die schon mal auf Türkisch.
       language: de
       region: DE
       targets:
         - iMailSecureTests
         - iMailSecureUITests
+    profile:
+      config: Release
+    archive:
+      config: Release
+
+  iMailSecure-macOS:
+    build:
+      targets:
+        iMailSecure-macOS: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      language: de
+      region: DE
+      targets:
+        - iMailSecure-macOSTests
     profile:
       config: Release
     archive:

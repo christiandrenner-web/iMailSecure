@@ -65,9 +65,9 @@ struct AccountSetupView: View {
                     TextField("E-Mail-Adresse", text: $email)
                         .focused($focusedField, equals: .email)
                         .accessibilityIdentifier("account.email")
-                        .keyboardType(.emailAddress)
+                        .platformKeyboardType(.emailAddress)
                         .autocorrectionDisabled()
-                        .textInputAutocapitalization(.never)
+                        .platformNoAutocapitalization()
                         .submitLabel(.next)
                         .onSubmit { focusedField = .password }
                 }
@@ -85,7 +85,7 @@ struct AccountSetupView: View {
                         .focused($focusedField, equals: .password)
                         .accessibilityIdentifier("account.password")
                         .autocorrectionDisabled()
-                        .textInputAutocapitalization(.never)
+                        .platformNoAutocapitalization()
                         .submitLabel(.next)
                         .onSubmit { focusedField = .imapHost }
 
@@ -110,7 +110,7 @@ struct AccountSetupView: View {
                     TextField("Server (z.B. imap.web.de)", text: $imapHost)
                         .focused($focusedField, equals: .imapHost)
                         .autocorrectionDisabled()
-                        .textInputAutocapitalization(.never)
+                        .platformNoAutocapitalization()
                         .submitLabel(.next)
                         .onSubmit { focusedField = .smtpHost }
                     HStack {
@@ -118,7 +118,7 @@ struct AccountSetupView: View {
                         Spacer()
                         TextField("993", text: $imapPort)
                             .multilineTextAlignment(.trailing)
-                            .keyboardType(.numberPad)
+                            .platformKeyboardType(.numberPad)
                             .frame(width: 80)
                     }
                     Picker("Sicherheit", selection: $imapSecurity) {
@@ -133,13 +133,13 @@ struct AccountSetupView: View {
                     TextField("Server (z.B. smtp.web.de)", text: $smtpHost)
                         .focused($focusedField, equals: .smtpHost)
                         .autocorrectionDisabled()
-                        .textInputAutocapitalization(.never)
+                        .platformNoAutocapitalization()
                     HStack {
                         Text("Port")
                         Spacer()
                         TextField("587", text: $smtpPort)
                             .multilineTextAlignment(.trailing)
-                            .keyboardType(.numberPad)
+                            .platformKeyboardType(.numberPad)
                             .frame(width: 80)
                     }
                     Picker("Sicherheit", selection: $smtpSecurity) {
@@ -164,7 +164,7 @@ struct AccountSetupView: View {
                 }
             }
             .navigationTitle("Konto hinzufügen")
-            .navigationBarTitleDisplayMode(.inline)
+            .inlineNavigationTitle()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Abbrechen") { dismiss() }

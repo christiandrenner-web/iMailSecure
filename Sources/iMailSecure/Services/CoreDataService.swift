@@ -25,10 +25,13 @@ final class CoreDataService {
             description.shouldMigrateStoreAutomatically    = true
             description.shouldInferMappingModelAutomatically = true
 
-            // Vollständiger Dateischutz: Store verschlüsselt wenn Gerät gesperrt
+            // Vollständiger Dateischutz: Store verschlüsselt wenn Gerät gesperrt.
+            // macOS kennt keinen Dateischutz-Schlüssel; dort schützt FileVault.
+            #if os(iOS)
             description.setOption(
                 FileProtectionType.complete as NSObject,
                 forKey: NSPersistentStoreFileProtectionKey)
+            #endif
         }
 
         container.loadPersistentStores { [weak self] storeDescription, error in

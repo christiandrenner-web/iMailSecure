@@ -14,17 +14,17 @@ struct ComposeView: View {
                 // Empfänger
                 Section("Empfänger") {
                     TextField("An", text: $viewModel.draft.toText)
-                        .keyboardType(.emailAddress)
+                        .platformKeyboardType(.emailAddress)
                         .autocorrectionDisabled()
-                        .textInputAutocapitalization(.never)
+                        .platformNoAutocapitalization()
                     TextField("CC", text: $viewModel.draft.ccText)
-                        .keyboardType(.emailAddress)
+                        .platformKeyboardType(.emailAddress)
                         .autocorrectionDisabled()
-                        .textInputAutocapitalization(.never)
+                        .platformNoAutocapitalization()
                     TextField("BCC", text: $viewModel.draft.bccText)
-                        .keyboardType(.emailAddress)
+                        .platformKeyboardType(.emailAddress)
                         .autocorrectionDisabled()
-                        .textInputAutocapitalization(.never)
+                        .platformNoAutocapitalization()
                 }
 
                 // Betreff
@@ -104,7 +104,7 @@ struct ComposeView: View {
                 }
             }
             .navigationTitle("Neue E-Mail")
-            .navigationBarTitleDisplayMode(.inline)
+            .inlineNavigationTitle()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Abbrechen") { dismiss() }
@@ -119,7 +119,7 @@ struct ComposeView: View {
                     }
                     .disabled(viewModel.isLoading)
                 }
-                ToolbarItem(placement: .topBarLeading) {
+                ToolbarItem(placement: .platformTopBarLeading) {
                     Button { viewModel.saveDraft() } label: {
                         Image(systemName: "square.and.arrow.down")
                     }

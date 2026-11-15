@@ -27,9 +27,9 @@ struct PaywallView: View {
                 .padding()
             }
             .navigationTitle("iMail Secure Pro")
-            .navigationBarTitleDisplayMode(.inline)
+            .inlineNavigationTitle()
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .platformTopBarTrailing) {
                     Button("Schließen") { dismiss() }
                 }
             }
@@ -204,7 +204,7 @@ struct PaywallView: View {
                 }
             }
             .padding(14)
-            .background(Color(uiColor: .secondarySystemBackground),
+            .background(Color.platformSecondaryBackground,
                         in: RoundedRectangle(cornerRadius: 12))
             .opacity(isLifetime && isActiveLifetime ? 0.6 : 1.0)
         }

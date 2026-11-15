@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  iMailSecure-macOS.entitlements
+  In Xcode: Build Settings → Code Signing Entitlements → Sources/iMailSecure/Resources/iMailSecure-macOS.entitlements
+-->
+<plist version="1.0">
+<dict>
+
+  <!-- ─── App Sandbox (macOS Pflicht für App Store) ───────────── -->
+  <key>com.apple.security.app-sandbox</key>
+  <true/>
+
+  <!-- ─── Network Client (IMAP/SMTP ausgehende Verbindungen) ─── -->
+  <key>com.apple.security.network.client</key>
+  <true/>
+
+  <!-- ─── Network Server (nur wenn lokaler Server nötig) ──────── -->
+  <!-- <key>com.apple.security.network.server</key>
+  <true/> -->
+
+  <!-- ─── User Selected File Read/Write (für .eml Import/Export) ─ -->
+  <key>com.apple.security.files.user-selected.read-write</key>
+  <true/>
+
+  <!-- ─── Personal Information (Keychain, Kontakte - optional) ─── -->
+  <key>com.apple.security.personal-information.keychain</key>
+  <true/>
+
+  <!-- ─── Push Notifications (Phase 3, mit Developer Account) ──── -->
+  <!-- <key>aps-environment</key>
+  <string>development</string> -->
+
+  <!-- ─── Background Fetch / Background Tasks ─────────────────── -->
+  <key>com.apple.developer.background-fetch</key>
+  <true/>
+
+  <!-- ─── Hardened Runtime (Notarization Pflicht) ─────────────── -->
+  <key>com.apple.security.cs.allow-jit</key>
+  <true/>
+  <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+  <true/>
+  <key>com.apple.security.cs.disable-executable-page-protection</key>
+  <true/>
+  <key>com.apple.security.cs.disable-library-validation</key>
+  <true/>
+  <key>com.apple.security.cs.allow-dyld-environment-variables</key>
+  <true/>
+
+</dict>
+</plist>

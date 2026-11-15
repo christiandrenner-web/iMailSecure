@@ -1,6 +1,5 @@
 // MessageDetailView.swift
 import SwiftUI
-import UIKit
 import UniformTypeIdentifiers
 
 struct MessageDetailView: View {
@@ -67,7 +66,7 @@ struct MessageDetailView: View {
         // davon, ob die Mail eine HTML-Fassung hat.
         .accessibilityIdentifier("detail.root")
         .navigationTitle(message.subject)
-        .navigationBarTitleDisplayMode(.inline)
+        .inlineNavigationTitle()
         .toolbar { toolbarItems }
         .onAppear {
             mailStore.markAsRead(message)
@@ -142,7 +141,7 @@ struct MessageDetailView: View {
             presenting: pendingExternalURL
         ) { url in
             Button("Im Browser öffnen") {
-                UIApplication.shared.open(url.trackingStripped)
+                openExternalURL(url.trackingStripped)
                 pendingExternalURL = nil
             }
             Button("Abbrechen", role: .cancel) { pendingExternalURL = nil }
@@ -219,7 +218,7 @@ struct MessageDetailView: View {
                 // WKWebView — sonst bliebe die alte Content-Rule-Liste aktiv.
                 .id(remoteContentAllowed)
                 .frame(height: max(160, min(htmlContentHeight, 20_000)))
-                .background(Color(uiColor: .secondarySystemBackground))
+                .background(Color.platformSecondaryBackground)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
 
                 if remoteContentAllowed {
@@ -449,7 +448,7 @@ struct MessageDetailView: View {
                             .foregroundStyle(.secondary)
                     }
                     .padding(10)
-                    .background(Color(uiColor: .secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+                    .background(Color.platformSecondaryBackground, in: RoundedRectangle(cornerRadius: 8))
                 }
             }
         }
@@ -459,7 +458,7 @@ struct MessageDetailView: View {
 
     @ToolbarContentBuilder
     private var toolbarItems: some ToolbarContent {
-        ToolbarItemGroup(placement: .topBarTrailing) {
+        ToolbarItemGroup(placement: .platformTopBarTrailing) {
             Button { showReply = true } label: {
                 Image(systemName: "arrowshape.turn.up.left")
             }
@@ -569,8 +568,9 @@ struct MessageDetailView: View {
     }
 }
 
-// MARK: – Share Sheet (UIActivityViewController)
+// MARK: – Share Sheet
 
+#if os(iOS)
 struct ShareSheet: UIViewControllerRepresentable {
     let items: [Any]
 
@@ -579,3 +579,21 @@ struct ShareSheet: UIViewControllerRepresentable {
     }
     func updateUIViewController(_ uvc: UIActivityViewController, context: Context) {}
 }
+#elseif os(macOS)
+/// macOS-Pendant zum UIActivityViewController: zeigt das System-Teilen-Menü
+/// an der unsichtbaren Anker-Ansicht.
+struct ShareSheet: NSViewRepresentable {
+    let items: [Any]
+
+    func makeNSView(context: Context) -> NSView {
+        let anchor = NSView()
+        DispatchQueue.main.async {
+            guard anchor.window != nil else { return }
+            NSSharingServicePicker(items: items)
+                .show(relativeTo: anchor.bounds, of: anchor, preferredEdge: .minY)
+        }
+        return anchor
+    }
+    func updateNSView(_ nsView: NSView, context: Context) {}
+}
+#endif

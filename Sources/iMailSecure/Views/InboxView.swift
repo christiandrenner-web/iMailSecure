@@ -40,7 +40,7 @@ struct InboxView: View {
                 await mailStore.sync(mailStore.selection)
             }
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
+                ToolbarItem(placement: .platformTopBarLeading) {
                     Button {
                         showFolders = true
                     } label: {
@@ -48,7 +48,7 @@ struct InboxView: View {
                     }
                     .accessibilityIdentifier("inbox.folders")
                 }
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .platformTopBarTrailing) {
                     refreshButton
                 }
             }
