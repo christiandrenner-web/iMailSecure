@@ -1,5 +1,5 @@
 # STATE — iMail Secure
-Stand: 2026-11-17 · Branch: `main` · Letzter Code-Commit: `7105dd4` · Build: **SUCCEEDED** · Tests: **130 Unit-Tests (4 übersprungen) + 3 UI-Tests grün** (Stand vor der PGP-Einbindung) · PGP-Fundament: FFI gebaut, 4 Host-Tests + Simulator-Smoke grün
+Stand: 2026-11-17 · Branch: `main` · Letzter Code-Commit: `49f7842` · Build: **SUCCEEDED** (iOS + macOS) · Tests: **140 Unit-Tests (4 übersprungen) + 3 UI-Tests grün** · PGP: FFI eingebunden, Swift-Wrapper, 5 Rust- und 10 Swift-Tests grün
 
 ## Ziel
 App-Store-fähige Version: echte IMAP-Ordner, Datenschutz nach D2, Free/Pro ohne
@@ -34,13 +34,28 @@ beschnittene Schutzfunktionen. Keine offenen Code-Fehler bekannt.
 - L1 Lizenz: entschieden (PolyForm Noncommercial 1.0.0), juristische Prüfung steht aus
 
 ## Zuletzt erledigt
+- 2026-11-17 PGP im App-Target: `PGPKit.xcframework` hängt als statische
+  Bibliothek in iOS- und macOS-Target (`embed: false`), `import imailpgp`
+  funktioniert ohne Brücken-Header. Swift-Wrapper
+  `Sources/iMailSecure/Crypto/PGP.swift` (Schlüssel parsen, Fingerprint
+  formatieren, abgetrennte Signatur prüfen) übersetzt die Int32-Codes in
+  `PGPError`; „Signatur falsch“ bleibt von „nicht prüfbar“ unterscheidbar.
+  Der Build-Skript baut jetzt auch beide Mac-Slices, das XCFramework hat drei
+  Slices. Geprüft: 10 neue Swift-Tests grün (140 gesamt, 4 StoreKit opt-in),
+  iOS- und macOS-Build grün, Release-Größendifferenz gemessen statt geschätzt:
+  +876 KB Binary (45.191.032 → 46.067.704 Byte, Simulator arm64, Release,
+  App-Bundle bleibt bei 44 MB). `swift build` war schon vorher kaputt
+  (`Package.swift` nutzte `.v18`/`.v15` bei Tools 5.9); jetzt behoben und
+  grün. `Tools/check-pgp-artifact.sh` bricht `xcodegen generate` mit klarer
+  Meldung ab, wenn das Artefakt fehlt
+
 - 2026-11-17 PGP-Fundament gelegt: `Crypto/pgp-ffi` bindet rpgp über eine
   C-Schnittstelle ein (`imailpgp.h`: Version, letzte Fehlermeldung, Schlüssel
   parsen, abgetrennte Signatur prüfen, Fingerprint). Panics werden an der
   Grenze abgefangen und als negative Int32 gemeldet, nie als Absturz.
-  `Tools/build-pgp-ios.sh` baut Gerät + beide Simulator-Slices und erzeugt
-  `Crypto/build/PGPKit.xcframework` (138 MB inkl. beider Simulator-Slices,
-  Geräte-Lib 46 MB vor Dead-Code-Stripping). Geprüft: 4 Host-Tests
+  `Tools/build-pgp-ios.sh` baut Gerät, beide Simulator-Slices und beide
+  Mac-Slices und erzeugt `Crypto/build/PGPKit.xcframework` (232 MB inkl.
+  aller Slices, Geräte-Lib 46 MB vor Dead-Code-Stripping). Geprüft: 5 Host-Tests
   (`cargo test --release`, u. a. gültige/manipulierte Signatur und leere
   Nutzdaten) plus C-Smoke-Test gegen die Simulator-Slice im laufenden
   Simulator (ABI, Symbole, Fehlerpfade). Rust auf `1.100.0` gepinnt
@@ -119,11 +134,9 @@ beschnittene Schutzfunktionen. Keine offenen Code-Fehler bekannt.
 - 2026-11-02 `52f2d99` Free/Pro (StoreKit 2), Apple-Trial, Multi-Account-Fix
 
 ## Nächster Schritt
-1. PGP-Stufe 1: `PGPKit.xcframework` in `project.yml` einbinden (`embed: false`,
-   statisch) und den Swift-Wrapper `Sources/iMailSecure/Crypto/PGP.swift`
-   schreiben, der `Data` per `withUnsafeBytes` übergibt und die Int32-Codes in
-   Swift-Fehler übersetzt. Danach WKD-Lookup, Autocrypt-Header und
-   Schlüsselbund/Trust-UI.
+1. PGP-Stufe 1 fortsetzen: Schlüsselbund (`PGPKeyStore`) mit öffentlichen
+   Schlüsseln im Keychain, WKD-Lookup und Autocrypt-Header, Trust-UI mit
+   Fingerprint-Vergleich. Der Swift-Wrapper (`PGP.swift`) steht bereits.
 2. Signaturprüfung eingehend: `fetchRawMessage` im `MailSyncEngine`-Pfad,
    Ergebnis in der Nachrichtenansicht ausweisen (gültig / ungültig / Schlüssel
    unbekannt) — ohne Roh-MIME zu speichern.

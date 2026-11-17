@@ -48,6 +48,35 @@ fn bytes_from<'a>(data: *const u8, len: usize) -> Option<&'a [u8]> {
     Some(unsafe { slice::from_raw_parts(data, len) })
 }
 
+/// rpgp erkennt Armor nicht selbst: `from_bytes` liest nur binäre Pakete.
+/// Schlüssel aus WKD, Autocrypt oder `gpg --armor --export` sind aber fast
+/// immer ASCII-armiert. Deshalb wird hier anhand der Kopfzeile entschieden.
+fn looks_armored(bytes: &[u8]) -> bool {
+    bytes.starts_with(b"-----BEGIN PGP ")
+}
+
+fn parse_public_key(bytes: &[u8]) -> Result<SignedPublicKey, String> {
+    if looks_armored(bytes) {
+        let text = std::str::from_utf8(bytes).map_err(|error| error.to_string())?;
+        SignedPublicKey::from_string(text)
+            .map(|(key, _headers)| key)
+            .map_err(|error| error.to_string())
+    } else {
+        SignedPublicKey::from_bytes(bytes).map_err(|error| error.to_string())
+    }
+}
+
+fn parse_detached_signature(bytes: &[u8]) -> Result<DetachedSignature, String> {
+    if looks_armored(bytes) {
+        let text = std::str::from_utf8(bytes).map_err(|error| error.to_string())?;
+        DetachedSignature::from_string(text)
+            .map(|(signature, _headers)| signature)
+            .map_err(|error| error.to_string())
+    } else {
+        DetachedSignature::from_bytes(bytes).map_err(|error| error.to_string())
+    }
+}
+
 /// Version der Bibliothek als NUL-terminierter String. Statisch, muss nicht
 /// freigegeben werden.
 #[no_mangle]
@@ -81,7 +110,7 @@ pub extern "C" fn imailpgp_parse_public_key(data: *const u8, len: usize) -> i32 
             set_error("leerer Schlüssel");
             return BAD_ARGUMENT;
         };
-        match SignedPublicKey::from_bytes(bytes) {
+        match parse_public_key(bytes) {
             Ok(key) => {
                 set_error("");
                 // Ein Schlüssel ohne Unterschlüssel kann noch gültig sein
@@ -124,14 +153,14 @@ pub extern "C" fn imailpgp_verify_detached(
             return BAD_ARGUMENT;
         };
 
-        let signature = match DetachedSignature::from_bytes(signature_bytes) {
+        let signature = match parse_detached_signature(signature_bytes) {
             Ok(signature) => signature,
             Err(error) => {
                 set_error(format!("Signatur nicht lesbar: {error}"));
                 return PARSE_ERROR;
             }
         };
-        let key = match SignedPublicKey::from_bytes(key_bytes) {
+        let key = match parse_public_key(key_bytes) {
             Ok(key) => key,
             Err(error) => {
                 set_error(format!("Schlüssel nicht lesbar: {error}"));
@@ -174,14 +203,14 @@ pub extern "C" fn imailpgp_primary_fingerprint(
             set_error("Ausgabepuffer zu klein");
             return BAD_ARGUMENT;
         }
-        let key = match SignedPublicKey::from_bytes(key_bytes) {
+        let key = match parse_public_key(key_bytes) {
             Ok(key) => key,
             Err(error) => {
                 set_error(error.to_string());
                 return PARSE_ERROR;
             }
         };
-        let hex = key.primary_key.fingerprint().to_string();
+        let hex = key.primary_key.fingerprint().to_string().to_uppercase();
         let bytes = hex.as_bytes();
         if bytes.len() > out_len {
             set_error("Ausgabepuffer zu klein");
@@ -293,6 +322,41 @@ mod tests {
             key_bytes.len(),
         );
         assert_eq!(status, OK, "Signatur über leere Daten muss gültig sein");
+    }
+
+    #[test]
+    fn accepts_armored_key_and_signature() {
+        // WKD und Autocrypt liefern ASCII-armierte Schlüssel; `gpg --detach-sign
+        // --armor` ebenso. Beides muss die FFI annehmen.
+        let secret = generate_key();
+        let public = secret.to_public_key();
+        let data = b"Hallo Welt";
+
+        let signature = DetachedSignature::sign_binary_data(
+            &mut rand::thread_rng(),
+            &secret.primary_key,
+            &Password::empty(),
+            HashAlgorithm::Sha256,
+            &data[..],
+        )
+        .expect("signieren");
+
+        let armored_sig = signature.to_armored_bytes(Default::default()).expect("armor sig");
+        let armored_key = public.to_armored_bytes(Default::default()).expect("armor key");
+        assert_eq!(
+            imailpgp_parse_public_key(armored_key.as_ptr(), armored_key.len()),
+            OK
+        );
+
+        let status = imailpgp_verify_detached(
+            armored_sig.as_ptr(),
+            armored_sig.len(),
+            data.as_ptr(),
+            data.len(),
+            armored_key.as_ptr(),
+            armored_key.len(),
+        );
+        assert_eq!(status, OK, "armierte Signatur muss gültig sein");
     }
 
     #[test]

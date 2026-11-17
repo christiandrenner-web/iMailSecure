@@ -43,8 +43,11 @@ iMailSecure/
 │   │                         KeychainManager, CertificatePinner, RemoteContentPolicy,
 │   │                         SubscriptionManager
 │   ├── Services/             EmailHeaderBuilder, MDNProcessor, CoreDataService
+│   ├── Crypto/               PGP.swift (Swift-Wrapper um die rpgp-FFI)
 │   └── Views/                InboxView, FolderListView, MessageDetailView, ComposeView,
 │                             SettingsView, PaywallView, …
+├── Crypto/                   PGP-FFI (Rust/rpgp) + Bauanleitung + Testfixtures
+├── Tools/                    Hilfsskripte, u. a. build-pgp-ios.sh
 ├── Tests/iMailSecureTests/   Unit Tests (iOS & macOS)
 ├── project.yml               XcodeGen-Quelle (verbindlich, Multi-Target: iOS + macOS)
 └── Package.swift             SwiftPM-Definition (gleiche Pins wie project.yml)
@@ -59,17 +62,21 @@ iMailSecure/
 - macOS mit Xcode 16 oder neuer (getestet mit Xcode 27.1, Swift 6.4)
 - iOS 18 SDK / macOS 15 SDK
 - [XcodeGen](https://github.com/yonaskolb/XcodeGen): `brew install xcodegen`
+- Für OpenPGP (rpgp): Rust über [rustup](https://rustup.rs) — Details in
+  [Crypto/README.md](Crypto/README.md)
 
 ### Projekt öffnen
 
 ```bash
 cd ~/XCODE/iMailSecure   # oder dein lokaler Projektordner
+Tools/build-pgp-ios.sh   # einmalig: baut Crypto/build/PGPKit.xcframework
 xcodegen generate
 open iMailSecure.xcodeproj
 ```
 
 `iMailSecure.xcodeproj` ist **generiert**. Änderungen an Targets, Dateien oder Paketen
-gehören in `project.yml`, danach `xcodegen generate` erneut ausführen.
+gehören in `project.yml`, danach `xcodegen generate` erneut ausführen. Ohne das
+PGP-Artefakt scheitert `xcodegen generate` — es ist bewusst nicht eingecheckt.
 
 ### Bauen und testen
 

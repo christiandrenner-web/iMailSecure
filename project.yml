@@ -11,7 +11,7 @@ options:
   defaultConfig: Debug
   xcodeVersion: "16.0"
   generateEmptyDirectories: true
-  postGenCommand: "python3 Tools/patch-storekit-testaction.py"
+  postGenCommand: "python3 Tools/patch-storekit-testaction.py && Tools/check-pgp-artifact.sh"
 
 settings:
   base:
@@ -52,6 +52,11 @@ targets:
       - package: SwiftMail
       - package: swift-log
         product: Logging
+      # Statische rpgp-FFI (Crypto/pgp-ffi). Muss vor `xcodegen generate`
+      # gebaut sein: Tools/build-pgp-ios.sh. Statisch, deshalb nicht einbetten.
+      - framework: Crypto/build/PGPKit.xcframework
+        embed: false
+        codeSign: false
     settings:
       base:
         PRODUCT_NAME: iMailSecure
@@ -77,6 +82,9 @@ targets:
       - package: SwiftMail
       - package: swift-log
         product: Logging
+      - framework: Crypto/build/PGPKit.xcframework
+        embed: false
+        codeSign: false
     settings:
       base:
         PRODUCT_NAME: iMailSecure-macOS

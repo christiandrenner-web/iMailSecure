@@ -1089,6 +1089,40 @@
         }
       }
     },
+    "Das ist kein gültiger öffentlicher Schlüssel.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This is not a valid public key."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No es una clave pública válida."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce n'est pas une clé publique valide."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Это не действительный открытый ключ."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu geçerli bir açık anahtar değil."
+          }
+        }
+      }
+    },
     "Datei anfügen": {
       "localizations": {
         "en": {
@@ -1425,6 +1459,74 @@
           "stringUnit": {
             "state": "translated",
             "value": "Abonelikler şu anda kullanılamıyor."
+          }
+        }
+      }
+    },
+    "Die Kryptographie-Bibliothek meldet einen Fehler.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The cryptography library reported an error."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La biblioteca criptográfica ha notificado un error."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La bibliothèque cryptographique a signalé une erreur."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Библиотека криптографии сообщила об ошибке."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kriptografi kitaplığı bir hata bildirdi."
+          }
+        }
+      }
+    },
+    "Die Signatur konnte nicht gelesen werden.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The signature could not be read."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se ha podido leer la firma."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La signature n'a pas pu être lue."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не удалось прочитать подпись."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İmza okunamadı."
           }
         }
       }

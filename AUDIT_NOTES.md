@@ -242,6 +242,20 @@ Konzept gut, Umsetzung unvollständig. Viele Schutzfunktionen existieren als UI-
   7. `ITSAppUsesNonExemptEncryption` bei Aktivierung auf `true` setzen + Exportkonformität prüfen.
 - **Betroffene Dateien:** `SMTPManager.swift`, `MailSyncEngine.swift`, `MessageDetailView.swift`, neues `CryptoManager.swift`
 
+**Stand 2026-11-17 — Teilentscheidung und Fundament:**
+- Bibliothek: **rpgp** (crates.io `pgp` 0.21.1, Apache-2.0/MIT) über eine eigene
+  C-FFI in `Crypto/pgp-ffi`. Gegen ObjectivePGP (kommerzielle Lizenz) und
+  GopenPGP (Go-Laufzeit) entschieden; gegen Sequoia, weil LGPL beim statischen
+  Linken Relink-Pflichten auslöst. `bzip2` ist abgeschaltet (kein C-Cross-Build).
+- Fertig: Schlüssel parsen (armiert/binär), Fingerprint, abgetrennte Signatur
+  prüfen — inkl. 5 Rust-Tests und 10 Swift-Tests.
+- Wichtig für die Signaturprüfung: `fetchRawMessage` liefert die Rohbytes der
+  Nachricht, ohne `\Seen` zu setzen; es wird kein MIME rekonstruiert.
+- Secure-Enclave-Befund bleibt: P-256 only, PGP-Schlüssel (Ed25519/Curve25519)
+  liegen damit als `ThisDeviceOnly` im Keychain, nicht in der Enclave.
+- `ITSAppUsesNonExemptEncryption` erst setzen, wenn PGP tatsächlich ausgeliefert
+  wird; dann Exportkonformität dokumentieren.
+
 ---
 
 ## Vorgeschlagene Umsetzungsreihenfolge
@@ -300,7 +314,7 @@ Konzept gut, Umsetzung unvollständig. Viele Schutzfunktionen existieren als UI-
 | S4 | ✅ erledigt | Blur-Overlay bei willResignActive; Schloss-Icon im App-Umschalter |
 | S5 | 🔴 offen | OAuth 2.0 – Entscheid ausstehend |
 | S6 | 🔴 offen | Entwürfe werden nicht gespeichert |
-| C1 | 🔴 offen | PGP/S/MIME – Entscheid Krypto-Bibliothek ausstehend |
+| C1 | 🟡 in Arbeit | PGP: entschieden für rpgp (Apache-2.0/MIT, reines Rust). FFI, Swift-Wrapper und Signaturprüfung stehen (2026-11-17); offen: Schlüsselbund, WKD/Autocrypt, Verschlüsseln/Signieren ausgehend. S/MIME nicht entschieden |
 | L1 | ✅ entschieden | **Dual Licensing** (PolyForm Noncommercial + Commercial License); juristische Prüfung von `LICENSE-NONCOMMERCIAL.md`, `LICENSE-COMMERCIAL.md`, `CLA.md` und AGB steht aus |
 
 ---

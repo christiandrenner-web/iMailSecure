@@ -82,6 +82,9 @@ Ziel ist keine „E-Mail-App mit Privacy-Feature“, sondern **Privacy als Archi
 # Vor dem Anfangen
 git status                      # muss clean sein, sonst erst committen
 
+# PGP-FFI einmalig bauen (Artefakt nicht eingecheckt, braucht Rust/cargo)
+Tools/build-pgp-ios.sh
+
 # Bauen (iOS)
 xcodebuild -scheme iMailSecure \
   -destination 'platform=iOS Simulator,name=iPad Pro 13-inch (M5)' build
@@ -97,6 +100,10 @@ xcodebuild -scheme iMailSecure-macOS \
 # Projektdatei neu erzeugen (nach Änderungen an project.yml)
 xcodegen generate
 ```
+
+- **`Crypto/build/PGPKit.xcframework` fehlt?** `xcodegen generate` scheitert dann. Erst
+  `Tools/build-pgp-ios.sh` (Rust-Toolchain über `rustup`, Targets siehe `Crypto/README.md`).
+- Ohne gültige Signatur baut macOS nur mit `CODE_SIGNING_ALLOWED=NO`.
 
 - **Kleine, benannte Commits.** Eine Änderung = ein Commit = eine nachvollziehbare Aussage.
   Beispiel: `fix(smtp): Zertifikat-Pinning auch beim Versand`.
