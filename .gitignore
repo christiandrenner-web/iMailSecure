@@ -20,6 +20,10 @@ xcuserdata/
 Packages/
 Package.resolved.orig
 
+# Rust / PGP-FFI: Build-Artefakte, nie einchecken. Cargo.lock bleibt drin.
+Crypto/build/
+Crypto/pgp-ffi/target/
+
 # Graphify (generierte Graphen, jeder kann sie lokal neu bauen)
 graphify-out/
 

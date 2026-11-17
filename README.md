@@ -14,7 +14,7 @@ Datenschutzfreundlicher E-Mail-Client für **iOS 18+** und **macOS 15+** (geplan
 - Empfangsbestätigungen (Return-Receipt-To)
 - Passwörter ausschließlich im iOS/macOS-Keychain (`ThisDeviceOnly`)
 - Tracking-Parameter-Entfernung in Links, Bestätigung vor externem Öffnen
-- Kein Tracking, keine Werbung, keine Drittanbieter-SDKs, keine Telemetrie
+- Kein Tracking, keine Werbung, keine Analyse- oder Tracking-SDKs, keine Telemetrie
 - HTML nur auf Knopfdruck: Text ist Standard, HTML wird ohne Netzwerkzugriff gerendert
 - Externe Inhalte blockiert — Freigabe nur pro Mail oder pro Absender-Adresse, jederzeit widerrufbar
 - **iOS 18+**, **macOS 15+** (geplant), SwiftUI / SwiftUI für macOS

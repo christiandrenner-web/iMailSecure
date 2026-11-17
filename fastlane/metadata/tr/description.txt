@@ -1,4 +1,4 @@
-iMail Secure, gizliliği ön plana alan bir iOS e-posta istemcisidir: tam IMAP/SMTP desteği, RFC 8098 uyumlu okundu bilgileri — ve hiç izleme, reklam, telemetri veya üçüncü taraf SDK yok.
+iMail Secure, gizliliği ön plana alan bir iOS e-posta istemcisidir: tam IMAP/SMTP desteği, RFC 8098 uyumlu okundu bilgileri — ve hiç izleme, reklam, telemetri veya analiz/izleme SDK'sı yok.
 
 VARSAYILAN OLARAK GİZLİLİK
 • E-postalar varsayılan olarak metin olarak gösterilir. HTML yalnızca düğmeye basıldığında işlenir — ağ erişimi ve JavaScript olmadan.

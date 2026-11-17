@@ -1,4 +1,4 @@
-iMail Secure ist ein E-Mail-Client für iOS, der Privatsphäre an die erste Stelle setzt: volle IMAP-/SMTP-Unterstützung, Lesebestätigungen nach RFC 8098 – und keinerlei Tracking, Werbung, Telemetrie oder Drittanbieter-SDKs.
+iMail Secure ist ein E-Mail-Client für iOS, der Privatsphäre an die erste Stelle setzt: volle IMAP-/SMTP-Unterstützung, Lesebestätigungen nach RFC 8098 – und keinerlei Tracking, Werbung, Telemetrie oder Analyse-/Tracking-SDKs.
 
 DATENSCHUTZ ALS STANDARD
 • E-Mails werden standardmäßig als Text angezeigt. HTML wird nur auf Knopfdruck gerendert – ohne Netzwerkzugriff und ohne JavaScript.

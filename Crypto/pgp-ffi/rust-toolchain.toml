@@ -1,0 +1,6 @@
+# Toolchain für reproduzierbare Builds der PGP-FFI.
+# Gleiche Version wie bei der Einrichtung; `rustup` installiert sie automatisch.
+[toolchain]
+channel = "1.100.0"
+profile = "minimal"
+targets = ["aarch64-apple-ios", "aarch64-apple-ios-sim", "x86_64-apple-ios"]

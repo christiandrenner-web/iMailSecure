@@ -1,9 +1,23 @@
 # STATE — iMail Secure
-Stand: 2026-11-14 · Branch: `main` · Letzter Code-Commit: `e870002` · Build: **SUCCEEDED** · Tests: **130 Unit-Tests (4 übersprungen) + 3 UI-Tests grün**
+Stand: 2026-11-17 · Branch: `main` · Letzter Code-Commit: `7105dd4` · Build: **SUCCEEDED** · Tests: **130 Unit-Tests (4 übersprungen) + 3 UI-Tests grün** (Stand vor der PGP-Einbindung) · PGP-Fundament: FFI gebaut, 4 Host-Tests + Simulator-Smoke grün
 
 ## Ziel
 App-Store-fähige Version: echte IMAP-Ordner, Datenschutz nach D2, Free/Pro ohne
 beschnittene Schutzfunktionen. Keine offenen Code-Fehler bekannt.
+
+## PGP und Push — Entscheidungen (2026-11-17)
+- **Krypto: rpgp** (crates.io `pgp` 0.21.1, Apache-2.0/MIT) statt Sequoia
+  (LGPL, statisches Linken wäre relink-pflichtig). Reines Rust, `default-features
+  = false` schaltet BZip2 ab (kein C-Cross-Build); BZip2-komprimierte Nachrichten
+  werden abgelehnt statt zu crashen. Fixiert per `=0.21.1` + `Cargo.lock`.
+- **Roh-MIME:** `IMAPServer+Fetch.fetchRawMessage(identifier:)` liefert die
+  vollständigen RFC822-Bytes ohne `\Seen`. Signaturprüfung braucht deshalb keine
+  MIME-Rekonstruktion aus `Message` — das war der kritische Punkt für PGP/MIME.
+- **Push: selbst betriebener Relay** (Docker auf NAS/VPS des Nutzers). Ein
+  gehosteter Relay müsste IMAP-Zugangsdaten halten; „Zero-Knowledge-Relay“ ist
+  bei IMAP nicht möglich. Zielumgebung (Domain, Server) noch offen.
+- **Lizenz der FFI:** Apache-2.0/MIT wie rpgp, kein Lizenzkonflikt mit PolyForm
+  Noncommercial; Quellcode liegt mit im Repo.
 
 ## Offen (max. 5, nach Schwere)
 | # | Datei:Zeile | Symptom | Soll | Status |
@@ -12,13 +26,28 @@ beschnittene Schutzfunktionen. Keine offenen Code-Fehler bekannt.
 | 2 | `imailsecure-site/terms.html` | Nutzungsbedingungen sind Entwurf, nicht anwaltlich geprüft; eigener EULA-Text für App Store Connect fehlt | juristisch prüfen, EULA erstellen, in Connect hinterlegen | Entwurf veröffentlicht |
 | 3 | App Store Connect | Produkte, Abo-Gruppe, 7-Tage-Offer und eigene EULA fehlen | mit Apple-Developer-Account anlegen | offen |
 | 4 | `imailsecure-site/*.html` | Website-Rechtstexte nur auf Deutsch | ES/FR/RU/TR ergänzen, wenn die Store-Einträge live gehen | offen |
-| 5 | App Store Connect | Screenshots liegen in `fastlane/screenshots/` (6 Sprachen × 2 Geräte × 4 Motive) | mit `fastlane deliver` hochladen, sobald der Account steht | fertig |
+| 5 | Push-Relay | Zielumgebung ungeklärt (Domain, NAS oder VPS, Docker), APNs-Key fehlt | mit Nutzer festlegen, dann Relay entwerfen (IMAP-IDLE-Worker, APNs, QR-Registrierung) | offen |
 
 ## Offene Entscheidungen
-- S5 OAuth 2.0 · S6 Entwürfe speichern · C1 PGP/S-MIME
+- S5 OAuth 2.0 · S6 Entwürfe speichern
+- C1 PGP: entschieden (rpgp). S/MIME bleibt offen
 - L1 Lizenz: entschieden (PolyForm Noncommercial 1.0.0), juristische Prüfung steht aus
 
 ## Zuletzt erledigt
+- 2026-11-17 PGP-Fundament gelegt: `Crypto/pgp-ffi` bindet rpgp über eine
+  C-Schnittstelle ein (`imailpgp.h`: Version, letzte Fehlermeldung, Schlüssel
+  parsen, abgetrennte Signatur prüfen, Fingerprint). Panics werden an der
+  Grenze abgefangen und als negative Int32 gemeldet, nie als Absturz.
+  `Tools/build-pgp-ios.sh` baut Gerät + beide Simulator-Slices und erzeugt
+  `Crypto/build/PGPKit.xcframework` (138 MB inkl. beider Simulator-Slices,
+  Geräte-Lib 46 MB vor Dead-Code-Stripping). Geprüft: 4 Host-Tests
+  (`cargo test --release`, u. a. gültige/manipulierte Signatur und leere
+  Nutzdaten) plus C-Smoke-Test gegen die Simulator-Slice im laufenden
+  Simulator (ABI, Symbole, Fehlerpfade). Rust auf `1.100.0` gepinnt
+  (`rust-toolchain.toml`), `Cargo.lock` eingecheckt, Build-Verzeichnisse in
+  `.gitignore`. Ein abgebrochener Sequoia-Entwurf (`PGPBridge/`) ist entfernt —
+  er widersprach der Entscheidung und hatte keinen Code
+
 - 2026-11-14 Gesamtlauf grün: 130 Unit-Tests (4 StoreKit-Tests opt-in, übersprungen)
   und 3 UI-Tests (`FolderManagementUITests` ×2, `ScreenshotUITests`) auf dem
   iPad-Simulator. Vorher fielen drei Unit-Tests auf Türkisch um, weil der
@@ -90,12 +119,20 @@ beschnittene Schutzfunktionen. Keine offenen Code-Fehler bekannt.
 - 2026-11-02 `52f2d99` Free/Pro (StoreKit 2), Apple-Trial, Multi-Account-Fix
 
 ## Nächster Schritt
-1. Screenshots in App Store Connect hochladen (`fastlane deliver`), sobald der
-   Developer-Account steht — die 48 Bilder sind fertig und geprüft.
-2. Kaufpfad einmal in Xcode mit `iMailSecure.storekit` durchklicken (Pro, Lifetime,
-   Wiederherstellen) und das Ergebnis hier notieren; alternativ im Sandbox-Konto.
-3. `terms.html` juristisch prüfen lassen und die Entwurfs-Kennzeichnung entfernen;
-   EULA-Text für App Store Connect erstellen lassen.
-4. App-Store-Produkte, Introductory Offer und EULA in App Store Connect anlegen;
-   danach die sechs lokalisierten Store-Einträge aus `fastlane/metadata/` übernehmen.
-5. Website-Rechtstexte ES/FR/RU/TR ergänzen (`imailsecure-site/*.html`).
+1. PGP-Stufe 1: `PGPKit.xcframework` in `project.yml` einbinden (`embed: false`,
+   statisch) und den Swift-Wrapper `Sources/iMailSecure/Crypto/PGP.swift`
+   schreiben, der `Data` per `withUnsafeBytes` übergibt und die Int32-Codes in
+   Swift-Fehler übersetzt. Danach WKD-Lookup, Autocrypt-Header und
+   Schlüsselbund/Trust-UI.
+2. Signaturprüfung eingehend: `fetchRawMessage` im `MailSyncEngine`-Pfad,
+   Ergebnis in der Nachrichtenansicht ausweisen (gültig / ungültig / Schlüssel
+   unbekannt) — ohne Roh-MIME zu speichern.
+3. Verschlüsseln und Signieren ausgehend über `MessageBuilder`, inkl.
+   Passphrase-Schutz des geheimen Schlüssels.
+4. Push-Relay: Zielumgebung mit dem Nutzer festlegen (Domain, NAS oder VPS),
+   dann IMAP-IDLE-Worker, APNs-Provider, Geräteregistrierung per QR und
+   Docker-Deployment entwerfen.
+5. Unverändert offen: Screenshots hochladen (`fastlane deliver`), Kaufpfad
+   einmal in Xcode durchklicken, `terms.html` juristisch prüfen und EULA
+   erstellen lassen, App-Store-Produkte anlegen, Website-Rechtstexte
+   ES/FR/RU/TR ergänzen.

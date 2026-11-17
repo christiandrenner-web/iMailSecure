@@ -1,4 +1,4 @@
-iMail Secure es un cliente de correo para iOS que pone la privacidad en primer lugar: compatibilidad completa con IMAP/SMTP, confirmaciones de lectura según RFC 8098, y sin rastreo, publicidad, telemetría ni SDK de terceros.
+iMail Secure es un cliente de correo para iOS que pone la privacidad en primer lugar: compatibilidad completa con IMAP/SMTP, confirmaciones de lectura según RFC 8098, y sin rastreo, publicidad, telemetría ni SDK de análisis o rastreo.
 
 PRIVACIDAD POR DEFECTO
 • Los correos se muestran como texto de forma predeterminada. El HTML solo se procesa al pulsar el botón, sin acceso a la red y sin JavaScript.

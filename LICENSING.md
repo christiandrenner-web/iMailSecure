@@ -115,8 +115,15 @@ Der Ordnername „Fair-iMail“ ist **intern**, taucht nirgendwo in Doku, UI, We
 |---|---|---|
 | SwiftMail (Cocoanetics) | BSD-3-Clause | ✅ Ja — permissiv, nur Hinweispflicht |
 | swift-log (Apple) | Apache-2.0 | ✅ Ja — permissiv, Patentklausel unproblematisch |
+| rpgp (`pgp` 0.21.1, eigene FFI in `Crypto/pgp-ffi`) | MIT **oder** Apache-2.0 | ✅ Ja — permissiv, statisch gelinkt, keine Relink-Pflicht. **Bewusst nicht Sequoia** (LGPL): statisches Linken wäre an Bedingungen geknüpft |
 
 Keine Copyleft-Abhängigkeit → keine virale Veröffentlichungsplicht.
+
+**Wichtig für die Außendarstellung:** „keine Drittanbieter-SDKs“ meint
+Bibliotheken, die Daten sammeln oder nach außen funken. Eingebunden sind
+technische Bibliotheken (SwiftMail, rpgp) — beide laufen lokal, übertragen
+nichts und sind quelloffen nachprüfbar. Formulierung deshalb: „keine
+Analyse-, Werbe- oder Tracking-SDKs“.
 
 ---
 

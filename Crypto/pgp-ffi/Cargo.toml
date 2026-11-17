@@ -1,0 +1,30 @@
+[package]
+name = "imailpgp"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.88"
+publish = false
+license = "Apache-2.0"
+
+[lib]
+name = "imailpgp"
+crate-type = ["staticlib", "rlib"]
+
+[dependencies]
+# rpgp heißt auf crates.io `pgp`. `default-features = false` schaltet bzip2 ab:
+# das zieht bzip2-sys (C) nach, das wir auf iOS nicht cross-compilieren wollen.
+# OpenPGP-Nachrichten mit BZip2-Kompression sind selten und werden abgelehnt,
+# statt zu crashen.
+pgp = { version = "=0.21.1", default-features = false }
+
+[dev-dependencies]
+rand = "0.8"
+
+[profile.release]
+# Statische Bibliothek für die App: Größe zählt, Debug-Symbole nicht.
+# `panic` bleibt bei unwind, damit Panics an der FFI-Grenze abgefangen werden
+# können, statt die App abzubrechen.
+opt-level = "z"
+lto = true
+codegen-units = 1
+strip = "debuginfo"
