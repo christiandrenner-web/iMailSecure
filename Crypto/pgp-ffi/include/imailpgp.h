@@ -37,6 +37,11 @@ int32_t imailpgp_verify_detached(const uint8_t *signature, size_t signature_len,
                                  const uint8_t *data, size_t data_len,
                                  const uint8_t *key, size_t key_len);
 
+/// Gibt die primäre User-ID als UTF-8 in `out` (z. B. "Name <mail@example.org>").
+/// Rückgabe: Länge, 0 = keine User-ID, negativ = Fehler.
+int32_t imailpgp_primary_user_id(const uint8_t *key, size_t key_len,
+                                 uint8_t *out, size_t out_len);
+
 /// Schreibt den Fingerprint des primären Schlüssels als Hex in `out`
 /// (mindestens 40 Bytes, 64 für v6). Rückgabe: Länge oder negativ.
 int32_t imailpgp_primary_fingerprint(const uint8_t *key, size_t key_len,

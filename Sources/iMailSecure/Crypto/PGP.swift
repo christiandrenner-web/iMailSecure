@@ -64,6 +64,15 @@ struct PGPKeyInfo: Equatable, Sendable {
     /// Primärer Fingerprint, Großbuchstaben-Hex ohne Trennzeichen.
     let fingerprint: String
 
+    /// Primäre User-ID, z. B. `Name <mail@example.org>`. `nil`, wenn der
+    /// Schlüssel keine (lesbare) User-ID hat.
+    let userID: String?
+
+    init(fingerprint: String, userID: String? = nil) {
+        self.fingerprint = fingerprint
+        self.userID = userID
+    }
+
     /// Fingerprint in Vierergruppen, wie ihn GnuPG und Schlüsselanhänger
     /// anzeigen: `D6F8 84A7 E63B E870 …`. Nur für die Darstellung.
     var formattedFingerprint: String {
@@ -117,7 +126,19 @@ enum PGP {
             throw PGPError.invalidKey(detail: lastError)
         }
         let fingerprint = String(decoding: output[0..<Int(length)], as: UTF8.self)
-        return PGPKeyInfo(fingerprint: fingerprint)
+
+        // User-ID ist optional: reine Signaturschlüssel haben keine.
+        var userIDBuffer = [UInt8](repeating: 0, count: 256)
+        let userIDLength = withBytes(data) { bytes, count in
+            userIDBuffer.withUnsafeMutableBufferPointer { buffer in
+                imailpgp_primary_user_id(bytes, count, buffer.baseAddress, buffer.count)
+            }
+        }
+        let userID = userIDLength > 0
+            ? String(decoding: userIDBuffer[0..<Int(userIDLength)], as: UTF8.self)
+            : nil
+
+        return PGPKeyInfo(fingerprint: fingerprint, userID: userID)
     }
 
     /// Prüft eine abgetrennte Signatur über `data`.

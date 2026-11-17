@@ -16,6 +16,7 @@ final class PGPTests: XCTestCase {
         let key = try PGP.parsePublicKey(Data(PGPFixtures.publicKey.utf8))
         XCTAssertEqual(key.fingerprint, PGPFixtures.fingerprint)
         XCTAssertEqual(key.fingerprint.count, 40, "Ed25519-Schlüssel der Fixture ist v4")
+        XCTAssertEqual(key.userID, "iMail Secure Test <test@imailsecure.invalid>")
     }
 
     func testFingerprintFormatting() throws {

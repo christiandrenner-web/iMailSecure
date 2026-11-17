@@ -1,5 +1,5 @@
 # STATE — iMail Secure
-Stand: 2026-11-17 · Branch: `main` · Letzter Code-Commit: `49f7842` · Build: **SUCCEEDED** (iOS + macOS) · Tests: **140 Unit-Tests (4 übersprungen) + 3 UI-Tests grün** · PGP: FFI eingebunden, Swift-Wrapper, 5 Rust- und 10 Swift-Tests grün
+Stand: 2026-11-17 · Branch: `main` · Letzter Code-Commit: `4f2a6a8` · Build: **SUCCEEDED** (iOS + macOS) · Tests: **146 Unit-Tests (4 übersprungen) + 3 UI-Tests grün** · PGP: FFI eingebunden, Swift-Wrapper, Schlüsselbund im Keychain, 6 Rust- und 16 Swift-Tests grün
 
 ## Ziel
 App-Store-fähige Version: echte IMAP-Ordner, Datenschutz nach D2, Free/Pro ohne
@@ -34,6 +34,18 @@ beschnittene Schutzfunktionen. Keine offenen Code-Fehler bekannt.
 - L1 Lizenz: entschieden (PolyForm Noncommercial 1.0.0), juristische Prüfung steht aus
 
 ## Zuletzt erledigt
+- 2026-11-17 PGP-Schlüsselbund: `PGPKeyStore` legt importierte öffentliche
+  Schlüssel als JSON im Keychain ab (`io.imailsecure.pgpkeys`,
+  `AfterFirstUnlockThisDeviceOnly`, kein iCloud-Sync), ein Eintrag pro
+  normalisierter Adresse; erneuter Import ersetzt. Die FFI liefert jetzt auch
+  die primäre User-ID (`imailpgp_primary_user_id`), der Wrapper führt sie in
+  `PGPKeyInfo.userID`. Beim Import wird die Adresse aus der User-ID gegen die
+  eingegebene geprüft und bei Abweichung abgelehnt (`emailMismatch`) — ein
+  falsch zugeordneter Vertrauensanker wäre schlimmer als kein Schlüssel.
+  Neue Ansichten `PGPKeysView`/`PGPKeyImportView` (Liste, Import per
+  Einfügen, Löschen mit Rückfrage), Einstieg in den Einstellungen. 17 neue
+  Texte im String Catalog, sechs Sprachen (253 Einträge). Geprüft: 6 Rust-
+  und 16 Swift-Tests grün (146 gesamt, 4 StoreKit opt-in)
 - 2026-11-17 PGP im App-Target: `PGPKit.xcframework` hängt als statische
   Bibliothek in iOS- und macOS-Target (`embed: false`), `import imailpgp`
   funktioniert ohne Brücken-Header. Swift-Wrapper
@@ -134,12 +146,12 @@ beschnittene Schutzfunktionen. Keine offenen Code-Fehler bekannt.
 - 2026-11-02 `52f2d99` Free/Pro (StoreKit 2), Apple-Trial, Multi-Account-Fix
 
 ## Nächster Schritt
-1. PGP-Stufe 1 fortsetzen: Schlüsselbund (`PGPKeyStore`) mit öffentlichen
-   Schlüsseln im Keychain, WKD-Lookup und Autocrypt-Header, Trust-UI mit
-   Fingerprint-Vergleich. Der Swift-Wrapper (`PGP.swift`) steht bereits.
-2. Signaturprüfung eingehend: `fetchRawMessage` im `MailSyncEngine`-Pfad,
-   Ergebnis in der Nachrichtenansicht ausweisen (gültig / ungültig / Schlüssel
-   unbekannt) — ohne Roh-MIME zu speichern.
+1. PGP-Stufe 1c: Signaturprüfung eingehend verdrahten — `fetchRawMessage`
+   beim Öffnen einer Nachricht, Status (gültig / ungültig / Schlüssel
+   unbekannt) in `MessageDetailView`. Der Schlüsselbund und die Import-UI
+   stehen bereits.
+2. WKD-Lookup und Autocrypt-Header (nur auf ausdrückliche Aktion, keine
+   stillen Keyserver-Abfragen).
 3. Verschlüsseln und Signieren ausgehend über `MessageBuilder`, inkl.
    Passphrase-Schutz des geheimen Schlüssels.
 4. Push-Relay: Zielumgebung mit dem Nutzer festlegen (Domain, NAS oder VPS),

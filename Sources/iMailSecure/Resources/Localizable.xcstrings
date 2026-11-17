@@ -749,6 +749,40 @@
         }
       }
     },
+    "Armierten Schlüssel einfügen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paste armored key"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pegar clave blindada"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coller la clé blindée"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вставьте бронированный ключ"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zırhlı anahtarı yapıştırın"
+          }
+        }
+      }
+    },
     "BCC": {
       "localizations": {
         "en": {
@@ -779,6 +813,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Gizli"
+          }
+        }
+      }
+    },
+    "Beginnt mit „-----BEGIN PGP PUBLIC KEY BLOCK-----“. Aus Dateien oder aus dem Schlüsseltext deines Gegenübers.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starts with \"-----BEGIN PGP PUBLIC KEY BLOCK-----\". From files or from the key text your contact sends you."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Empieza por «-----BEGIN PGP PUBLIC KEY BLOCK-----». De archivos o del texto de clave que te envía tu contacto."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Commence par « -----BEGIN PGP PUBLIC KEY BLOCK----- ». Depuis des fichiers ou le texte de clé envoyé par votre correspondant."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Начинается с «-----BEGIN PGP PUBLIC KEY BLOCK-----». Из файлов или из текста ключа, присланного собеседником."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "\"-----BEGIN PGP PUBLIC KEY BLOCK-----\" ile başlar. Dosyalardan veya karşı tarafın gönderdiği anahtar metninden."
           }
         }
       }
@@ -987,6 +1055,40 @@
         }
       }
     },
+    "Bitte gib eine E-Mail-Adresse an; der Schlüssel enthält keine.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Please enter an email address; the key does not contain one."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Introduce una dirección de correo; la clave no contiene ninguna."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saisissez une adresse e-mail ; la clé n'en contient pas."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Укажите адрес эл. почты: в ключе его нет."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lütfen bir e-posta adresi girin; anahtar bir adres içermiyor."
+          }
+        }
+      }
+    },
     "Bleibt kostenlos": {
       "localizations": {
         "en": {
@@ -1085,6 +1187,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Abonelik, App Store ayarlarından iptal edene kadar otomatik olarak yenilenir. Deneme süresi, daha önce iptal etmezseniz abonelik başladığında otomatik olarak sona erer."
+          }
+        }
+      }
+    },
+    "Das hat nicht geklappt": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "That didn't work"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No ha funcionado"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cela n'a pas fonctionné"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не получилось"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu işe yaramadı"
           }
         }
       }
@@ -1361,6 +1497,40 @@
         }
       }
     },
+    "Der Schlüssel konnte nicht gespeichert werden.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The key could not be saved."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se ha podido guardar la clave."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La clé n'a pas pu être enregistrée."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не удалось сохранить ключ."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anahtar kaydedilemedi."
+          }
+        }
+      }
+    },
     "Der gemeinsame Posteingang bündelt alle Konten und ist Teil von Pro.": {
       "localizations": {
         "en": {
@@ -1561,6 +1731,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bu gönderene kalıcı olarak izin verildi. İptal işlemi hemen ve gelecekteki tüm e-postalar için geçerli olur."
+          }
+        }
+      }
+    },
+    "Dieser Schlüssel gehört zu %@, nicht zu der eingegebenen Adresse.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This key belongs to %@, not to the address you entered."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esta clave pertenece a %@, no a la dirección introducida."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette clé appartient à %@, pas à l'adresse saisie."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Этот ключ принадлежит %@, а не введённому адресу."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu anahtar girdiğiniz adrese değil, %@ adresine ait."
           }
         }
       }
@@ -2245,6 +2449,40 @@
         }
       }
     },
+    "Für diese Adresse ist kein öffentlicher Schlüssel hinterlegt.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No public key is stored for this address."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay ninguna clave pública guardada para esta dirección."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune clé publique n'est enregistrée pour cette adresse."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Для этого адреса нет сохранённого открытого ключа."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu adres için kayıtlı açık anahtar yok."
+          }
+        }
+      }
+    },
     "Gelesen": {
       "localizations": {
         "en": {
@@ -2653,6 +2891,40 @@
         }
       }
     },
+    "Importieren": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importer"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Импортировать"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İçe aktar"
+          }
+        }
+      }
+    },
     "Jederzeit kündbar": {
       "localizations": {
         "en": {
@@ -2955,6 +3227,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Satın alımları geri yükle"
+          }
+        }
+      }
+    },
+    "Leer lassen, wenn der Schlüssel die Adresse selbst enthält.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leave empty if the key contains the address itself."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Déjalo vacío si la clave ya contiene la dirección."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laissez vide si la clé contient déjà l'adresse."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Оставьте пустым, если адрес есть в самом ключе."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anahtar adresi kendisi içeriyorsa boş bırakın."
           }
         }
       }
@@ -3469,6 +3775,40 @@
         }
       }
     },
+    "Nachrichten dieses Absenders lassen sich danach nicht mehr prüfen, bis du den Schlüssel erneut hinzufügst. (%@)": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Messages from this sender can no longer be verified until you add the key again. (%@)"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Después ya no se podrán verificar los mensajes de este remitente hasta que vuelvas a añadir la clave. (%@)"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les messages de cet expéditeur ne pourront plus être vérifiés tant que vous n'aurez pas ajouté la clé à nouveau. (%@)"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сообщения от этого отправителя нельзя будет проверить, пока вы снова не добавите ключ. (%@)"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anahtarı yeniden ekleyene kadar bu gönderenin iletileri doğrulanamaz. (%@)"
+          }
+        }
+      }
+    },
     "Nachrichtenoptionen": {
       "localizations": {
         "en": {
@@ -3605,6 +3945,40 @@
         }
       }
     },
+    "Noch keine Schlüssel hinterlegt.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No keys stored yet."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todavía no hay claves guardadas."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune clé enregistrée pour l'instant."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ключи пока не сохранены."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Henüz anahtar kaydedilmedi."
+          }
+        }
+      }
+    },
     "Nur Text": {
       "localizations": {
         "en": {
@@ -3737,6 +4111,43 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tamam"
+          }
+        }
+      }
+    },
+    "OpenPGP": {
+      "shouldTranslate": false
+    },
+    "OpenPGP-Schlüssel": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenPGP keys"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claves OpenPGP"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clés OpenPGP"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ключи OpenPGP"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenPGP anahtarları"
           }
         }
       }
@@ -4349,6 +4760,108 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kapat"
+          }
+        }
+      }
+    },
+    "Schlüssel hinzufügen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add key"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añadir clave"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouter une clé"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавить ключ"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anahtar ekle"
+          }
+        }
+      }
+    },
+    "Schlüssel liegen nur auf diesem Gerät. Der Fingerprint ist der Vertrauensanker: Vergleiche ihn über einen zweiten Weg mit dem, den dir dein Gegenüber nennt.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keys are stored on this device only. The fingerprint is the trust anchor: compare it through a second channel with the one your contact tells you."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las claves se guardan solo en este dispositivo. La huella es el ancla de confianza: compárala por un segundo canal con la que te indique tu contacto."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les clés restent sur cet appareil. L'empreinte est l'ancre de confiance : comparez-la par un second canal avec celle que vous communique votre correspondant."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ключи хранятся только на этом устройстве. Отпечаток — это якорь доверия: сверьте его по другому каналу с тем, что вам назвал собеседник."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anahtarlar yalnızca bu cihazda saklanır. Parmak izi güven çapasıdır: karşı tarafın size söylediğiyle ikinci bir kanaldan karşılaştırın."
+          }
+        }
+      }
+    },
+    "Schlüssel löschen?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete key?"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Eliminar clave?"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supprimer la clé ?"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Удалить ключ?"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anahtar silinsin mi?"
           }
         }
       }
@@ -8481,6 +8994,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kaynak kodu incelenebilir, ticari değil"
+          }
+        }
+      }
+    },
+    "Öffentliche Schlüssel werden nur auf diesem Gerät gespeichert. Es gibt keine automatische Keyserver-Abfrage.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Public keys are stored on this device only. There is no automatic keyserver lookup."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las claves públicas se guardan solo en este dispositivo. No hay consultas automáticas a servidores de claves."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les clés publiques restent sur cet appareil. Aucune interrogation automatique de serveur de clés."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открытые ключи хранятся только на этом устройстве. Автоматических запросов к серверам ключей нет."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Açık anahtarlar yalnızca bu cihazda saklanır. Otomatik anahtar sunucusu sorgusu yoktur."
           }
         }
       }

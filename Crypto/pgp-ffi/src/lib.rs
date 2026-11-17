@@ -226,6 +226,54 @@ pub extern "C" fn imailpgp_primary_fingerprint(
     })
 }
 
+/// Gibt die primäre User-ID (z. B. `Name <mail@example.org>`) als UTF-8 aus.
+/// `out` muss großzügig sein (256 Bytes reichen für übliche IDs).
+/// Rückgabe: Länge, 0 = keine User-ID vorhanden, negativ = Fehler.
+#[no_mangle]
+pub extern "C" fn imailpgp_primary_user_id(
+    key: *const u8,
+    key_len: usize,
+    out: *mut u8,
+    out_len: usize,
+) -> i32 {
+    let result = catch_unwind(AssertUnwindSafe(|| {
+        let Some(key_bytes) = bytes_from(key, key_len) else {
+            set_error("leerer Schlüssel");
+            return BAD_ARGUMENT;
+        };
+        if out.is_null() || out_len == 0 {
+            set_error("Ausgabepuffer fehlt");
+            return BAD_ARGUMENT;
+        }
+        let key = match parse_public_key(key_bytes) {
+            Ok(key) => key,
+            Err(error) => {
+                set_error(error.to_string());
+                return PARSE_ERROR;
+            }
+        };
+        let Some(user) = key.details.users.first() else {
+            set_error("");
+            return 0;
+        };
+        // User-IDs sind laut RFC UTF-8, in der Praxis aber nicht immer. Verlust-
+        // behaftete Umwandlung ist hier richtig: lieber anzeigen als abbrechen.
+        let text = String::from_utf8_lossy(user.id.id());
+        let bytes = text.as_bytes();
+        if bytes.len() > out_len {
+            set_error("Ausgabepuffer zu klein");
+            return BAD_ARGUMENT;
+        }
+        // SAFETY: `out` zeigt auf mindestens `out_len` beschreibbare Bytes.
+        unsafe { ptr::copy_nonoverlapping(bytes.as_ptr(), out, bytes.len()) };
+        bytes.len() as i32
+    }));
+    result.unwrap_or_else(|_| {
+        set_error("Panic beim Lesen der User-ID");
+        PANIC
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -374,6 +422,23 @@ mod tests {
             imailpgp_parse_public_key(garbage.as_ptr(), garbage.len()),
             PARSE_ERROR
         );
+    }
+
+    #[test]
+    fn reads_primary_user_id() {
+        let secret = generate_key();
+        let public = secret.to_public_key();
+        let key_bytes = public.to_bytes().expect("schlüssel");
+        let mut out = [0u8; 256];
+        let len = imailpgp_primary_user_id(
+            key_bytes.as_ptr(),
+            key_bytes.len(),
+            out.as_mut_ptr(),
+            out.len(),
+        );
+        assert!(len > 0);
+        let user_id = std::str::from_utf8(&out[..len as usize]).expect("UTF-8");
+        assert!(user_id.contains("test@example.org"), "{user_id}");
     }
 
     #[test]

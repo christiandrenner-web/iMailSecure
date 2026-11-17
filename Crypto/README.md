@@ -73,10 +73,12 @@ cd Crypto/pgp-ffi && cargo run --release --example make_fixtures
 | `imailpgp_parse_public_key` | fertig |
 | `imailpgp_verify_detached` | fertig |
 | `imailpgp_primary_fingerprint` | fertig |
+| `imailpgp_primary_user_id` | fertig |
 | Swift-Wrapper `PGP.swift` | fertig |
+| Schlüsselbund `PGPKeyStore` (Keychain) + Import-UI | fertig |
 | Signieren ausgehend | offen |
 | Ent-/Verschlüsseln (`MessageBuilder`, `Message`) | offen |
-| Schlüsselbund, Passphrase-Schutz (Secure Enclave) | offen |
+| Passphrase-Schutz (Secure Enclave) | offen |
 
 Fehler werden als negative Int32 gemeldet, nie als Panic über die Grenze:
 Jede Funktion fängt Panics ab und legt eine thread-lokale Meldung in

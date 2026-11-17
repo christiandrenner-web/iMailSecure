@@ -80,6 +80,17 @@ struct SettingsView: View {
                     Text("iMail Secure überträgt keine Daten an Dritte und enthält kein Tracking. Externe Bilder und Stylesheets werden blockiert, bis du sie für eine Mail oder einen Absender ausdrücklich freigibst.")
                 }
 
+                // OpenPGP
+                Section {
+                    NavigationLink {
+                        PGPKeysView()
+                    } label: {
+                        Label("OpenPGP-Schlüssel", systemImage: "key.horizontal.fill")
+                    }
+                } footer: {
+                    Text("Öffentliche Schlüssel werden nur auf diesem Gerät gespeichert. Es gibt keine automatische Keyserver-Abfrage.")
+                }
+
                 // D2 Stufe 3 – Freigaben widerrufen
                 Section {
                     if remotePolicy.sortedTrustedSenders.isEmpty {
