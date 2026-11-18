@@ -16,9 +16,11 @@ crate-type = ["staticlib", "rlib"]
 # OpenPGP-Nachrichten mit BZip2-Kompression sind selten und werden abgelehnt,
 # statt zu crashen.
 pgp = { version = "=0.21.1", default-features = false }
+# Nur für den Zufall beim Signieren. Selbe Version wie rpgp, damit die
+# Trait-Grenzen (Rng + CryptoRng) ohne Adapter passen.
+rand = "0.8"
 
 [dev-dependencies]
-rand = "0.8"
 
 [profile.release]
 # Statische Bibliothek für die App: Größe zählt, Debug-Symbole nicht.

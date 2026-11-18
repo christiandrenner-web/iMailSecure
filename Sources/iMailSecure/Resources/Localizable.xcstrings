@@ -783,6 +783,40 @@
         }
       }
     },
+    "Armierten geheimen Schlüssel einfügen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paste armored private key"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pegar clave privada armada"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coller la clé privée armorisée"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вставить армированный закрытый ключ"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Armorlanmış özel anahtarı yapıştır"
+          }
+        }
+      }
+    },
     "Auch ein Autocrypt-Header ist nur ein Hinweis. Vergleiche den Fingerprint über einen zweiten Weg.": {
       "localizations": {
         "en": {
@@ -983,6 +1017,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Gizli"
+          }
+        }
+      }
+    },
+    "Beginnt mit „-----BEGIN PGP PRIVATE KEY BLOCK-----“. Der Schlüssel bleibt auf diesem Gerät.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Starts with “-----BEGIN PGP PRIVATE KEY BLOCK-----”. The key stays on this device."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Empieza con «-----BEGIN PGP PRIVATE KEY BLOCK-----». La clave permanece en este dispositivo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Commence par « -----BEGIN PGP PRIVATE KEY BLOCK----- ». La clé reste sur cet appareil."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Начинается с «-----BEGIN PGP PRIVATE KEY BLOCK-----». Ключ остаётся на этом устройстве."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "«-----BEGIN PGP PRIVATE KEY BLOCK-----» ile başlar. Anahtar bu cihazda kalır."
           }
         }
       }
@@ -1769,6 +1837,40 @@
         }
       }
     },
+    "Der Schlüssel für %@ und die zugehörige Passphrase werden von diesem Gerät gelöscht.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The key for %@ and its passphrase will be deleted from this device."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La clave de %@ y su frase de contraseña se eliminarán de este dispositivo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La clé pour %@ et sa phrase secrète seront supprimées de cet appareil."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ключ для %@ и его парольная фраза будут удалены с этого устройства."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ için anahtar ve parolası bu cihazdan silinecek."
+          }
+        }
+      }
+    },
     "Der Schlüssel gehört zu %@, nicht zu %@.": {
       "localizations": {
         "en": {
@@ -1905,6 +2007,40 @@
         }
       }
     },
+    "Der geheime Schlüssel und seine Passphrase liegen nur auf diesem Gerät und werden nicht synchronisiert. Die App kann damit Mail signieren, sobald du es im Verfassen-Fenster aktivierst.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The private key and its passphrase stay on this device only and are not synced. Once you enable it while composing, the app can use it to sign mail."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La clave privada y su frase de contraseña permanecen solo en este dispositivo y no se sincronizan. La app puede usarla para firmar correos si la activas al redactar."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La clé privée et sa phrase secrète restent uniquement sur cet appareil et ne sont pas synchronisées. L'application peut l'utiliser pour signer les messages si vous l'activez lors de la rédaction."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Закрытый ключ и его парольная фраза остаются только на этом устройстве и не синхронизируются. Приложение сможет подписывать письма, если вы включите это при создании письма."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Özel anahtar ve parolası yalnızca bu cihazda kalır ve eşitlenmez. Uygulama, mesaj oluştururken etkinleştirirseniz postaları imzalayabilir."
+          }
+        }
+      }
+    },
     "Der gemeinsame Posteingang bündelt alle Konten und ist Teil von Pro.": {
       "localizations": {
         "en": {
@@ -1969,6 +2105,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "%1$@:%2$lld için kayıtlı parmak izi silinecek. Bundan sonra ortadaki adam saldırısı artık algılanamaz — yalnızca yeni sertifikayı doğruladıysanız yapın."
+          }
+        }
+      }
+    },
+    "Der private Schlüssel konnte nicht gespeichert werden.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The private key could not be saved."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo guardar la clave privada."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La clé privée n'a pas pu être enregistrée."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не удалось сохранить закрытый ключ."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Özel anahtar kaydedilemedi."
           }
         }
       }
@@ -2177,6 +2347,40 @@
         }
       }
     },
+    "Die Passphrase passt nicht zum geheimen Schlüssel.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The passphrase does not match the private key."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La frase de contraseña no coincide con la clave privada."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La phrase secrète ne correspond pas à la clé privée."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Парольная фраза не подходит к закрытому ключу."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parola özel anahtarla eşleşmiyor."
+          }
+        }
+      }
+    },
     "Die Signatur konnte nicht gelesen werden.": {
       "localizations": {
         "en": {
@@ -2207,6 +2411,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "İmza okunamadı."
+          }
+        }
+      }
+    },
+    "Die Signatur umfasst Text und Anhänge. Sie wird mit deinem privaten Schlüssel erstellt, der nur auf diesem Gerät liegt.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The signature covers text and attachments. It is created with your private key, which stays on this device."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La firma cubre el texto y los archivos adjuntos. Se crea con tu clave privada, que permanece en este dispositivo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La signature couvre le texte et les pièces jointes. Elle est créée avec votre clé privée, qui reste sur cet appareil."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подпись охватывает текст и вложения. Она создаётся вашим закрытым ключом, который остаётся на этом устройстве."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İmza metni ve ekleri kapsar. Yalnızca bu cihazda kalan özel anahtarınızla oluşturulur."
           }
         }
       }
@@ -2343,6 +2581,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bu anahtar girdiğiniz adrese değil, %@ adresine ait."
+          }
+        }
+      }
+    },
+    "Digital signieren": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sign digitally"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Firmar digitalmente"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Signer numériquement"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Цифровая подпись"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dijital olarak imzala"
           }
         }
       }
@@ -2615,6 +2887,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Alıcılar"
+          }
+        }
+      }
+    },
+    "Entfernen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eliminar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supprimer"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Удалить"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaldır"
           }
         }
       }
@@ -3163,6 +3469,74 @@
         }
       }
     },
+    "Für dieses Konto ist kein privater Schlüssel hinterlegt.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No private key is stored for this account."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay ninguna clave privada guardada para esta cuenta."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune clé privée n'est enregistrée pour ce compte."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Для этой учётной записи не сохранён закрытый ключ."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu hesap için özel anahtar kayıtlı değil."
+          }
+        }
+      }
+    },
+    "Für dieses Konto ist kein privater Schlüssel hinterlegt. Die Mail wird unsigniert versendet.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No private key is stored for this account. The mail will be sent unsigned."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay ninguna clave privada guardada para esta cuenta. El correo se enviará sin firmar."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune clé privée n'est enregistrée pour ce compte. Le message sera envoyé sans signature."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Для этой учётной записи не сохранён закрытый ключ. Письмо будет отправлено без подписи."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu hesap için özel anahtar kayıtlı değil. Mail imzasız gönderilecek."
+          }
+        }
+      }
+    },
     "Gefundener Schlüssel": {
       "localizations": {
         "en": {
@@ -3193,6 +3567,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bulunan anahtar"
+          }
+        }
+      }
+    },
+    "Geheimer Schlüssel": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Private key"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clave privada"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clé privée"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Закрытый ключ"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Özel anahtar"
           }
         }
       }
@@ -4727,6 +5135,40 @@
         }
       }
     },
+    "Noch kein privater Schlüssel hinterlegt.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No private key stored yet."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aún no hay ninguna clave privada guardada."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune clé privée enregistrée pour l'instant."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Закрытый ключ пока не сохранён."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Henüz özel anahtar kayıtlı değil."
+          }
+        }
+      }
+    },
     "Noch keine Schlüssel hinterlegt.": {
       "localizations": {
         "en": {
@@ -5138,6 +5580,40 @@
         }
       }
     },
+    "Passphrase": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Passphrase"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Frase de contraseña"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Phrase secrète"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Парольная фраза"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Parola"
+          }
+        }
+      }
+    },
     "Passwort": {
       "localizations": {
         "en": {
@@ -5338,6 +5814,108 @@
           "stringUnit": {
             "state": "translated",
             "value": "Fiyatlar yükleniyor…"
+          }
+        }
+      }
+    },
+    "Private Schlüssel": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Private keys"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claves privadas"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clés privées"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Закрытые ключи"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Özel anahtarlar"
+          }
+        }
+      }
+    },
+    "Privaten Schlüssel entfernen?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove private key?"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Eliminar la clave privada?"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supprimer la clé privée ?"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Удалить закрытый ключ?"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Özel anahtar kaldırılsın mı?"
+          }
+        }
+      }
+    },
+    "Privaten Schlüssel hinzufügen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add private key"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añadir clave privada"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouter une clé privée"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добавить закрытый ключ"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Özel anahtar ekle"
           }
         }
       }
@@ -5750,6 +6328,40 @@
         }
       }
     },
+    "Schlüssel prüfen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Check key"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comprobar clave"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vérifier la clé"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Проверить ключ"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anahtarı kontrol et"
+          }
+        }
+      }
+    },
     "Schlüssel suchen": {
       "localizations": {
         "en": {
@@ -5780,6 +6392,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Anahtar ara"
+          }
+        }
+      }
+    },
+    "Schlüssel werden nur auf diesem Gerät gespeichert. Es gibt keine automatische Keyserver-Abfrage.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keys are stored on this device only. There is no automatic key server lookup."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Las claves se guardan solo en este dispositivo. No hay consulta automática a servidores de claves."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les clés ne sont enregistrées que sur cet appareil. Aucune recherche automatique sur un serveur de clés n'est effectuée."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ключи хранятся только на этом устройстве. Автоматического обращения к серверам ключей нет."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anahtarlar yalnızca bu cihazda saklanır. Anahtar sunucularına otomatik sorgu yapılmaz."
           }
         }
       }
@@ -6260,6 +6906,40 @@
         }
       }
     },
+    "Vergleiche den Fingerprint mit deinem Schlüsselbund, bevor du den Schlüssel hier speicherst.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compare the fingerprint with your own keyring before saving the key here."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compara la huella digital con tu propio anillo de claves antes de guardar la clave aquí."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comparez l'empreinte avec votre propre trousseau avant d'enregistrer la clé ici."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сверьте отпечаток со своим хранилищем ключей, прежде чем сохранить ключ здесь."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anahtarı burada kaydetmeden önce parmak izini kendi anahtar halkangızla karşılaştırın."
+          }
+        }
+      }
+    },
     "Version": {
       "localizations": {
         "en": {
@@ -6392,6 +7072,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hangi hesaptan gönderilsin?"
+          }
+        }
+      }
+    },
+    "Vorschau": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preview"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vista previa"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aperçu"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Предпросмотр"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Önizleme"
           }
         }
       }
@@ -10252,6 +10966,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kaynak kodu incelenebilir, ticari değil"
+          }
+        }
+      }
+    },
+    "Öffentliche Schlüssel": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Public keys"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claves públicas"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clés publiques"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Открытые ключи"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Açık anahtarlar"
           }
         }
       }

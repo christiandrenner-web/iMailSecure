@@ -65,6 +65,29 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .to_armored_bytes(Default::default())?,
     )?;
 
+    // Ein zweiter, passphrasegeschützter Schlüssel für den ausgehenden Pfad.
+    // Er bleibt unabhängig vom ersten Fixture-Schlüssel, damit bestehende
+    // Tests ihren bekannten Fingerprint behalten.
+    let signing_passphrase = "test-passphrase";
+    let signing_params = SecretKeyParamsBuilder::default()
+        .key_type(KeyType::Ed25519Legacy)
+        .can_certify(false)
+        .can_sign(true)
+        .passphrase(Some(signing_passphrase.to_string()))
+        .primary_user_id("iMail Secure Signing <signing@imailsecure.invalid>".into())
+        .preferred_hash_algorithms(vec![HashAlgorithm::Sha256].into())
+        .subkeys(vec![SubkeyParamsBuilder::default()
+            .key_type(KeyType::ECDH(ECCCurve::Curve25519Legacy))
+            .build()?])
+        .build()?;
+    let signing_secret = signing_params.generate(&mut rand::thread_rng())?;
+    let signing_public = signing_secret.to_public_key();
+    let armored_signing_secret =
+        String::from_utf8(signing_secret.to_armored_bytes(Default::default())?)?;
+    let armored_signing_public =
+        String::from_utf8(signing_public.to_armored_bytes(Default::default())?)?;
+    let signing_fingerprint = signing_public.fingerprint().to_string().to_uppercase();
+
     let armored_key = String::from_utf8(public.to_armored_bytes(Default::default())?)?;
     let armored_sig = String::from_utf8(signature.to_armored_bytes(Default::default())?)?;
     let fingerprint = public.fingerprint().to_string().to_uppercase();
@@ -168,6 +191,20 @@ enum PGPFixtures {{
 
     /// Fingerprint des primären Schlüssels, Großbuchstaben-Hex.
     static let fingerprint = "{fingerprint}"
+
+    /// Passphrasegeschützter geheimer Schlüssel für den ausgehenden Pfad.
+    static let privateKey = """
+{armored_signing_secret}"""
+
+    /// Passphrase zum geheimen Schlüssel. Nur Testdaten.
+    static let privateKeyPassphrase = "{signing_passphrase}"
+
+    /// Öffentlicher Gegenstand zum geheimen Schlüssel.
+    static let privateKeyPublicKey = """
+{armored_signing_public}"""
+
+    /// Fingerprint des geheimen Schlüssels.
+    static let privateKeyFingerprint = "{signing_fingerprint}"
 
     /// Dieselben Nutzdaten, ein Zeichen verändert — die Signatur muss dann
     /// ungültig sein.

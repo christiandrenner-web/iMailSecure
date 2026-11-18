@@ -11,6 +11,10 @@ struct EmailDraft: Identifiable {
 
     var requestMDN:     Bool = false
     var requestReceipt: Bool = false
+    /// Nur wenn ein passender privater Schlüssel hinterlegt ist — sonst bleibt
+    /// der Versand unsigniert. Standardmäßig aus, damit Empfänger nicht mit
+    /// einer unerwarteten Signatur konfrontiert werden.
+    var pgpSign:        Bool = false
     var attachments: [EmailAttachment] = []
     var lastModified: Date = Date()
 

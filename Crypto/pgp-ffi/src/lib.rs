@@ -13,8 +13,9 @@ use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::ptr;
 use std::slice;
 
-use pgp::composed::{Deserializable, DetachedSignature, SignedPublicKey};
-use pgp::types::KeyDetails;
+use pgp::composed::{Deserializable, DetachedSignature, SignedPublicKey, SignedSecretKey};
+use pgp::crypto::hash::HashAlgorithm;
+use pgp::types::{KeyDetails, Password};
 
 /// Rückgabewerte. Bewusst klein und stabil, damit Swift sie als Int32 sieht.
 pub const OK: i32 = 1;
@@ -22,6 +23,8 @@ pub const INVALID: i32 = 0;
 pub const BAD_ARGUMENT: i32 = -1;
 pub const PARSE_ERROR: i32 = -2;
 pub const PANIC: i32 = -3;
+/// Der geheime Schlüssel ist lesbar, aber die Passphrase passt nicht.
+pub const WRONG_PASSWORD: i32 = -4;
 
 thread_local! {
     static LAST_ERROR: std::cell::RefCell<CString> =
@@ -63,6 +66,26 @@ fn parse_public_key(bytes: &[u8]) -> Result<SignedPublicKey, String> {
             .map_err(|error| error.to_string())
     } else {
         SignedPublicKey::from_bytes(bytes).map_err(|error| error.to_string())
+    }
+}
+
+fn parse_secret_key(bytes: &[u8]) -> Result<SignedSecretKey, String> {
+    if looks_armored(bytes) {
+        let text = std::str::from_utf8(bytes).map_err(|error| error.to_string())?;
+        SignedSecretKey::from_string(text)
+            .map(|(key, _headers)| key)
+            .map_err(|error| error.to_string())
+    } else {
+        SignedSecretKey::from_bytes(bytes).map_err(|error| error.to_string())
+    }
+}
+
+/// Leere Passphrase bedeutet: ein unverschlüsselter Schlüssel darf benutzt
+/// werden. Bei einem verschlüsselten Schlüssel schlägt `unlock` fehl.
+fn password_from(bytes: Option<&[u8]>) -> Password {
+    match bytes {
+        Some(bytes) if !bytes.is_empty() => Password::from(bytes),
+        _ => Password::empty(),
     }
 }
 
@@ -324,6 +347,172 @@ pub extern "C" fn imailpgp_armor_public_key(
     })
 }
 
+/// Liest einen geheimen Schlüssel und prüft die Passphrase. Liefert
+/// Fingerprint und User-ID, damit die App den Schlüssel eindeutig anzeigen
+/// und der eingegebenen Adresse zuordnen kann. Es wird nichts gespeichert.
+///
+/// Rückgabe: OK bei Erfolg, WRONG_PASSWORD bei falscher Passphrase, sonst
+/// negativ. `passphrase` darf leer sein (unverschlüsselter Schlüssel).
+#[no_mangle]
+pub extern "C" fn imailpgp_secret_key_info(
+    key: *const u8,
+    key_len: usize,
+    passphrase: *const u8,
+    passphrase_len: usize,
+    fingerprint_out: *mut u8,
+    fingerprint_out_len: usize,
+    user_id_out: *mut u8,
+    user_id_out_len: usize,
+) -> i32 {
+    let result = catch_unwind(AssertUnwindSafe(|| {
+        let Some(key_bytes) = bytes_from(key, key_len) else {
+            set_error("leerer Schlüssel");
+            return BAD_ARGUMENT;
+        };
+        let passphrase = bytes_from(passphrase, passphrase_len);
+        if fingerprint_out.is_null() || fingerprint_out_len < 40 || user_id_out.is_null() {
+            set_error("Ausgabepuffer fehlt");
+            return BAD_ARGUMENT;
+        }
+        let secret = match parse_secret_key(key_bytes) {
+            Ok(secret) => secret,
+            Err(error) => {
+                set_error(format!("Geheimer Schlüssel nicht lesbar: {error}"));
+                return PARSE_ERROR;
+            }
+        };
+
+        // `unlock` führt keine Kryptographie aus, sondern entschlüsselt nur
+        // kurzfristig die geheimen Parameter. Genau damit prüfen wir die
+        // Passphrase, ohne den Schlüssel in eine Datei zu schreiben.
+        let password = password_from(passphrase);
+        if let Err(error) = secret
+            .primary_key
+            .unlock(&password, |_, _| Ok(()))
+            .and_then(|inner| inner)
+        {
+            set_error(format!("Passphrase passt nicht: {error}"));
+            return WRONG_PASSWORD;
+        }
+
+        let fingerprint = secret.primary_key.fingerprint().to_string().to_uppercase();
+        let fingerprint_bytes = fingerprint.as_bytes();
+        if fingerprint_bytes.len() > fingerprint_out_len {
+            set_error("Ausgabepuffer für Fingerprint zu klein");
+            return BAD_ARGUMENT;
+        }
+        // SAFETY: Der Aufrufer garantiert die angegebene Puffergröße.
+        unsafe {
+            ptr::copy_nonoverlapping(
+                fingerprint_bytes.as_ptr(),
+                fingerprint_out,
+                fingerprint_bytes.len(),
+            )
+        };
+
+        if user_id_out_len > 0 {
+            if let Some(user) = secret.details.users.first() {
+                let text = String::from_utf8_lossy(user.id.id());
+                let bytes = text.as_bytes();
+                let copy_length = bytes.len().min(user_id_out_len);
+                // SAFETY: Der Aufrufer garantiert die angegebene Puffergröße.
+                unsafe {
+                    ptr::copy_nonoverlapping(bytes.as_ptr(), user_id_out, copy_length)
+                };
+            }
+        }
+
+        set_error("");
+        OK
+    }));
+    result.unwrap_or_else(|_| {
+        set_error("Panic beim Lesen des geheimen Schlüssels");
+        PANIC
+    })
+}
+
+/// Erzeugt eine abgetrennte OpenPGP-Signatur (SHA-256, binär) über `data`.
+/// Ausgegeben wird ASCII-Armor, wie er in `multipart/signed` steht. SHA-256
+/// ist hier fest verdrahtet, damit micalg und Signaturalgorithmus zusammen-
+/// passen und die Gegenprobe mit `imailpgp_verify_detached` funktioniert.
+///
+/// Rückgabe: Länge der armorierten Signatur (>0), negativ = Fehler.
+#[no_mangle]
+pub extern "C" fn imailpgp_sign_detached(
+    key: *const u8,
+    key_len: usize,
+    passphrase: *const u8,
+    passphrase_len: usize,
+    data: *const u8,
+    data_len: usize,
+    out: *mut u8,
+    out_len: usize,
+) -> i32 {
+    let result = catch_unwind(AssertUnwindSafe(|| {
+        let (Some(key_bytes), Some(data_bytes)) = (
+            bytes_from(key, key_len),
+            bytes_from(data, data_len),
+        ) else {
+            set_error("leeres Argument");
+            return BAD_ARGUMENT;
+        };
+        let passphrase = bytes_from(passphrase, passphrase_len);
+        if out.is_null() || out_len == 0 {
+            set_error("Ausgabepuffer fehlt");
+            return BAD_ARGUMENT;
+        }
+        let secret = match parse_secret_key(key_bytes) {
+            Ok(secret) => secret,
+            Err(error) => {
+                set_error(format!("Geheimer Schlüssel nicht lesbar: {error}"));
+                return PARSE_ERROR;
+            }
+        };
+        let password = password_from(passphrase);
+        if let Err(error) = secret
+            .primary_key
+            .unlock(&password, |_, _| Ok(()))
+            .and_then(|inner| inner)
+        {
+            set_error(format!("Passphrase passt nicht: {error}"));
+            return WRONG_PASSWORD;
+        }
+
+        let signature = match DetachedSignature::sign_binary_data(
+            &mut rand::thread_rng(),
+            &secret.primary_key,
+            &password,
+            HashAlgorithm::Sha256,
+            data_bytes,
+        ) {
+            Ok(signature) => signature,
+            Err(error) => {
+                set_error(format!("Signieren fehlgeschlagen: {error}"));
+                return PARSE_ERROR;
+            }
+        };
+        let armored = match signature.to_armored_bytes(Default::default()) {
+            Ok(bytes) => bytes,
+            Err(error) => {
+                set_error(format!("Signatur nicht armierbar: {error}"));
+                return PARSE_ERROR;
+            }
+        };
+        if armored.len() > out_len {
+            set_error("Ausgabepuffer zu klein");
+            return BAD_ARGUMENT;
+        }
+        // SAFETY: Der Aufrufer garantiert die angegebene Puffergröße.
+        unsafe { ptr::copy_nonoverlapping(armored.as_ptr(), out, armored.len()) };
+        set_error("");
+        armored.len() as i32
+    }));
+    result.unwrap_or_else(|_| {
+        set_error("Panic beim Signieren");
+        PANIC
+    })
+}
+
 /// Hexadezimal, Großbuchstaben — für Key IDs, die rpgp nicht selbst als
 /// String ausgibt.
 fn hex_upper(bytes: &[u8]) -> String {
@@ -399,13 +588,14 @@ mod tests {
     use pgp::ser::Serialize;
     use pgp::types::Password;
 
-    fn generate_key() -> SignedSecretKey {
+    fn generate_key_with_passphrase(passphrase: Option<&str>) -> SignedSecretKey {
         let params = SecretKeyParamsBuilder::default()
             .key_type(KeyType::Ed25519Legacy)
             .can_certify(false)
             .can_sign(true)
             .primary_user_id("Test <test@example.org>".into())
             .preferred_hash_algorithms(vec![HashAlgorithm::Sha256].into())
+            .passphrase(passphrase.map(str::to_string))
             .subkeys(vec![SubkeyParamsBuilder::default()
                 .key_type(KeyType::ECDH(ECCCurve::Curve25519Legacy))
                 .build()
@@ -413,6 +603,10 @@ mod tests {
             .build()
             .expect("Params");
         params.generate(&mut rand::thread_rng()).expect("Schlüssel")
+    }
+
+    fn generate_key() -> SignedSecretKey {
+        generate_key_with_passphrase(None)
     }
 
     #[test]
@@ -541,6 +735,121 @@ mod tests {
         let armored = &out[..len as usize];
         assert!(armored.starts_with(b"-----BEGIN PGP PUBLIC KEY BLOCK-----"));
         assert_eq!(imailpgp_parse_public_key(armored.as_ptr(), armored.len()), OK);
+    }
+
+    #[test]
+    fn secret_key_info_checks_passphrase_and_reports_identity() {
+        // Der Import muss die Passphrase prüfen, bevor der Schlüssel im
+        // Keychain landet. Fingerprint und User-ID kommen aus rpgp, nicht aus
+        // dem Textfeld der Oberfläche.
+        let secret = generate_key_with_passphrase(Some("geheim"));
+        let key_bytes = secret.to_armored_bytes(Default::default()).expect("armor");
+        let public = secret.to_public_key();
+        let expected = public.fingerprint().to_string().to_uppercase();
+        let password = b"geheim";
+
+        let mut fingerprint = [0u8; 64];
+        let mut user_id = [0u8; 256];
+        let status = imailpgp_secret_key_info(
+            key_bytes.as_ptr(),
+            key_bytes.len(),
+            password.as_ptr(),
+            password.len(),
+            fingerprint.as_mut_ptr(),
+            fingerprint.len(),
+            user_id.as_mut_ptr(),
+            user_id.len(),
+        );
+        assert_eq!(status, OK);
+        assert_eq!(
+            std::str::from_utf8(&fingerprint).expect("UTF-8").trim_end_matches('\0'),
+            expected
+        );
+        assert!(std::str::from_utf8(&user_id)
+            .expect("UTF-8")
+            .contains("test@example.org"));
+
+        let wrong = b"falsch";
+        let status = imailpgp_secret_key_info(
+            key_bytes.as_ptr(),
+            key_bytes.len(),
+            wrong.as_ptr(),
+            wrong.len(),
+            fingerprint.as_mut_ptr(),
+            fingerprint.len(),
+            user_id.as_mut_ptr(),
+            user_id.len(),
+        );
+        assert_eq!(status, WRONG_PASSWORD, "falsche Passphrase muss auffallen");
+    }
+
+    #[test]
+    fn sign_detached_roundtrips_and_rejects_wrong_passphrase() {
+        // Genau diese Signatur später in multipart/signed: Sie muss mit dem
+        // öffentlichen Schlüssel prüfbar sein und mit falscher Passphrase
+        // gar nicht erst entstehen.
+        let secret = generate_key_with_passphrase(Some("geheim"));
+        let key_bytes = secret.to_armored_bytes(Default::default()).expect("armor");
+        let public_bytes = secret
+            .to_public_key()
+            .to_bytes()
+            .expect("öffentlicher Schlüssel");
+        let data = b"signierte MIME-Einheit\r\nZeile 2";
+        let password = b"geheim";
+
+        let mut signature = vec![0u8; 16_384];
+        let len = imailpgp_sign_detached(
+            key_bytes.as_ptr(),
+            key_bytes.len(),
+            password.as_ptr(),
+            password.len(),
+            data.as_ptr(),
+            data.len(),
+            signature.as_mut_ptr(),
+            signature.len(),
+        );
+        assert!(len > 0, "Signatur muss erzeugt werden");
+        let signature = &signature[..len as usize];
+        assert!(signature.starts_with(b"-----BEGIN PGP SIGNATURE-----"));
+        assert_eq!(
+            imailpgp_verify_detached(
+                signature.as_ptr(),
+                signature.len(),
+                data.as_ptr(),
+                data.len(),
+                public_bytes.as_ptr(),
+                public_bytes.len(),
+            ),
+            OK
+        );
+
+        let mut tampered = data.to_vec();
+        tampered[0] ^= 0xFF;
+        assert_eq!(
+            imailpgp_verify_detached(
+                signature.as_ptr(),
+                signature.len(),
+                tampered.as_ptr(),
+                tampered.len(),
+                public_bytes.as_ptr(),
+                public_bytes.len(),
+            ),
+            INVALID
+        );
+
+        let wrong = b"falsch";
+        let mut out = vec![0u8; 16_384];
+        let status = imailpgp_sign_detached(
+            key_bytes.as_ptr(),
+            key_bytes.len(),
+            wrong.as_ptr(),
+            wrong.len(),
+            data.as_ptr(),
+            data.len(),
+            out.as_mut_ptr(),
+            out.len(),
+        );
+        assert_eq!(status, WRONG_PASSWORD);
     }
 
     #[test]

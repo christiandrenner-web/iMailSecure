@@ -43,9 +43,10 @@ Build reproduzierbar bleibt.
 cd Crypto/pgp-ffi && cargo test --release
 ```
 
-Deckt ab: Schlüsselerzeugung, abgetrennte Signatur (gültig, manipuliert,
-leere Nutzdaten), armierte Schlüssel und Signaturen, Parsen von Müll,
-Fingerprint, User-ID, Signaturaussteller und Armierung. Die Kryptographie ist
+Deckt ab: Schlüsselerzeugung (auch passphrasegeschützt), abgetrennte Signatur
+(gültig, manipuliert, leere Nutzdaten), Passphrase-Prüfung, armierte Schlüssel
+und Signaturen, Parsen von Müll, Fingerprint, User-ID, Signaturaussteller und
+Armierung. Die Kryptographie ist
 plattformunabhängig; der iOS-Build wird
 zusätzlich mit `Crypto/pgp-ffi/smoke.c` gegen die Simulator-Slice geprüft
 (ABI, Symbole, Rückgabewerte):
@@ -59,7 +60,8 @@ xcrun simctl spawn booted /tmp/imailpgp-smoke
 ```
 
 Die Swift-Seite prüft `PGPTests.swift` (10), `PGPKeyStoreTests.swift` (6),
-`PGPSignatureTests.swift` (13) und `PGPKeyDiscoveryTests.swift` (8) gegen
+`PGPSignatureTests.swift` (13), `PGPKeyDiscoveryTests.swift` (8),
+`PGPOutgoingTests.swift` (6) und `PGPPrivateKeyStoreTests.swift` (5) gegen
 dieselbe Bibliothek. Die Testdaten liegen in
 `Tests/iMailSecureTests/Fixtures/PGPFixtures.swift` und werden erzeugt mit:
 
@@ -78,13 +80,16 @@ cd Crypto/pgp-ffi && cargo run --release --example make_fixtures
 | `imailpgp_primary_user_id` | fertig |
 | `imailpgp_signature_issuer` | fertig |
 | `imailpgp_armor_public_key` | fertig |
+| `imailpgp_secret_key_info` (Passphrase, Fingerprint, User-ID) | fertig |
+| `imailpgp_sign_detached` (SHA-256, armoriert) | fertig |
 | Swift-Wrapper `PGP.swift` | fertig |
 | Schlüsselbund `PGPKeyStore` (Keychain) + Import-UI | fertig |
 | Eingehende Signaturprüfung (`PGPSignature.swift`) | fertig |
 | WKD (`WKDLookup.swift`) und Autocrypt (`AutocryptHeader.swift`) | fertig |
-| Signieren ausgehend | offen |
+| Geheime Schlüssel `PGPPrivateKeyStore` + Import-UI | fertig |
+| Signieren ausgehend (`PGPMIMEBuilder`, `multipart/signed`) | fertig |
 | Ent-/Verschlüsseln (`MessageBuilder`, `Message`) | offen |
-| Passphrase-Schutz des geheimen Schlüssels (Keychain `ThisDeviceOnly`) | offen |
+| Passphrase-Schutz des geheimen Schlüssels (Keychain `ThisDeviceOnly`) | fertig |
 
 Die Secure Enclave speichert nur P-256-Schlüssel; OpenPGP-Schlüssel bleiben
 deshalb im Keychain mit `ThisDeviceOnly`-Zugriff und ohne iCloud-Synchronisation.
@@ -97,6 +102,23 @@ direkt), ohne Redirects, ohne Cache und ohne Cookies. Ein Autocrypt-Header
 wird nur aus dem Kopf der geöffneten Nachricht gelesen. Beide Wege zeigen
 zuerst den Fingerprint; ein Import erfolgt nie still und nur, wenn die
 User-ID zur Adresse passt.
+
+## Ausgehendes Signieren
+
+`PGPMIMEBuilder` erzeugt `multipart/signed` nach RFC 3156. Der erste MIME-Teil
+wird als Rohbytes gebaut und genau so signiert, wie er auf dem Server liegt —
+mit CRLF als Zeilenende und ohne das Zeilenende vor der Grenzlinie. Die
+Signatur ist SHA-256 (`micalg=pgp-sha256`), Text und Anhänge sind base64 in
+Zeilen à 76 Zeichen kodiert; die Nachricht bleibt damit rein ASCII und läuft
+auch über Server ohne 8BITMIME. BCC steht nur im SMTP-Umschlag, nie im Header.
+`SMTPManager` benutzt für signierte Mail `sendRawMessage`, damit SwiftMail den
+signierten Teil nicht neu zusammenstellt und die Prüfsumme ungültig wird.
+
+Der Schalter „Digital signieren" im Verfassen-Fenster erscheint nur, wenn für
+das Konto ein privater Schlüssel hinterlegt ist. Ohne Schlüssel bleibt der
+Versand unsigniert. `PGPOutgoingTests` prüft den Rundlauf durch den
+eingehenden Parser, Manipulation von Text und Anhang, Header-Injection und
+die SMTP-Zeilengrenzen.
 
 Fehler werden als negative Int32 gemeldet, nie als Panic über die Grenze:
 Jede Funktion fängt Panics ab und legt eine thread-lokale Meldung in

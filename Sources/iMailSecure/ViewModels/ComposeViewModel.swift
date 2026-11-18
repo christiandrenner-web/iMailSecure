@@ -15,6 +15,14 @@ final class ComposeViewModel: ObservableObject {
     private let defaults: UserDefaults
     var onSent: ((EmailDraft) -> Void)?   // Callback → MailStore.saveSentMessage
 
+    /// Signieren ist nur möglich, wenn für dieses Konto ein privater Schlüssel
+    /// hinterlegt ist. Die Oberfläche zeigt den Schalter dann gar nicht erst
+    /// an — ein sichtbarer, aber wirkungsloser Datenschutzschalter wäre
+    /// schlimmer als kein Schalter.
+    var canSign: Bool {
+        PGPPrivateKeyStore.shared.hasKey(forEmail: account.email)
+    }
+
     init(account: EmailAccount, defaults: UserDefaults = .standard) {
         self.account     = account
         self.smtpManager = SMTPManager(account: account)
@@ -62,7 +70,7 @@ final class ComposeViewModel: ObservableObject {
 
         Task {
             do {
-                try await smtpManager.sendEmail(draft: draft)
+                try await smtpManager.sendEmail(draft: draft, sign: draft.pgpSign && canSign)
                 let sentDraft = draft
                 isLoading      = false
                 successMessage = String(localized: "compose.success.sent",

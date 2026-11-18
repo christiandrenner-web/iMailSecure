@@ -85,10 +85,17 @@ struct SettingsView: View {
                     NavigationLink {
                         PGPKeysView()
                     } label: {
-                        Label("OpenPGP-Schlüssel", systemImage: "key.horizontal.fill")
+                        Label("Öffentliche Schlüssel", systemImage: "key.horizontal.fill")
                     }
+                    NavigationLink {
+                        PGPPrivateKeysView()
+                    } label: {
+                        Label("Private Schlüssel", systemImage: "key.fill")
+                    }
+                } header: {
+                    Text("OpenPGP")
                 } footer: {
-                    Text("Öffentliche Schlüssel werden nur auf diesem Gerät gespeichert. Es gibt keine automatische Keyserver-Abfrage.")
+                    Text("Schlüssel werden nur auf diesem Gerät gespeichert. Es gibt keine automatische Keyserver-Abfrage.")
                 }
 
                 // D2 Stufe 3 – Freigaben widerrufen

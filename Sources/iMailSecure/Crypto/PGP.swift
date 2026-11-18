@@ -22,6 +22,7 @@ private enum PGPStatus {
     static let badArgument: Int32 = -1
     static let parseError: Int32 = -2
     static let panic: Int32 = -3
+    static let wrongPassword: Int32 = -4
 }
 
 // MARK: – Fehler
@@ -32,6 +33,8 @@ enum PGPError: LocalizedError, Equatable {
     /// Die Signatur ließ sich nicht parsen — nicht zu verwechseln mit
     /// „Signatur ist falsch“, das ist ein reguläres `false`.
     case unreadableSignature(detail: String?)
+    /// Die Passphrase passt nicht zum geheimen Schlüssel.
+    case wrongPassphrase(detail: String?)
     /// Alles andere aus der Bibliothek (Panic, zu kleiner Puffer …).
     case library(detail: String)
 
@@ -41,6 +44,8 @@ enum PGPError: LocalizedError, Equatable {
             return String(localized: "Das ist kein gültiger öffentlicher Schlüssel.")
         case .unreadableSignature:
             return String(localized: "Die Signatur konnte nicht gelesen werden.")
+        case .wrongPassphrase:
+            return String(localized: "Die Passphrase passt nicht zum geheimen Schlüssel.")
         case .library:
             return String(localized: "Die Kryptographie-Bibliothek meldet einen Fehler.")
         }
@@ -48,7 +53,7 @@ enum PGPError: LocalizedError, Equatable {
 
     var failureReason: String? {
         switch self {
-        case let .invalidKey(detail), let .unreadableSignature(detail):
+        case let .invalidKey(detail), let .unreadableSignature(detail), let .wrongPassphrase(detail):
             return detail.flatMap { $0.isEmpty ? nil : $0 }
         case let .library(detail):
             return detail.isEmpty ? nil : detail
@@ -220,6 +225,91 @@ enum PGP {
             throw PGPError.unreadableSignature(detail: lastError)
         }
         return String(decoding: output[0..<Int(length)], as: UTF8.self)
+    }
+
+    /// Liest einen geheimen Schlüssel und prüft die Passphrase. Liefert
+    /// Fingerprint und User-ID, damit die Import-UI den Schlüssel eindeutig
+    /// anzeigen und der Adresse zuordnen kann. Der Schlüssel wird nicht
+    /// gespeichert — das macht erst `PGPPrivateKeyStore`.
+    static func secretKeyInfo(_ data: Data, passphrase: String) throws -> PGPKeyInfo {
+        let password = Data(passphrase.utf8)
+        var fingerprintBuffer = [UInt8](repeating: 0, count: 128)
+        var userIDBuffer = [UInt8](repeating: 0, count: 512)
+
+        let status = withBytes(data) { keyBytes, keyCount in
+            withBytes(password) { passwordBytes, passwordCount in
+                fingerprintBuffer.withUnsafeMutableBufferPointer { fingerprint in
+                    userIDBuffer.withUnsafeMutableBufferPointer { userID in
+                        imailpgp_secret_key_info(
+                            keyBytes, keyCount,
+                            passwordBytes, passwordCount,
+                            fingerprint.baseAddress, fingerprint.count,
+                            userID.baseAddress, userID.count
+                        )
+                    }
+                }
+            }
+        }
+
+        switch status {
+        case PGPStatus.ok:
+            break
+        case PGPStatus.wrongPassword:
+            throw PGPError.wrongPassphrase(detail: lastError)
+        case PGPStatus.badArgument, PGPStatus.panic:
+            throw PGPError.library(detail: lastError)
+        default:
+            throw PGPError.invalidKey(detail: lastError)
+        }
+
+        let fingerprintLength = fingerprintBuffer.firstIndex(of: 0) ?? fingerprintBuffer.count
+        guard fingerprintLength > 0 else {
+            throw PGPError.invalidKey(detail: lastError)
+        }
+        let fingerprint = String(
+            decoding: fingerprintBuffer[0..<fingerprintLength], as: UTF8.self
+        )
+        let userIDLength = userIDBuffer.firstIndex(of: 0) ?? userIDBuffer.count
+        let userID = userIDLength > 0
+            ? String(decoding: userIDBuffer[0..<userIDLength], as: UTF8.self)
+            : nil
+        return PGPKeyInfo(fingerprint: fingerprint, userID: userID)
+    }
+
+    /// Signiert `data` abgetrennt mit SHA-256 und gibt die armierte Signatur
+    /// zurück. Genau diese Bytes gehören in den zweiten Teil von
+    /// `multipart/signed`. Eine falsche Passphrase ist ein eigener Fehler,
+    /// damit die Oberfläche nicht „Kryptographie-Fehler“ sagen muss.
+    static func signDetached(
+        _ data: Data,
+        secretKey: Data,
+        passphrase: String
+    ) throws -> Data {
+        let password = Data(passphrase.utf8)
+        var output = [UInt8](repeating: 0, count: 64 * 1024)
+
+        let length = withBytes(secretKey) { keyBytes, keyCount in
+            withBytes(password) { passwordBytes, passwordCount in
+                withBytes(data) { dataBytes, dataCount in
+                    output.withUnsafeMutableBufferPointer { buffer in
+                        imailpgp_sign_detached(
+                            keyBytes, keyCount,
+                            passwordBytes, passwordCount,
+                            dataBytes, dataCount,
+                            buffer.baseAddress, buffer.count
+                        )
+                    }
+                }
+            }
+        }
+
+        guard length > 0 else {
+            if length == PGPStatus.wrongPassword {
+                throw PGPError.wrongPassphrase(detail: lastError)
+            }
+            throw PGPError.library(detail: lastError)
+        }
+        return Data(output[0..<Int(length)])
     }
 
     // MARK: – Intern

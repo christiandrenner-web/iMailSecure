@@ -41,6 +41,26 @@ int main(void) {
            armor < 0 ? "ok" : "FEHLER");
     if (armor >= 0) return 1;
 
+    // Ausgehender Pfad: Auch die neuen Symbole müssen im iOS-Artefakt
+    // tatsächlich linken. Die Kryptographie selbst testen die Rust-Tests;
+    // hier zählen nur Signatur der Funktion und Rückgabewerte.
+    uint8_t key_info[128];
+    int32_t secret = imailpgp_secret_key_info(garbage, sizeof(garbage) - 1,
+                                              (const uint8_t *)"", 0,
+                                              key_info, sizeof(key_info),
+                                              out, sizeof(out));
+    printf("secret_info(garbage): %d (erwartet negativ) %s\n", secret,
+           secret < 0 ? "ok" : "FEHLER");
+    if (secret >= 0) return 1;
+
+    int32_t sign = imailpgp_sign_detached(garbage, sizeof(garbage) - 1,
+                                         (const uint8_t *)"", 0,
+                                         garbage, sizeof(garbage) - 1,
+                                         out, sizeof(out));
+    printf("sign(garbage): %d (erwartet negativ) %s\n", sign,
+           sign < 0 ? "ok" : "FEHLER");
+    if (sign >= 0) return 1;
+
     printf("Fehlermeldung: %s\n", imailpgp_last_error());
     return 0;
 }

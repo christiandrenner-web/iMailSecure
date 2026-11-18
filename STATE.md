@@ -1,5 +1,5 @@
 # STATE — iMail Secure
-Stand: 2026-11-18 · Branch: `main` · Letzter Code-Commit: `f8b5c02` · Build: **SUCCEEDED** (iOS + macOS) · Tests: **167 Unit-Tests (4 übersprungen) + 3 UI-Tests grün** · PGP: FFI, Schlüsselbund, Signaturprüfung, WKD/Autocrypt, 8 Rust- und 37 Swift-Tests grün
+Stand: 2026-11-18 · Branch: `main` · Letzter Code-Commit: `57b1e40` · Build: **SUCCEEDED** (iOS + macOS) · Tests: **178 Unit-Tests (4 übersprungen) + 3 UI-Tests grün** · PGP: FFI, Schlüsselbund, Signaturprüfung ein- und ausgehend, WKD/Autocrypt, 10 Rust- und 48 Swift-Tests grün
 
 ## Ziel
 App-Store-fähige Version: echte IMAP-Ordner, Datenschutz nach D2, Free/Pro ohne
@@ -34,6 +34,25 @@ beschnittene Schutzfunktionen. Keine offenen Code-Fehler bekannt.
 - L1 Lizenz: entschieden (PolyForm Noncommercial 1.0.0), juristische Prüfung steht aus
 
 ## Zuletzt erledigt
+- 2026-11-18 Ausgehendes PGP-Signieren: Der Nutzer importiert seinen eigenen
+  geheimen Schlüssel in `PGPPrivateKeyStore` — Keychain
+  (`WhenUnlockedThisDeviceOnly`, kein iCloud-Sync), Schlüssel und Passphrase in
+  getrennten Einträgen. Die FFI prüft die Passphrase vor dem Speichern und
+  liefert Fingerprint und User-ID aus rpgp; die Import-UI zeigt beides erst als
+  Vorschau. Neue FFI-Funktionen `imailpgp_secret_key_info` und
+  `imailpgp_sign_detached` (SHA-256 fest verdrahtet, `micalg=pgp-sha256`),
+  neuer Status `IMAILPGP_WRONG_PASSWORD -4`. `PGPMIMEBuilder` erzeugt
+  `multipart/signed` mit CRLF-Rohbytes; Text und Anhänge sind base64-kodiert,
+  damit die Nachricht auch ohne 8BITMIME rein ASCII bleibt. Signiert werden
+  genau die Bytes, die der erste MIME-Teil später auf dem Server hat — die
+  Gegenprobe läuft durch denselben Parser wie die eingehende Prüfung. BCC
+  steht nur im SMTP-Umschlag, nie im Header; Zeilenlimits und Header-Injection
+  sind in Tests abgedeckt. Der Schalter im Verfassen-Fenster erscheint nur,
+  wenn für dieses Konto wirklich ein privater Schlüssel liegt; ohne Schlüssel
+  bleibt der Versand unsigniert. 22 neue Übersetzungen (312 Einträge), 11 neue
+  Swift- und 2 neue Rust-Tests, C-Smoke-Test um die neuen Symbole erweitert.
+  Geprüft: 178 Unit-Tests (4 StoreKit opt-in), 10 Rust-Tests, iOS- und
+  macOS-Build grün
 - 2026-11-18 Kontrollierter Schlüsselbezug: WKD und Autocrypt, beides nur
   auf ausdrückliche Nutzeraktion — keine Hintergrundabfrage, kein Keyserver,
   keine stillen Importe. `WKDLookup` berechnet den Hash gemäß Spezifikation
@@ -181,8 +200,10 @@ beschnittene Schutzfunktionen. Keine offenen Code-Fehler bekannt.
    oder Gmail öffnen und das Banner mit einem externen Verifier vergleichen.
 2. WKD gegen einen echten Anbieter testen (z. B. eine Adresse bei Posteo),
    inklusive Rückfall von der erweiterten auf die direkte Methode.
-3. Verschlüsseln und Signieren ausgehend über `MessageBuilder`, inkl.
-   Passphrase-Schutz des geheimen Schlüssels.
+3. Ausgehende Verschlüsselung mit den öffentlichen Schlüsseln aus
+   `PGPKeyStore`: `multipart/encrypted` mit Session-Schlüssel, nur auf
+   ausdrückliche Nutzeraktion und nur, wenn für jeden Empfänger ein geprüfter
+   Schlüssel vorliegt. Das Signieren steht (siehe oben).
 4. Entschlüsselung von `multipart/encrypted`: derzeit zeigt die App ehrlich an,
    dass der Inhalt nicht entschlüsselt wird.
 5. Push-Relay: Zielumgebung mit dem Nutzer festlegen (Domain, NAS oder VPS),

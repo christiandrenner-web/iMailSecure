@@ -256,6 +256,27 @@ Konzept gut, Umsetzung unvollständig. Viele Schutzfunktionen existieren als UI-
 - `ITSAppUsesNonExemptEncryption` erst setzen, wenn PGP tatsächlich ausgeliefert
   wird; dann Exportkonformität dokumentieren.
 
+**Stand 2026-11-18 — ausgehendes Signieren ergänzt:**
+- Neue FFI: `imailpgp_secret_key_info` (Passphrase prüfen, Fingerprint und
+  User-ID liefern) und `imailpgp_sign_detached` (abgetrennte SHA-256-Signatur,
+  armoriert). Falsche Passphrase ist ein eigener Status
+  (`IMAILPGP_WRONG_PASSWORD`), kein allgemeiner Krypto-Fehler.
+- Geheime Schlüssel liegen in `PGPPrivateKeyStore` im Keychain mit
+  `WhenUnlockedThisDeviceOnly`, die Passphrase in einem getrennten Eintrag,
+  beides ohne iCloud-Sync. Import erst nach Vorschau von Adresse, User-ID und
+  Fingerprint; ein Import mit falscher Passphrase oder fremder Adresse
+  hinterlässt nichts. Keine Schlüsselerzeugung und kein Keyserver in der App.
+- `PGPMIMEBuilder` baut `multipart/signed` (RFC 3156). Der erste Teil wird als
+  Rohbytes signiert, genau wie er auf dem Server liegt; CRLF durchgehend,
+  Text und Anhänge base64 (rein ASCII, auch ohne 8BITMIME). BCC nur im
+  SMTP-Umschlag, nicht im Header; Nutzereingaben können keine Kopfzeilen
+  injizieren. `SMTPManager` sendet signierte Mail über `sendRawMessage`, damit
+  SwiftMail den signierten Teil nicht neu zusammenbaut.
+- Opt-in pro Entwurf, nur sichtbar, wenn ein privater Schlüssel für das Konto
+  hinterlegt ist. Ohne Schlüssel wird unsigniert versendet — kein wirkungsloser
+  Datenschutzschalter.
+- Offen: ausgehende Verschlüsselung, Entschlüsselung und S/MIME.
+
 ---
 
 ## Vorgeschlagene Umsetzungsreihenfolge
@@ -314,7 +335,7 @@ Konzept gut, Umsetzung unvollständig. Viele Schutzfunktionen existieren als UI-
 | S4 | ✅ erledigt | Blur-Overlay bei willResignActive; Schloss-Icon im App-Umschalter |
 | S5 | 🔴 offen | OAuth 2.0 – Entscheid ausstehend |
 | S6 | 🔴 offen | Entwürfe werden nicht gespeichert |
-| C1 | 🟡 in Arbeit | PGP: entschieden für rpgp (Apache-2.0/MIT, reines Rust). FFI, Swift-Wrapper, Schlüsselbund (Keychain, Import-UI), eingehende Signaturprüfung mit Statusbanner sowie WKD/Autocrypt nur auf ausdrückliche Aktion stehen (2026-11-18); offen: Verschlüsseln/Signieren ausgehend, Entschlüsselung. S/MIME nicht entschieden |
+| C1 | 🟡 in Arbeit | PGP: entschieden für rpgp (Apache-2.0/MIT, reines Rust). FFI, Swift-Wrapper, Schlüsselbund (Keychain, Import-UI), Signaturprüfung mit Statusbanner, WKD/Autocrypt nur auf ausdrückliche Aktion und ausgehendes Signieren (PGP/MIME, Passphrase im Keychain) stehen (2026-11-18); offen: Verschlüsseln und Entschlüsseln ausgehend/eingehend. S/MIME nicht entschieden |
 | L1 | ✅ entschieden | **Dual Licensing** (PolyForm Noncommercial + Commercial License); juristische Prüfung von `LICENSE-NONCOMMERCIAL.md`, `LICENSE-COMMERCIAL.md`, `CLA.md` und AGB steht aus |
 
 ---

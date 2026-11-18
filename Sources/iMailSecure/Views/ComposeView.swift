@@ -89,6 +89,23 @@ struct ComposeView: View {
                     Text("MDN (RFC 8098): Benachrichtigung wenn die Mail geöffnet wird.")
                 }
 
+                // OpenPGP – Signieren nur, wenn wirklich ein Schlüssel da ist
+                Section {
+                    if viewModel.canSign {
+                        Toggle(isOn: $viewModel.draft.pgpSign) {
+                            Label("Digital signieren", systemImage: "signature")
+                        }
+                        .tint(.blue)
+                    } else {
+                        Text("Für dieses Konto ist kein privater Schlüssel hinterlegt. Die Mail wird unsigniert versendet.")
+                            .foregroundStyle(.secondary)
+                    }
+                } header: {
+                    Text("OpenPGP")
+                } footer: {
+                    Text("Die Signatur umfasst Text und Anhänge. Sie wird mit deinem privaten Schlüssel erstellt, der nur auf diesem Gerät liegt.")
+                }
+
                 // Fehler / Erfolg
                 if let error = viewModel.errorMessage {
                     Section {

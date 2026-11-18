@@ -21,6 +21,7 @@ extern "C" {
 #define IMAILPGP_BAD_ARGUMENT -1
 #define IMAILPGP_PARSE_ERROR -2
 #define IMAILPGP_PANIC -3
+#define IMAILPGP_WRONG_PASSWORD -4
 
 /// Version als statischer C-String, z. B. "imailpgp 0.1.0 / rpgp 0.21.1".
 const char *imailpgp_version(void);
@@ -56,6 +57,21 @@ int32_t imailpgp_signature_issuer(const uint8_t *signature, size_t signature_len
 /// (mindestens 40 Bytes, 64 für v6). Rückgabe: Länge oder negativ.
 int32_t imailpgp_primary_fingerprint(const uint8_t *key, size_t key_len,
                                      uint8_t *out, size_t out_len);
+
+/// Liest einen geheimen Schlüssel, prüft die Passphrase und schreibt
+/// Fingerprint und User-ID in die Puffer. Rückgabe: IMAILPGP_OK,
+/// IMAILPGP_WRONG_PASSWORD oder negativ bei Lesefehlern.
+int32_t imailpgp_secret_key_info(const uint8_t *key, size_t key_len,
+                                 const uint8_t *passphrase, size_t passphrase_len,
+                                 uint8_t *fingerprint_out, size_t fingerprint_out_len,
+                                 uint8_t *user_id_out, size_t user_id_out_len);
+
+/// Erzeugt eine armierte, abgetrennte SHA-256-Signatur über `data`.
+/// Rückgabe: Länge der Signatur (>0) oder negativ bei Fehlern.
+int32_t imailpgp_sign_detached(const uint8_t *key, size_t key_len,
+                               const uint8_t *passphrase, size_t passphrase_len,
+                               const uint8_t *data, size_t data_len,
+                               uint8_t *out, size_t out_len);
 
 #ifdef __cplusplus
 }
