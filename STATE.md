@@ -1,5 +1,5 @@
 # STATE — iMail Secure
-Stand: 2026-11-18 · Branch: `main` · Letzter Code-Commit: `104380f` · Build: **SUCCEEDED** (iOS + macOS) · Tests: **191 Unit-Tests (4 übersprungen) + 3 UI-Tests grün** · PGP: FFI, Schlüsselbund, Signaturprüfung, Ver-/Entschlüsselung, WKD/Autocrypt, 13 Rust- und 69 Swift-Tests grün
+Stand: 2026-11-18 · Branch: `main` · Letzter Code-Commit: `2ad7edc` · Build: **SUCCEEDED** (iOS + macOS) · Tests: **191 Unit-Tests (4 übersprungen) + 3 UI-Tests grün** · PGP: FFI, Schlüsselbund, Signaturprüfung, Ver-/Entschlüsselung, WKD/Autocrypt, 13 Rust- und 69 Swift-Tests grün
 
 ## Ziel
 App-Store-fähige Version: echte IMAP-Ordner, Datenschutz nach D2, Free/Pro ohne
