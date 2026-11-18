@@ -1,5 +1,5 @@
 # STATE — iMail Secure
-Stand: 2026-11-18 · Branch: `main` · Letzter Code-Commit: `ec03d26` · Build: **SUCCEEDED** (iOS + macOS) · Tests: **159 Unit-Tests (4 übersprungen) + 3 UI-Tests grün** · PGP: FFI, Swift-Wrapper, Schlüsselbund und eingehende Signaturprüfung, 7 Rust- und 29 Swift-Tests grün
+Stand: 2026-11-18 · Branch: `main` · Letzter Code-Commit: `f8b5c02` · Build: **SUCCEEDED** (iOS + macOS) · Tests: **167 Unit-Tests (4 übersprungen) + 3 UI-Tests grün** · PGP: FFI, Schlüsselbund, Signaturprüfung, WKD/Autocrypt, 8 Rust- und 37 Swift-Tests grün
 
 ## Ziel
 App-Store-fähige Version: echte IMAP-Ordner, Datenschutz nach D2, Free/Pro ohne
@@ -34,6 +34,22 @@ beschnittene Schutzfunktionen. Keine offenen Code-Fehler bekannt.
 - L1 Lizenz: entschieden (PolyForm Noncommercial 1.0.0), juristische Prüfung steht aus
 
 ## Zuletzt erledigt
+- 2026-11-18 Kontrollierter Schlüsselbezug: WKD und Autocrypt, beides nur
+  auf ausdrückliche Nutzeraktion — keine Hintergrundabfrage, kein Keyserver,
+  keine stillen Importe. `WKDLookup` berechnet den Hash gemäß Spezifikation
+  (z-base32(SHA-1(lokaler Teil))), probt zuerst `openpgpkey.<domain>` und dann
+  die direkte Adresse, ausschließlich über HTTPS mit regulärer
+  Zertifikatsprüfung; Umleitungen werden verworfen, damit nie ein Dritter
+  von der Adresse erfährt. Ephemere Session ohne Cache und Cookies.
+  `AutocryptHeader` liest `addr` und gefaltetes Base64 aus dem Kopf der
+  geöffneten Nachricht; der Rohtext wird nicht über die Nachricht hinaus
+  gespeichert. Neue Ansicht `PGPKeyLookupView`: Vorschau von Adresse,
+  User-ID und Fingerprint, Übernahme erst nach Prüfung der Adresse gegen die
+  User-ID — danach landet der Schlüssel im gewohnten Keychain-Schlüsselbund.
+  Erweiterung der FFI um `imailpgp_armor_public_key`, weil WKD und Autocrypt
+  Binärschlüssel liefern, der Bund aber armierte Texte speichert. 24 neue
+  Texte im String Catalog (290 Einträge). Geprüft: 8 Rust-, 8 neue Swift-
+  Tests (167 gesamt), iOS- und macOS-Build grün
 - 2026-11-18 Eingehende PGP-Signaturprüfung: `MailSyncEngine` erkennt
   `multipart/signed` und `multipart/encrypted` an den MIME-Teilen; die
   Detailansicht lädt beim Öffnen einer signierten Mail die Rohbytes per
@@ -161,17 +177,18 @@ beschnittene Schutzfunktionen. Keine offenen Code-Fehler bekannt.
 - 2026-11-02 `52f2d99` Free/Pro (StoreKit 2), Apple-Trial, Multi-Account-Fix
 
 ## Nächster Schritt
-1. PGP-Stufe 2a: WKD-Lookup und Autocrypt-Header (nur auf ausdrückliche
-   Aktion, keine stillen Keyserver-Abfragen). Gefundene Schlüssel landen im
-   bestehenden Schlüsselbund; die Import-UI bleibt der Kontrollpunkt.
-2. Signaturprüfung an echten Konten gegenprobe: Eine signierte Mail von GMX
+1. Signaturprüfung an echten Konten gegenprobe: Eine signierte Mail von GMX
    oder Gmail öffnen und das Banner mit einem externen Verifier vergleichen.
+2. WKD gegen einen echten Anbieter testen (z. B. eine Adresse bei Posteo),
+   inklusive Rückfall von der erweiterten auf die direkte Methode.
 3. Verschlüsseln und Signieren ausgehend über `MessageBuilder`, inkl.
    Passphrase-Schutz des geheimen Schlüssels.
-4. Push-Relay: Zielumgebung mit dem Nutzer festlegen (Domain, NAS oder VPS),
+4. Entschlüsselung von `multipart/encrypted`: derzeit zeigt die App ehrlich an,
+   dass der Inhalt nicht entschlüsselt wird.
+5. Push-Relay: Zielumgebung mit dem Nutzer festlegen (Domain, NAS oder VPS),
    dann IMAP-IDLE-Worker, APNs-Provider, Geräteregistrierung per QR und
    Docker-Deployment entwerfen.
-5. Unverändert offen: Screenshots hochladen (`fastlane deliver`), Kaufpfad
+6. Unverändert offen: Screenshots hochladen (`fastlane deliver`), Kaufpfad
    einmal in Xcode durchklicken, `terms.html` juristisch prüfen und EULA
    erstellen lassen, App-Store-Produkte anlegen, Website-Rechtstexte
    ES/FR/RU/TR ergänzen.

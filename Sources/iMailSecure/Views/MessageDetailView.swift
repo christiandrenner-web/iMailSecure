@@ -35,6 +35,7 @@ struct MessageDetailView: View {
 
     // PGP – Signatur wird beim Öffnen gegen die Rohbytes geprüft
     @State private var pgpStatus: PGPSignatureStatus?
+    @State private var showKeyLookup = false
 
     var body: some View {
         ScrollView {
@@ -89,6 +90,16 @@ struct MessageDetailView: View {
         // Mails, damit nicht jede Nachricht ein zweites Mal geladen wird.
         .task(id: message.listID) {
             await checkSignature()
+        }
+        .sheet(isPresented: $showKeyLookup) {
+            PGPKeyLookupView(
+                initialEmail: message.from.address,
+                autocryptHeader: message.autocryptHeader
+            ) { _ in
+                // Nach der Übernahme sofort neu prüfen: Der Schlüssel liegt
+                // jetzt lokal, die Rohbytes müssen nicht gespeichert werden.
+                Task { await checkSignature() }
+            }
         }
         // MDN-Bestätigungs-Dialog
         .confirmationDialog(
@@ -377,10 +388,33 @@ struct MessageDetailView: View {
                     .foregroundStyle(.secondary)
                     .textSelection(.enabled)
             }
+
+            if showsKeyActions {
+                HStack(spacing: 10) {
+                    if isUnknownKey {
+                        Button("Schlüssel suchen") { showKeyLookup = true }
+                    }
+                    if message.autocryptHeader != nil {
+                        Button("Autocrypt-Schlüssel ansehen") { showKeyLookup = true }
+                    }
+                }
+                .buttonStyle(.bordered)
+                .font(.caption.bold())
+                .padding(.top, 4)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(10)
         .background(banner.tint.opacity(0.10), in: RoundedRectangle(cornerRadius: 10))
+    }
+
+    private var isUnknownKey: Bool {
+        if case .unknownKey = pgpStatus { return true }
+        return false
+    }
+
+    private var showsKeyActions: Bool {
+        isUnknownKey || message.autocryptHeader != nil
     }
 
     private struct PGPBanner {

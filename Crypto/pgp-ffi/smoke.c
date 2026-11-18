@@ -28,6 +28,19 @@ int main(void) {
            fp < 0 ? "ok" : "FEHLER");
     if (fp >= 0) return 1;
 
+    uint8_t out[128];
+    int32_t issuer = imailpgp_signature_issuer(garbage, sizeof(garbage) - 1,
+                                               out, sizeof(out));
+    printf("issuer(garbage): %d (erwartet negativ) %s\n", issuer,
+           issuer < 0 ? "ok" : "FEHLER");
+    if (issuer >= 0) return 1;
+
+    int32_t armor = imailpgp_armor_public_key(garbage, sizeof(garbage) - 1,
+                                              out, sizeof(out));
+    printf("armor(garbage): %d (erwartet negativ) %s\n", armor,
+           armor < 0 ? "ok" : "FEHLER");
+    if (armor >= 0) return 1;
+
     printf("Fehlermeldung: %s\n", imailpgp_last_error());
     return 0;
 }

@@ -141,6 +141,25 @@ enum PGP {
         return PGPKeyInfo(fingerprint: fingerprint, userID: userID)
     }
 
+    /// Bringt einen beliebigen öffentlichen Schlüssel (binär aus WKD oder
+    /// Autocrypt, oder bereits armiert) in die einheitliche Armor-Form, wie
+    /// sie der Schlüsselbund speichert.
+    static func armoredPublicKey(_ data: Data) throws -> Data {
+        // Ein öffentlicher Schlüssel ist klein; 128 KiB sind auch für große
+        // RSA-Schlüssel reichlich. Die FFI meldet einen zu kleinen Puffer
+        // ohnehin als Fehler statt ihn zu überlaufen.
+        var output = [UInt8](repeating: 0, count: 128 * 1024)
+        let length = withBytes(data) { bytes, count in
+            output.withUnsafeMutableBufferPointer { buffer in
+                imailpgp_armor_public_key(bytes, count, buffer.baseAddress, buffer.count)
+            }
+        }
+        guard length > 0 else {
+            throw PGPError.invalidKey(detail: lastError)
+        }
+        return Data(output[0..<Int(length)])
+    }
+
     /// Prüft eine abgetrennte Signatur über `data`.
     ///
     /// - Returns: `true`, wenn die Signatur zu Daten und Schlüssel passt.

@@ -42,6 +42,11 @@ int32_t imailpgp_verify_detached(const uint8_t *signature, size_t signature_len,
 int32_t imailpgp_primary_user_id(const uint8_t *key, size_t key_len,
                                  uint8_t *out, size_t out_len);
 
+/// Schreibt einen öffentlichen Schlüssel als ASCII-Armor in `out`
+/// (akzeptiert binär und armiert). Rückgabe: Länge, negativ = Fehler.
+int32_t imailpgp_armor_public_key(const uint8_t *key, size_t key_len,
+                                  uint8_t *out, size_t out_len);
+
 /// Schreibt den Aussteller der Signatur als Hex (Fingerprint, sonst Key ID)
 /// in `out`. Rückgabe: Länge, 0 = kein Aussteller angegeben, negativ = Fehler.
 int32_t imailpgp_signature_issuer(const uint8_t *signature, size_t signature_len,

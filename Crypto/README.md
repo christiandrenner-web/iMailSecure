@@ -45,7 +45,7 @@ cd Crypto/pgp-ffi && cargo test --release
 
 Deckt ab: Schlüsselerzeugung, abgetrennte Signatur (gültig, manipuliert,
 leere Nutzdaten), armierte Schlüssel und Signaturen, Parsen von Müll,
-Fingerprint, User-ID und Signaturaussteller. Die Kryptographie ist
+Fingerprint, User-ID, Signaturaussteller und Armierung. Die Kryptographie ist
 plattformunabhängig; der iOS-Build wird
 zusätzlich mit `Crypto/pgp-ffi/smoke.c` gegen die Simulator-Slice geprüft
 (ABI, Symbole, Rückgabewerte):
@@ -58,8 +58,9 @@ clang -target arm64-apple-ios18.0-simulator -isysroot "$SDK" \
 xcrun simctl spawn booted /tmp/imailpgp-smoke
 ```
 
-Die Swift-Seite prüft `PGPTests.swift` (10), `PGPKeyStoreTests.swift` (6) und
-`PGPSignatureTests.swift` (13) gegen dieselbe Bibliothek. Die Testdaten liegen in
+Die Swift-Seite prüft `PGPTests.swift` (10), `PGPKeyStoreTests.swift` (6),
+`PGPSignatureTests.swift` (13) und `PGPKeyDiscoveryTests.swift` (8) gegen
+dieselbe Bibliothek. Die Testdaten liegen in
 `Tests/iMailSecureTests/Fixtures/PGPFixtures.swift` und werden erzeugt mit:
 
 ```bash
@@ -76,15 +77,26 @@ cd Crypto/pgp-ffi && cargo run --release --example make_fixtures
 | `imailpgp_primary_fingerprint` | fertig |
 | `imailpgp_primary_user_id` | fertig |
 | `imailpgp_signature_issuer` | fertig |
+| `imailpgp_armor_public_key` | fertig |
 | Swift-Wrapper `PGP.swift` | fertig |
 | Schlüsselbund `PGPKeyStore` (Keychain) + Import-UI | fertig |
 | Eingehende Signaturprüfung (`PGPSignature.swift`) | fertig |
+| WKD (`WKDLookup.swift`) und Autocrypt (`AutocryptHeader.swift`) | fertig |
 | Signieren ausgehend | offen |
 | Ent-/Verschlüsseln (`MessageBuilder`, `Message`) | offen |
 | Passphrase-Schutz des geheimen Schlüssels (Keychain `ThisDeviceOnly`) | offen |
 
 Die Secure Enclave speichert nur P-256-Schlüssel; OpenPGP-Schlüssel bleiben
 deshalb im Keychain mit `ThisDeviceOnly`-Zugriff und ohne iCloud-Synchronisation.
+
+WKD und Autocrypt liefern Binärschlüssel, der Bund speichert armierte Texte.
+`imailpgp_armor_public_key` macht die Umwandlung in Rust — Swift baut keine
+OpenPGP-Pakete. WKD-Abfragen laufen nur auf ausdrücklichen Knopfdruck,
+ausschließlich per HTTPS an die Domain der Adresse (erweiterte Methode, dann
+direkt), ohne Redirects, ohne Cache und ohne Cookies. Ein Autocrypt-Header
+wird nur aus dem Kopf der geöffneten Nachricht gelesen. Beide Wege zeigen
+zuerst den Fingerprint; ein Import erfolgt nie still und nur, wenn die
+User-ID zur Adresse passt.
 
 Fehler werden als negative Int32 gemeldet, nie als Panic über die Grenze:
 Jede Funktion fängt Panics ab und legt eine thread-lokale Meldung in

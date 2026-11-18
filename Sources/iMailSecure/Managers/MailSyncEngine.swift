@@ -368,6 +368,9 @@ final class MailSyncEngine {
         let isRead        = msg.flags.contains(.seen)
 
         let mdnRequested  = msg.header.additionalFields?["disposition-notification-to"] != nil
+        // Autocrypt wird nur mitgenommen, damit die Oberfläche ihn auf
+        // ausdrücklichen Wunsch anzeigen kann — nie still importieren.
+        let autocrypt     = msg.header.additionalFields?["autocrypt"]
         // Klartext bleibt die Standardansicht. Die HTML-Fassung wird
         // mitgeführt, aber erst nach Knopfdruck gerendert (D2).
         let htmlBody      = msg.htmlBody?.isEmpty == false ? msg.htmlBody : nil
@@ -416,7 +419,8 @@ final class MailSyncEngine {
             attachments: attachments,
             mdnRequested: mdnRequested,
             folder: folder,
-            pgpState: pgpState
+            pgpState: pgpState,
+            autocryptHeader: autocrypt
         )
     }
 }

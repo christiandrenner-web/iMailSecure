@@ -274,6 +274,56 @@ pub extern "C" fn imailpgp_primary_user_id(
     })
 }
 
+/// Schreibt einen öffentlichen Schlüssel als ASCII-Armor in `out`.
+/// WKD liefert binäre Schlüssel, Autocrypt base64-kodierte Binärschlüssel;
+/// der Schlüsselbund speichert aber einheitlich armierte Texte. Die FFI
+/// übernimmt die Serialisierung, damit Swift keine OpenPGP-Pakete baut.
+/// Rückgabe: Länge (>0), negativ = Fehler.
+#[no_mangle]
+pub extern "C" fn imailpgp_armor_public_key(
+    key: *const u8,
+    key_len: usize,
+    out: *mut u8,
+    out_len: usize,
+) -> i32 {
+    let result = catch_unwind(AssertUnwindSafe(|| {
+        let Some(bytes) = bytes_from(key, key_len) else {
+            set_error("leerer Schlüssel");
+            return BAD_ARGUMENT;
+        };
+        if out.is_null() || out_len == 0 {
+            set_error("Ausgabepuffer fehlt");
+            return BAD_ARGUMENT;
+        }
+        let public = match parse_public_key(bytes) {
+            Ok(key) => key,
+            Err(error) => {
+                set_error(format!("Schlüssel nicht lesbar: {error}"));
+                return PARSE_ERROR;
+            }
+        };
+        let armored = match public.to_armored_bytes(Default::default()) {
+            Ok(bytes) => bytes,
+            Err(error) => {
+                set_error(format!("Schlüssel nicht armierbar: {error}"));
+                return PARSE_ERROR;
+            }
+        };
+        if armored.len() > out_len {
+            set_error("Ausgabepuffer zu klein");
+            return BAD_ARGUMENT;
+        }
+        // SAFETY: `out` zeigt auf mindestens `out_len` beschreibbare Bytes.
+        unsafe { ptr::copy_nonoverlapping(armored.as_ptr(), out, armored.len()) };
+        set_error("");
+        armored.len() as i32
+    }));
+    result.unwrap_or_else(|_| {
+        set_error("Panic beim Armieren des Schlüssels");
+        PANIC
+    })
+}
+
 /// Hexadezimal, Großbuchstaben — für Key IDs, die rpgp nicht selbst als
 /// String ausgibt.
 fn hex_upper(bytes: &[u8]) -> String {
@@ -469,6 +519,28 @@ mod tests {
             armored_key.len(),
         );
         assert_eq!(status, OK, "armierte Signatur muss gültig sein");
+    }
+
+    #[test]
+    fn armors_binary_key_for_the_store() {
+        // WKD und Autocrypt liefern Binärschlüssel; der Schlüsselbund
+        // speichert armierte Texte. Die gerundete FFI muss daraus genau
+        // denselben Schlüssel machen.
+        let secret = generate_key();
+        let public = secret.to_public_key();
+        let binary = public.to_bytes().expect("schlüssel");
+
+        let mut out = vec![0u8; 16_384];
+        let len = imailpgp_armor_public_key(
+            binary.as_ptr(),
+            binary.len(),
+            out.as_mut_ptr(),
+            out.len(),
+        );
+        assert!(len > 0);
+        let armored = &out[..len as usize];
+        assert!(armored.starts_with(b"-----BEGIN PGP PUBLIC KEY BLOCK-----"));
+        assert_eq!(imailpgp_parse_public_key(armored.as_ptr(), armored.len()), OK);
     }
 
     #[test]

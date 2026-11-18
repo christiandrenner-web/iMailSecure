@@ -314,7 +314,7 @@ Konzept gut, Umsetzung unvollständig. Viele Schutzfunktionen existieren als UI-
 | S4 | ✅ erledigt | Blur-Overlay bei willResignActive; Schloss-Icon im App-Umschalter |
 | S5 | 🔴 offen | OAuth 2.0 – Entscheid ausstehend |
 | S6 | 🔴 offen | Entwürfe werden nicht gespeichert |
-| C1 | 🟡 in Arbeit | PGP: entschieden für rpgp (Apache-2.0/MIT, reines Rust). FFI, Swift-Wrapper, Schlüsselbund (Keychain, Import-UI) und eingehende Signaturprüfung mit Statusbanner stehen (2026-11-18); offen: WKD/Autocrypt, Verschlüsseln/Signieren ausgehend, Entschlüsselung. S/MIME nicht entschieden |
+| C1 | 🟡 in Arbeit | PGP: entschieden für rpgp (Apache-2.0/MIT, reines Rust). FFI, Swift-Wrapper, Schlüsselbund (Keychain, Import-UI), eingehende Signaturprüfung mit Statusbanner sowie WKD/Autocrypt nur auf ausdrückliche Aktion stehen (2026-11-18); offen: Verschlüsseln/Signieren ausgehend, Entschlüsselung. S/MIME nicht entschieden |
 | L1 | ✅ entschieden | **Dual Licensing** (PolyForm Noncommercial + Commercial License); juristische Prüfung von `LICENSE-NONCOMMERCIAL.md`, `LICENSE-COMMERCIAL.md`, `CLA.md` und AGB steht aus |
 
 ---

@@ -37,6 +37,10 @@ struct EmailMessage: Identifiable, Equatable {
     /// diesen Hinweis würde jede Mail einen zweiten Abruf auslösen.
     var pgpState: PGPMessageState    = .none
 
+    /// Autocrypt-Header dieser Nachricht, unverändert vom Server. Nur im
+    /// Speicher; der Nutzer kann den Schlüssel daraus ausdrücklich übernehmen.
+    var autocryptHeader: String?     = nil
+
     /// Eindeutig innerhalb von Konto und Ordner. Die Message-ID allein
     /// reicht nicht: Eine Mail kann auf dem Server in mehreren Ordnern
     /// liegen (Gmail-Labels, „Alle Nachrichten"). `id` bleibt die

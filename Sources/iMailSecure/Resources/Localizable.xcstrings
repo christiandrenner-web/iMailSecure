@@ -783,6 +783,40 @@
         }
       }
     },
+    "Auch ein Autocrypt-Header ist nur ein Hinweis. Vergleiche den Fingerprint über einen zweiten Weg.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "An Autocrypt header is only a hint too. Compare the fingerprint using a second channel."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una cabecera Autocrypt también es solo una pista. Compara la huella digital por otro medio."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un en-tête Autocrypt n'est lui aussi qu'une indication. Comparez l'empreinte par un autre canal."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Заголовок Autocrypt — тоже лишь указание. Сверьте отпечаток через второй канал."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autocrypt başlığı da sadece bir ipucudur. Parmak izini ikinci bir yoldan karşılaştırın."
+          }
+        }
+      }
+    },
     "Aussteller: %@": {
       "localizations": {
         "en": {
@@ -813,6 +847,108 @@
           "stringUnit": {
             "state": "translated",
             "value": "Veren: %@"
+          }
+        }
+      }
+    },
+    "Autocrypt-Header dieser Nachricht": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autocrypt header of this message"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cabecera Autocrypt de este mensaje"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En-tête Autocrypt de ce message"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Заголовок Autocrypt этого сообщения"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu iletinin Autocrypt başlığı"
+          }
+        }
+      }
+    },
+    "Autocrypt-Schlüssel ansehen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "View Autocrypt key"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ver clave Autocrypt"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voir la clé Autocrypt"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Посмотреть ключ Autocrypt"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autocrypt anahtarını görüntüle"
+          }
+        }
+      }
+    },
+    "Autocrypt-Schlüssel anzeigen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show Autocrypt key"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mostrar clave Autocrypt"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afficher la clé Autocrypt"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Показать ключ Autocrypt"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autocrypt anahtarını göster"
           }
         }
       }
@@ -1293,6 +1429,40 @@
         }
       }
     },
+    "Das ist keine gültige E-Mail-Adresse.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "That is not a valid email address."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Esa no es una dirección de correo válida."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce n'est pas une adresse e-mail valide."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Это недействительный адрес электронной почты."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu geçerli bir e-posta adresi değil."
+          }
+        }
+      }
+    },
     "Datei anfügen": {
       "localizations": {
         "en": {
@@ -1425,6 +1595,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Gizlilik odaklı e-posta istemcisi"
+          }
+        }
+      }
+    },
+    "Der Autocrypt-Header enthält keinen lesbaren Schlüssel.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Autocrypt header does not contain a readable key."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La cabecera Autocrypt no contiene ninguna clave legible."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'en-tête Autocrypt ne contient aucune clé lisible."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Заголовок Autocrypt не содержит читаемого ключа."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autocrypt başlığında okunabilir bir anahtar yok."
           }
         }
       }
@@ -1565,6 +1769,40 @@
         }
       }
     },
+    "Der Schlüssel gehört zu %@, nicht zu %@.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The key belongs to %@, not to %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La clave pertenece a %@, no a %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La clé appartient à %@, et non à %@."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ключ принадлежит %@, а не %@."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anahtar %@ adresine ait, %@ adresine değil."
+          }
+        }
+      }
+    },
     "Der Schlüssel konnte nicht gespeichert werden.": {
       "localizations": {
         "en": {
@@ -1595,6 +1833,74 @@
           "stringUnit": {
             "state": "translated",
             "value": "Anahtar kaydedilemedi."
+          }
+        }
+      }
+    },
+    "Der WKD-Server antwortete mit Status %d.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The WKD server responded with status %d."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El servidor WKD respondió con el estado %d."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le serveur WKD a répondu avec le statut %d."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сервер WKD ответил со статусом %d."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WKD sunucusu %d durumuyla yanıt verdi."
+          }
+        }
+      }
+    },
+    "Der WKD-Server lieferte keinen Schlüssel.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The WKD server returned no key."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El servidor WKD no devolvió ninguna clave."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le serveur WKD n'a renvoyé aucune clé."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сервер WKD не вернул ключ."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WKD sunucusu bir anahtar döndürmedi."
           }
         }
       }
@@ -1667,6 +1973,40 @@
         }
       }
     },
+    "Die Abfrage geht ausschließlich an die Domain der Adresse und nur, wenn du sie hier startest. Es wird kein Keyserver und kein anderer Dritter gefragt.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The request goes only to the domain of the address, and only when you start it here. No key server or other third party is contacted."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La consulta se envía solo al dominio de la dirección y solo cuando la inicias aquí. No se contacta a ningún servidor de claves ni a otros terceros."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La requête va uniquement au domaine de l'adresse, et seulement si vous la lancez ici. Aucun serveur de clés ni autre tiers n'est contacté."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запрос уходит только на домен адреса и только когда вы запускаете его здесь. Ни к серверу ключей, ни к другим третьим лицам обращения нет."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sorgu yalnızca adresin etki alanına gider ve yalnızca burada başlattığınızda gönderilir. Anahtar sunucusuna veya başka bir üçüncü tarafa başvurulmaz."
+          }
+        }
+      }
+    },
     "Die Abos sind derzeit nicht verfügbar.": {
       "localizations": {
         "en": {
@@ -1697,6 +2037,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Abonelikler şu anda kullanılamıyor."
+          }
+        }
+      }
+    },
+    "Die Antwort des WKD-Servers ist ungewöhnlich groß und wurde verworfen.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The WKD server's response is unusually large and was discarded."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La respuesta del servidor WKD es inusualmente grande y se descartó."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La réponse du serveur WKD est inhabituellement volumineuse et a été ignorée."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ответ сервера WKD необычно большой и был отброшен."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WKD sunucusunun yanıtı olağandışı şekilde büyük ve atıldı."
           }
         }
       }
@@ -1833,6 +2207,74 @@
           "stringUnit": {
             "state": "translated",
             "value": "İmza okunamadı."
+          }
+        }
+      }
+    },
+    "Die WKD-Abfrage schlug fehl: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The WKD lookup failed: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La consulta WKD falló: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La recherche WKD a échoué : %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Запрос WKD не удался: %@"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WKD sorgusu başarısız oldu: %@"
+          }
+        }
+      }
+    },
+    "Diese Nachricht enthält einen Autocrypt-Header. Der Schlüssel stammt aus dem Kopf der Nachricht, nicht von einem Server.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This message contains an Autocrypt header. The key comes from the message header, not from a server."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este mensaje contiene una cabecera Autocrypt. La clave procede de la cabecera del mensaje, no de un servidor."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce message contient un en-tête Autocrypt. La clé provient de l'en-tête du message, et non d'un serveur."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Это сообщение содержит заголовок Autocrypt. Ключ взят из заголовка сообщения, а не с сервера."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu ileti bir Autocrypt başlığı içeriyor. Anahtar bir sunucudan değil, iletinin başlığından geliyor."
           }
         }
       }
@@ -2245,6 +2687,40 @@
         }
       }
     },
+    "Erst nach der Übernahme wird der Schlüssel für die Signaturprüfung verwendet. Er liegt dann nur auf diesem Gerät.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only after you import it will the key be used to verify signatures. It then resides on this device only."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La clave solo se usará para verificar firmas después de importarla. Entonces residirá únicamente en este dispositivo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La clé ne sera utilisée pour vérifier les signatures qu'après import. Elle ne réside alors que sur cet appareil."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ключ будет использоваться для проверки подписей только после сохранения. После этого он хранится только на этом устройстве."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anahtar, içe aktardıktan sonra imzaları doğrulamak için kullanılır. Ardından yalnızca bu cihazda saklanır."
+          }
+        }
+      }
+    },
     "Externe Bilder und Stylesheets werden danach wieder für alle Absender blockiert.": {
       "localizations": {
         "en": {
@@ -2649,6 +3125,74 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bu adres için kayıtlı açık anahtar yok."
+          }
+        }
+      }
+    },
+    "Für diese Adresse veröffentlicht die Domain keinen Schlüssel per WKD.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The domain does not publish a key for this address via WKD."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El dominio no publica ninguna clave para esta dirección mediante WKD."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le domaine ne publie aucune clé pour cette adresse via WKD."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Домен не публикует ключ для этого адреса через WKD."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Etki alanı bu adres için WKD üzerinden bir anahtar yayımlamıyor."
+          }
+        }
+      }
+    },
+    "Gefundener Schlüssel": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Key found"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clave encontrada"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clé trouvée"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Найденный ключ"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bulunan anahtar"
           }
         }
       }
@@ -5172,6 +5716,108 @@
         }
       }
     },
+    "Schlüssel per WKD suchen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search key via WKD"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buscar clave por WKD"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rechercher une clé via WKD"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Найти ключ через WKD"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WKD ile anahtar ara"
+          }
+        }
+      }
+    },
+    "Schlüssel suchen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Find key"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buscar clave"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rechercher une clé"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Найти ключ"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anahtar ara"
+          }
+        }
+      }
+    },
+    "Schlüssel übernehmen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Import key"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importar clave"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importer la clé"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сохранить ключ"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anahtarı içe aktar"
+          }
+        }
+      }
+    },
     "Senden": {
       "localizations": {
         "en": {
@@ -5580,6 +6226,40 @@
         }
       }
     },
+    "Unbekannte Antwort.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unknown response."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Respuesta desconocida."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Réponse inconnue."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Неизвестный ответ."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bilinmeyen yanıt."
+          }
+        }
+      }
+    },
     "Version": {
       "localizations": {
         "en": {
@@ -5614,6 +6294,74 @@
         }
       }
     },
+    "Von der Domain kam kein gültiger Schlüssel.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The domain did not return a valid key."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El dominio no devolvió una clave válida."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le domaine n'a pas renvoyé de clé valide."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Домен не вернул действительный ключ."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Etki alanı geçerli bir anahtar döndürmedi."
+          }
+        }
+      }
+    },
+    "Von der Domain kam kein gültiger Schlüssel: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The domain did not return a valid key: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El dominio no devolvió una clave válida: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le domaine n'a pas renvoyé de clé valide : %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Домен не вернул действительный ключ: %@"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Etki alanı geçerli bir anahtar döndürmedi: %@"
+          }
+        }
+      }
+    },
     "Von welchem Konto senden?": {
       "localizations": {
         "en": {
@@ -5644,6 +6392,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hangi hesaptan gönderilsin?"
+          }
+        }
+      }
+    },
+    "Web Key Directory": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Web Key Directory"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Directorio Web de Claves"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Annuaire Web de clés"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Веб-каталог ключей"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Web Anahtar Dizini"
           }
         }
       }
@@ -8196,6 +8978,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "(konu yok)"
+          }
+        }
+      }
+    },
+    "name@example.org": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "name@example.org"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "name@example.org"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "name@example.org"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "name@example.org"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "name@example.org"
           }
         }
       }

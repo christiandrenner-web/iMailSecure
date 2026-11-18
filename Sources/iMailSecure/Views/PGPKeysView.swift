@@ -1,14 +1,16 @@
 // PGPKeysView.swift
 //
 // Verwaltung der importierten öffentlichen Schlüssel. Bewusst schlicht: keine
-// Keyserver-Abfrage, kein automatischer Tausch. Was hier steht, hat der Nutzer
-// selbst hinzugefügt und kann es jederzeit wieder entfernen.
+// automatische Abfrage und kein stiller Tausch. WKD wird nur auf Knopfdruck
+// angestoßen. Was hier steht, hat der Nutzer selbst hinzugefügt und kann es
+// jederzeit wieder entfernen.
 
 import SwiftUI
 
 struct PGPKeysView: View {
     @State private var keys: [StoredPGPKey] = []
     @State private var showImport = false
+    @State private var showLookup = false
     @State private var pendingDeletion: StoredPGPKey?
     @State private var actionError: String?
 
@@ -41,9 +43,19 @@ struct PGPKeysView: View {
                     Label("Schlüssel hinzufügen", systemImage: "plus")
                 }
             }
+            ToolbarItem(placement: .automatic) {
+                Button {
+                    showLookup = true
+                } label: {
+                    Label("Schlüssel suchen", systemImage: "magnifyingglass")
+                }
+            }
         }
         .sheet(isPresented: $showImport) {
             PGPKeyImportView { reload() }
+        }
+        .sheet(isPresented: $showLookup) {
+            PGPKeyLookupView { _ in reload() }
         }
         .confirmationDialog(
             "Schlüssel löschen?",
