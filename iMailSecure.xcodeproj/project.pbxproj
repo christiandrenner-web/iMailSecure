@@ -23,6 +23,7 @@
 		20474F5E777C99306B592C51 /* HTMLMessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E67BF3EA4EABA3614B71902 /* HTMLMessageView.swift */; };
 		218593F627A0721868599B50 /* HTMLSanitizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EC8813452319DB26F8DD0D8 /* HTMLSanitizer.swift */; };
 		235546012D292946323DC246 /* PGPKeyDiscoveryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D4B5597982AF59B06B89EBE /* PGPKeyDiscoveryTests.swift */; };
+		26757FC8671D57613AC62300 /* PGPExternalFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38A48C8025079EB3ACC46A95 /* PGPExternalFixtures.swift */; };
 		2724A2767E715C75421FA8C2 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21D84802D3FFAA1D2C0EFA22 /* Constants.swift */; };
 		2746658E975390FBA4CBE9A9 /* EmailDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58C5249BE4D91B58F7D61840 /* EmailDraft.swift */; };
 		287C5651D417243874256D19 /* PGPDecryptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17BC9DF3D15F0178386BCB59 /* PGPDecryptor.swift */; };
@@ -59,6 +60,7 @@
 		598CC11A31E9FC0CB5564164 /* SubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F81FF05774F3EF5303F3CF1D /* SubscriptionManager.swift */; };
 		5B03D642CAD17D4889FF1AA8 /* ComposeViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21696189A4A7D084F74BA21B /* ComposeViewModelTests.swift */; };
 		5B578E1537B4ADC22C582ADE /* StoreKitPurchaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24E712E0761C87D2810B5CB2 /* StoreKitPurchaseTests.swift */; };
+		5C105522C1C8E1EF7F008598 /* WKDRealWorldTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF376CB161FDC171381FAFA0 /* WKDRealWorldTests.swift */; };
 		614A95A881B9B6681BDEB038 /* EntitlementTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3655C391CFBB75E34F56AF5 /* EntitlementTests.swift */; };
 		63B9220BA429A3AF638CCCAC /* FolderListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 702086401268B9640AABB7C0 /* FolderListView.swift */; };
 		653FE6FC6A57ADFE251632CB /* PGPPrivateKeysView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C52BAFAB1F465782D68EA3 /* PGPPrivateKeysView.swift */; };
@@ -89,6 +91,7 @@
 		8FDE35ED30528ABDF452A5AF /* PGPKit.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2052F34A14F9105107E0DD7C /* PGPKit.xcframework */; };
 		900DF1873B8F041BD0B875CD /* MailStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68421DC7E19C712CDF9D6CC4 /* MailStore.swift */; };
 		926DD804AFF3837776E33499 /* PGPPrivateKeyStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 821CFDCF6534D1B6734C0986 /* PGPPrivateKeyStoreTests.swift */; };
+		928853363C1E463531DAE9AC /* WKDRealWorldTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF376CB161FDC171381FAFA0 /* WKDRealWorldTests.swift */; };
 		92A42AD7CCB1346C8B9DABBC /* EmailDraft.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58C5249BE4D91B58F7D61840 /* EmailDraft.swift */; };
 		933D8BC4D3B6DD9DE8F09EE9 /* HTMLMessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E67BF3EA4EABA3614B71902 /* HTMLMessageView.swift */; };
 		96B91D6589146A46C20AB027 /* EmailMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 161F7CD991A81743DD97E8B8 /* EmailMessage.swift */; };
@@ -144,6 +147,7 @@
 		E1635765D9FC4983BC565B40 /* ModifiedUTF7.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FBD4BE182959BF5E1FBDB9D /* ModifiedUTF7.swift */; };
 		E2E4795DED480A0A72D77E01 /* InboxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C8649627657E92D885637B /* InboxView.swift */; };
 		E3173777DF647600ED312E39 /* PGPKeysView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F238B9B77F19A452C4346B92 /* PGPKeysView.swift */; };
+		E3B5CE7C0992E7202BC04BC5 /* PGPExternalMessageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D6428019D621DEA41C945C8 /* PGPExternalMessageTests.swift */; };
 		E44B124F7569DF986078C8CC /* iMailSecure.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 5B32C82217E33A4037515DAA /* iMailSecure.xcdatamodeld */; };
 		E553258C99C82017B9085E9C /* Logging in Frameworks */ = {isa = PBXBuildFile; productRef = 151DD99DD194B3D114550A82 /* Logging */; };
 		E701ADB9E375D9A7E1D25BA1 /* iMailSecure.storekit in Resources */ = {isa = PBXBuildFile; fileRef = BDFDFD847F5EFDF05563239D /* iMailSecure.storekit */; };
@@ -157,9 +161,11 @@
 		ED9C69DCAD661614A1DC1D0B /* MessageRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A72766BB8E3A9F80A242AFE /* MessageRowView.swift */; };
 		EE28913E38A7E514EC01EB77 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D00E34566BA61E1261B4A62 /* MainTabView.swift */; };
 		EEB1962A132FCA50BE1B4A9B /* SMTPManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CD97B1BD76C748321FB7A5 /* SMTPManager.swift */; };
+		EF4637B322F279185E4186F7 /* PGPExternalFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38A48C8025079EB3ACC46A95 /* PGPExternalFixtures.swift */; };
 		F0277DDB7C964DFAB4C9C5AE /* SwiftMail in Frameworks */ = {isa = PBXBuildFile; productRef = 44BC742B700FB2509ACF3420 /* SwiftMail */; };
 		F078E1AC162F4A47A4A2DEDE /* MDNBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E29782D4F7CBC5425CE06B7 /* MDNBannerView.swift */; };
 		F164ADD64777A4EC1B9F9A9A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C3B6F372A04E86A5199F7290 /* Assets.xcassets */; };
+		F331E835D50C73D2C04854F3 /* PGPExternalMessageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D6428019D621DEA41C945C8 /* PGPExternalMessageTests.swift */; };
 		F6533ECF71DD7A168061E887 /* iMailSecure.storekit in Resources */ = {isa = PBXBuildFile; fileRef = BDFDFD847F5EFDF05563239D /* iMailSecure.storekit */; };
 		F69BF89E7CBF9B58CBD501AA /* HTMLSanitizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EC8813452319DB26F8DD0D8 /* HTMLSanitizer.swift */; };
 		FB1D48FE396BA173D6F72843 /* PGPKeyStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 782116F2E602310EE45BEC63 /* PGPKeyStore.swift */; };
@@ -218,6 +224,7 @@
 		33C2084D4F653F0F44CA89A4 /* AccountSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountSetupView.swift; sourceTree = "<group>"; };
 		38608E68D49A2DD52D36060A /* iMailSecureTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = iMailSecureTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		388CFB9610A465E12D975AB4 /* PGPDecryptorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PGPDecryptorTests.swift; sourceTree = "<group>"; };
+		38A48C8025079EB3ACC46A95 /* PGPExternalFixtures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PGPExternalFixtures.swift; sourceTree = "<group>"; };
 		407B65806E207B9E29584FAC /* PGPTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PGPTests.swift; sourceTree = "<group>"; };
 		40C8649627657E92D885637B /* InboxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InboxView.swift; sourceTree = "<group>"; };
 		4B51D3076A9E25E73ED8C06A /* ModifiedUTF7Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModifiedUTF7Tests.swift; sourceTree = "<group>"; };
@@ -227,6 +234,7 @@
 		629CA0BEA49CEAEBD008C3B0 /* iMailSecureUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = iMailSecureUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		63CAA01853408BABE0801055 /* WKDLookup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WKDLookup.swift; sourceTree = "<group>"; };
 		68421DC7E19C712CDF9D6CC4 /* MailStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MailStore.swift; sourceTree = "<group>"; };
+		6D6428019D621DEA41C945C8 /* PGPExternalMessageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PGPExternalMessageTests.swift; sourceTree = "<group>"; };
 		6DD3C204C3E895F322218EE0 /* PGPPrivateKeyStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PGPPrivateKeyStore.swift; sourceTree = "<group>"; };
 		6F29807904543A4D215DB437 /* PGPMIMEBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PGPMIMEBuilder.swift; sourceTree = "<group>"; };
 		702086401268B9640AABB7C0 /* FolderListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderListView.swift; sourceTree = "<group>"; };
@@ -267,6 +275,7 @@
 		D2B8BB8112A4323D969E0CF3 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		D38AF3044D9DB6C6C1DAA237 /* SnapshotHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotHelper.swift; sourceTree = "<group>"; };
 		DCF1F44921FEB6772DF86473 /* PGPKeyStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PGPKeyStoreTests.swift; sourceTree = "<group>"; };
+		DF376CB161FDC171381FAFA0 /* WKDRealWorldTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WKDRealWorldTests.swift; sourceTree = "<group>"; };
 		E3655C391CFBB75E34F56AF5 /* EntitlementTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntitlementTests.swift; sourceTree = "<group>"; };
 		E59455C08B21A9F5B16AAC6F /* AccountStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountStore.swift; sourceTree = "<group>"; };
 		E9C6D6909E13736F5FE7F8DB /* KeychainManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainManager.swift; sourceTree = "<group>"; };
@@ -431,6 +440,7 @@
 		B13BDFB46E13A8B478A2F091 /* Fixtures */ = {
 			isa = PBXGroup;
 			children = (
+				38A48C8025079EB3ACC46A95 /* PGPExternalFixtures.swift */,
 				A4ACF871D9B462B0749E186A /* PGPFixtures.swift */,
 			);
 			path = Fixtures;
@@ -447,6 +457,7 @@
 				296784EEF112A8020064411A /* MailStoreTests.swift */,
 				4B51D3076A9E25E73ED8C06A /* ModifiedUTF7Tests.swift */,
 				388CFB9610A465E12D975AB4 /* PGPDecryptorTests.swift */,
+				6D6428019D621DEA41C945C8 /* PGPExternalMessageTests.swift */,
 				9D4B5597982AF59B06B89EBE /* PGPKeyDiscoveryTests.swift */,
 				DCF1F44921FEB6772DF86473 /* PGPKeyStoreTests.swift */,
 				D25AD2D0561A2545B7E36CA4 /* PGPOutgoingTests.swift */,
@@ -455,6 +466,7 @@
 				407B65806E207B9E29584FAC /* PGPTests.swift */,
 				72E698286EB31D572E39F34C /* RemoteContentPolicyTests.swift */,
 				24E712E0761C87D2810B5CB2 /* StoreKitPurchaseTests.swift */,
+				DF376CB161FDC171381FAFA0 /* WKDRealWorldTests.swift */,
 				B13BDFB46E13A8B478A2F091 /* Fixtures */,
 			);
 			name = iMailSecureTests;
@@ -750,6 +762,8 @@
 				A86CE4151652239179DB8196 /* MailStoreTests.swift in Sources */,
 				C5D334BF278C1767913CBF7A /* ModifiedUTF7Tests.swift in Sources */,
 				3B6A9BA4C341E0B5657A67F8 /* PGPDecryptorTests.swift in Sources */,
+				26757FC8671D57613AC62300 /* PGPExternalFixtures.swift in Sources */,
+				F331E835D50C73D2C04854F3 /* PGPExternalMessageTests.swift in Sources */,
 				9F4F5252B69620ADE6F31F37 /* PGPFixtures.swift in Sources */,
 				235546012D292946323DC246 /* PGPKeyDiscoveryTests.swift in Sources */,
 				1FABBA6E3255A599F3D4C227 /* PGPKeyStoreTests.swift in Sources */,
@@ -759,6 +773,7 @@
 				696A9A8AE5E9DB26F7C6F5B1 /* PGPTests.swift in Sources */,
 				6700C83CFBEDD1F95FE8DF1F /* RemoteContentPolicyTests.swift in Sources */,
 				5B578E1537B4ADC22C582ADE /* StoreKitPurchaseTests.swift in Sources */,
+				928853363C1E463531DAE9AC /* WKDRealWorldTests.swift in Sources */,
 				2AF7D1B93712181D2308773D /* iMailSecureTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -774,6 +789,8 @@
 				C7706C3CD838A630227355EA /* MailStoreTests.swift in Sources */,
 				DC43F0CFD76A1341265B77AB /* ModifiedUTF7Tests.swift in Sources */,
 				74F7E0FAC1F15CF7A1B4EBD9 /* PGPDecryptorTests.swift in Sources */,
+				EF4637B322F279185E4186F7 /* PGPExternalFixtures.swift in Sources */,
+				E3B5CE7C0992E7202BC04BC5 /* PGPExternalMessageTests.swift in Sources */,
 				A04C0AAABC8FB78D306D46B3 /* PGPFixtures.swift in Sources */,
 				7639952B73AD98355475E9F3 /* PGPKeyDiscoveryTests.swift in Sources */,
 				D2831E7D68AFDB7926EED32A /* PGPKeyStoreTests.swift in Sources */,
@@ -783,6 +800,7 @@
 				A88E11CB34054A2B0EA1362C /* PGPTests.swift in Sources */,
 				A13FCA2ECB96B13767E2166A /* RemoteContentPolicyTests.swift in Sources */,
 				1AB31820DA09689B66E39EEA /* StoreKitPurchaseTests.swift in Sources */,
+				5C105522C1C8E1EF7F008598 /* WKDRealWorldTests.swift in Sources */,
 				8B086A3F1057C546524F34E9 /* iMailSecureTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -180,6 +180,7 @@ enum WKDLookup {
         defer { session.finishTasksAndInvalidate() }
 
         var lastError: Error = WKDError.notFound
+        var sawNotFound = false
         for candidate in candidates {
             var request = URLRequest(url: candidate.url)
             request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
@@ -192,6 +193,11 @@ enum WKDLookup {
                 }
                 if http.statusCode == 404 {
                     // Erweiterte Adresse nicht vorhanden → direkt probieren.
+                    // Merken: Wenn ein Server ausdrücklich „kein Schlüssel“
+                    // meldet, ist das die treffendere Antwort als ein
+                    // Netzwerkfehler auf der anderen Adresse (z. B. wenn es
+                    // die openpgpkey-Subdomain gar nicht gibt).
+                    sawNotFound = true
                     continue
                 }
                 guard (200..<300).contains(http.statusCode) else {
@@ -217,6 +223,7 @@ enum WKDLookup {
                 lastError = WKDError.network(error.localizedDescription)
             }
         }
+        if sawNotFound { throw WKDError.notFound }
         throw lastError
     }
 }

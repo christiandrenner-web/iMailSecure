@@ -63,10 +63,13 @@ xcrun simctl spawn booted /tmp/imailpgp-smoke
 
 Die Swift-Seite prüft `PGPTests.swift`, `PGPKeyStoreTests.swift`,
 `PGPSignatureTests.swift`, `PGPKeyDiscoveryTests.swift`, `PGPOutgoingTests.swift`,
-`PGPPrivateKeyStoreTests.swift` und `PGPDecryptorTests.swift` gegen dieselbe
-Bibliothek (191 Unit-Tests gesamt, 4 StoreKit-Tests opt-in übersprungen). Die
-Testdaten liegen in
-`Tests/iMailSecureTests/Fixtures/PGPFixtures.swift` und werden erzeugt mit:
+`PGPPrivateKeyStoreTests.swift`, `PGPDecryptorTests.swift`,
+`PGPExternalMessageTests.swift` und `WKDRealWorldTests.swift` gegen dieselbe
+Bibliothek (194 Unit-Tests gesamt, 6 opt-in-Tests übersprungen: 4 StoreKit,
+2 WKD-Netzwerk). Die Netzwerk-Tests laufen mit
+`IMAIL_NETWORK_TESTS=1 xcodebuild … test`. Die selbst erzeugten Testdaten
+liegen in `Tests/iMailSecureTests/Fixtures/PGPFixtures.swift` und werden
+erzeugt mit:
 
 ```bash
 cd Crypto/pgp-ffi && cargo run --release --example make_fixtures
@@ -151,6 +154,32 @@ gespeichert — die Anzeige ist bei jedem Öffnen eine frische Prüfung.
 `PGPDecryptorTests` prüft den Rundlauf durch den eingehenden Parser:
 verschlüsselt, signiert plus verschlüsselt, Anhänge (auch `text/plain`),
 fremder Schlüssel, Klartext-Mail und fehlender lokaler Schlüssel.
+
+## Gegenproben gegen andere Implementierungen
+
+Ein Rundlauf innerhalb derselben Bibliothek beweist keine Interoperabilität.
+Deshalb gibt es echte Gegenproben:
+
+- `PGPExternalMessageTests` verarbeitet eine Nachricht, die vollständig von
+  **GnuPG 2.5** stammt — beide Wegwerfschlüssel, die Signatur und die
+  Verschlüsselung (Fixture in `Fixtures/PGPExternalFixtures.swift`). Sie wurde
+  zusätzlich über Gmail SMTP versendet und per IMAP zurückgeholt; der
+  Entschlüssler verarbeitete genau die zurückgeholten Rohbytes. Umgekehrt
+  verifiziert GnuPG die von rpgp erzeugte Fixture-Signatur, sofern die Payload
+  ohne abschließendes `\n` übergeben wird (Swift-Multiline-Strings haben kein
+  abschließendes Zeilenende).
+- `WKDRealWorldTests` (opt-in) fragt echte Server ab:
+  `bernhard.reiter@intevation.de` liefert über die direkte Methode den
+  Fingerprint `BDD957F9C4FE0FDC583DCD6D2B7BA3BF9BC3A554`; eine unbekannte
+  Posteo-Adresse muss `notFound` ergeben.
+
+**Dabei gefunden und behoben:** GnuPG 2.4+ verschlüsselt mit AEAD-Paket Typ 20
+(OCB), das rpgp standardmäßig ablehnt. `imailpgp_decrypt` aktiviert gezielt
+`DecryptionOptions::new().enable_gnupg_aead()` über einen `TheRing`; OCB prüft
+die Integrität. Das alte, manipulierbare SED-Paket (Typ 9) bleibt abgelehnt.
+Außerdem merkt sich `WKDLookup` ein explizites 404, damit ein Netzwerkfehler
+auf der erweiterten Adresse die treffendere „kein Schlüssel"-Meldung der
+direkten Adresse nicht überschreibt.
 
 ## Einbindung in Xcode
 

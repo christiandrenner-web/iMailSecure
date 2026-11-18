@@ -1,5 +1,5 @@
 # STATE — iMail Secure
-Stand: 2026-11-18 · Branch: `main` · Letzter Code-Commit: `2ad7edc` · Build: **SUCCEEDED** (iOS + macOS) · Tests: **191 Unit-Tests (4 übersprungen) + 3 UI-Tests grün** · PGP: FFI, Schlüsselbund, Signaturprüfung, Ver-/Entschlüsselung, WKD/Autocrypt, 13 Rust- und 69 Swift-Tests grün
+Stand: 2026-11-18 · Branch: `main` · Letzter Code-Commit: `2ad7edc` · Build: **SUCCEEDED** (iOS + macOS) · Tests: **194 Unit-Tests (6 übersprungen) + 3 UI-Tests grün** · PGP: FFI, Schlüsselbund, Signaturprüfung, Ver-/Entschlüsselung, WKD/Autocrypt, 13 Rust-Tests grün; Gegenproben gegen GnuPG, Gmail und echte WKD-Server bestanden
 
 ## Ziel
 App-Store-fähige Version: echte IMAP-Ordner, Datenschutz nach D2, Free/Pro ohne
@@ -34,6 +34,30 @@ beschnittene Schutzfunktionen. Keine offenen Code-Fehler bekannt.
 - L1 Lizenz: entschieden (PolyForm Noncommercial 1.0.0), juristische Prüfung steht aus
 
 ## Zuletzt erledigt
+- 2026-11-18 Interoperabilitäts-Gegenproben gegen echte Implementierungen:
+  Eine vollständig mit GnuPG 2.5 erzeugte signiert-verschlüsselte Mail
+  (zwei Wegwerfschlüssel, `extern@gnupg.invalid` / `empfaenger@gnupg.invalid`)
+  wird von `PGPDecryptor` entschlüsselt und die innere Signatur als gültig
+  erkannt. Dabei fiel ein echter Bug auf: GnuPG nutzt bei passendem Schlüssel
+  standardmäßig sein proprietäres AEAD-Paket (Typ 20, OCB), das rpgp ohne
+  Opt-in ablehnt. Die FFI erlaubt jetzt gezielt genau dieses
+  integritätsgeschützte Paket über `DecryptionOptions::enable_gnupg_aead()`;
+  das alte manipulierbare SED-Paket (Typ 9) bleibt abgelehnt. Die WKD-Gegenprobe
+  gegen `intevation.de` (`bernhard.reiter@intevation.de`, Fingerprint
+  `BDD957F9C4FE0FDC583DCD6D2B7BA3BF9BC3A554`) bestätigt den Rückfall von der
+  erweiterten auf die direkte Methode. Bei unbekannten Adressen auf `posteo.de`
+  zeigte die App fälschlich eine Netzwerkmeldung statt „kein Schlüssel“ —
+  `WKDLookup` merkt sich jetzt ein explizites 404, auch wenn die andere
+  Adresse einen Netzwerkfehler liefert. Zusätzlich lief eine GnuPG-signiert-
+  verschlüsselte Mail über Gmail SMTP und kam per IMAP zurück; unser
+  Entschlüssler verarbeitete genau diese Rohbytes korrekt. Umgekehrt
+  verifiziert GnuPG unsere rpgp-Signatur (`BAD signature` war nur ein
+  Extraktionsartefakt: die Swift-Multiline-String-Payload hat kein
+  abschließendes `\n`). Neue opt-in-Tests `PGPExternalMessageTests` und
+  `WKDRealWorldTests`, Scheme-Variablen `IMAIL_NETWORK_TESTS` /
+  `IMAIL_STOREKIT_TESTS` in `project.yml`. Geprüft: 194 Unit-Tests grün
+  (6 übersprungen), 13 Rust-Tests, erweiterter C-Smoke-Test, iOS- und
+  macOS-Build
 - 2026-11-18 PGP-Verschlüsselung und Entschlüsselung: Neue FFI `imailpgp_encrypt`
   (AES-256 fest verdrahtet, mehrere Empfänger über einen Session-Schlüssel,
   Schlüsselbund `[UInt32 LE][Bytes]`) und `imailpgp_decrypt` (armoriert oder
@@ -207,18 +231,16 @@ beschnittene Schutzfunktionen. Keine offenen Code-Fehler bekannt.
 - 2026-11-02 `52f2d99` Free/Pro (StoreKit 2), Apple-Trial, Multi-Account-Fix
 
 ## Nächster Schritt
-1. Signaturprüfung an echten Konten gegenprobe: Eine signierte Mail von GMX
-   oder Gmail öffnen und das Banner mit einem externen Verifier vergleichen.
-2. WKD gegen einen echten Anbieter testen (z. B. eine Adresse bei Posteo),
-   inklusive Rückfall von der erweiterten auf die direkte Methode.
-3. Ausgehende Verschlüsselung: jetzt umgesetzt (siehe „Zuletzt erledigt").
-4. Entschlüsselung von `multipart/encrypted`: jetzt umgesetzt; Rohbytes werden
-   beim Öffnen geholt, nie gespeichert. Offen: Gegenprobe mit einer echten
-   fremdsignierten Mail.
-5. Push-Relay: Zielumgebung mit dem Nutzer festlegen (Domain, NAS oder VPS),
+1. Kaufpfad einmal in Xcode mit `iMailSecure.storekit` oder im Sandbox-Konto
+   durchklicken (im iOS-26-Simulator nicht automatisierbar).
+2. Die 48 Store-Screenshots sichtprüfen (6 Sprachen × 2 Geräte × 4 Motive) und
+   hochladen (`fastlane deliver`).
+3. Push-Relay: Zielumgebung mit dem Nutzer festlegen (Domain, NAS oder VPS),
    dann IMAP-IDLE-Worker, APNs-Provider, Geräteregistrierung per QR und
    Docker-Deployment entwerfen.
-6. Unverändert offen: Screenshots hochladen (`fastlane deliver`), Kaufpfad
-   einmal in Xcode durchklicken, `terms.html` juristisch prüfen und EULA
-   erstellen lassen, App-Store-Produkte anlegen, Website-Rechtstexte
-   ES/FR/RU/TR ergänzen.
+4. `terms.html` juristisch prüfen, eigene EULA erstellen und in App Store
+   Connect hinterlegen; dort außerdem Produkte, Abo-Gruppe und 7-Tage-Offer
+   anlegen.
+5. Website-Rechtstexte ES/FR/RU/TR ergänzen. GMX-spezifische Live-PGP-
+   Gegenprobe nachreichen, sobald Zugangsdaten vorliegen (die früheren
+   GMX-IMAP/SMTP-Tests waren erfolgreich; hier liegen nur Gmail-Testzugänge vor).

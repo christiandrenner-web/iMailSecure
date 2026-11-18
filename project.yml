@@ -156,6 +156,9 @@ schemes:
       storeKitConfiguration: iMailSecure.storekit
       language: de
       region: DE
+      environmentVariables:
+        IMAIL_NETWORK_TESTS: $(IMAIL_NETWORK_TESTS)
+        IMAIL_STOREKIT_TESTS: $(IMAIL_STOREKIT_TESTS)
       targets:
         - iMailSecureTests
         - iMailSecureUITests

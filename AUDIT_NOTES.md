@@ -287,7 +287,32 @@ Konzept gut, Umsetzung unvollständig. Viele Schutzfunktionen existieren als UI-
 - Eingehend holt `MailSyncEngine` die Rohbytes ohne `\Seen`, probt die lokalen
   geheimen Schlüssel und zeigt Klartext, Anhänge und Status. Nichts davon wird
   gespeichert; die Anzeige bleibt bei jedem Öffnen eine frische Prüfung.
-- Offen: S/MIME und Gegenprobe mit echter fremder PGP-Mail.
+**Stand 2026-11-18 — Gegenproben gegen externe Implementierungen bestanden:**
+- Eine vollständig mit GnuPG 2.5 erzeugte Nachricht (beide Schlüssel, Signatur
+  und Verschlüsselung stammen von GnuPG; Wegwerfadressen `.invalid`) wird von
+  `PGPDecryptor` entschlüsselt; die innere Signatur wird als gültig erkannt.
+  Zusätzlich lief dieselbe Nachricht über Gmail SMTP und kam per IMAP zurück —
+  unser Entschlüssler verarbeitete genau die zurückgeholten Rohbytes korrekt.
+  Umgekehrt verifiziert GnuPG unsere rpgp-Signatur (die zuvor gemeldete
+  `BAD signature` war ein Extraktionsartefakt der Swift-Multiline-String; ohne
+  abschließendes `\n` ist sie gültig).
+- **Gefundener und behobener Interop-Fehler:** GnuPG 2.4+ nutzt bei passendem
+  Schlüssel standardmäßig sein proprietäres AEAD-Paket (Typ 20, OCB). rpgp
+  lehnt es ohne Opt-in ab. Die FFI aktiviert gezielt
+  `DecryptionOptions::enable_gnupg_aead()`; OCB ist integritätsgeschützt. Das
+  alte, manipulierbare SED-Paket (Typ 9) bleibt bewusst abgelehnt — kein
+  generalisiertes „alles entschlüsseln".
+- **Gefundener und behobener WKD-Fehler:** Bei unbekannten Adressen auf
+  `posteo.de` gewann der Netzwerkfehler der nicht existierenden
+  `openpgpkey`-Subdomain über die explizite 404 der direkten Adresse; der Nutzer
+  sah „Server nicht gefunden“ statt „kein Schlüssel veröffentlicht“.
+  `WKDLookup` merkt sich ein explizites 404 und meldet `notFound`.
+  Gegenprobe: `bernhard.reiter@intevation.de` →
+  `BDD957F9C4FE0FDC583DCD6D2B7BA3BF9BC3A554` über die direkte Methode.
+- Regressionstests: `PGPExternalMessageTests` und `WKDRealWorldTests`
+  (Netzwerk-Test opt-in über `IMAIL_NETWORK_TESTS=1`). 194 Unit-Tests grün.
+- Offen: S/MIME nicht entschieden; GMX-spezifische Live-PGP-Gegenprobe ohne
+  Zugangsdaten in dieser Umgebung (GMX-IMAP/SMTP war bereits erfolgreich).
 
 ---
 
@@ -347,7 +372,7 @@ Konzept gut, Umsetzung unvollständig. Viele Schutzfunktionen existieren als UI-
 | S4 | ✅ erledigt | Blur-Overlay bei willResignActive; Schloss-Icon im App-Umschalter |
 | S5 | 🔴 offen | OAuth 2.0 – Entscheid ausstehend |
 | S6 | 🔴 offen | Entwürfe werden nicht gespeichert |
-| C1 | 🟢 umgesetzt | PGP: rpgp (Apache-2.0/MIT, reines Rust). FFI, Swift-Wrapper, Schlüsselbund (Keychain, Import-UI), Signaturprüfung mit Statusbanner, WKD/Autocrypt nur auf ausdrückliche Aktion, ausgehendes Signieren und Ver-/Entschlüsselung (RFC 3156, AES-256, sign-then-encrypt, Klartext nie gespeichert) stehen (2026-11-18). Offen: Gegenprobe mit echter fremder PGP-Mail; S/MIME nicht entschieden |
+| C1 | 🟢 umgesetzt | PGP: rpgp (Apache-2.0/MIT, reines Rust). FFI, Swift-Wrapper, Schlüsselbund (Keychain, Import-UI), Signaturprüfung mit Statusbanner, WKD/Autocrypt nur auf ausdrückliche Aktion, ausgehendes Signieren und Ver-/Entschlüsselung (RFC 3156, AES-256, sign-then-encrypt, Klartext nie gespeichert) stehen (2026-11-18). Gegenproben gegen GnuPG, Gmail und echte WKD-Server bestanden (AEAD- und WKD-Fehler dabei gefunden und behoben). Offen: S/MIME nicht entschieden |
 | L1 | ✅ entschieden | **Dual Licensing** (PolyForm Noncommercial + Commercial License); juristische Prüfung von `LICENSE-NONCOMMERCIAL.md`, `LICENSE-COMMERCIAL.md`, `CLA.md` und AGB steht aus |
 
 ---

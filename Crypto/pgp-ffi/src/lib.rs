@@ -14,8 +14,8 @@ use std::ptr;
 use std::slice;
 
 use pgp::composed::{
-    Deserializable, DetachedSignature, Message, MessageBuilder, SignedPublicKey,
-    SignedPublicSubKey, SignedSecretKey,
+    DecryptionOptions, Deserializable, DetachedSignature, Message, MessageBuilder,
+    SignedPublicKey, SignedPublicSubKey, SignedSecretKey, TheRing,
 };
 use pgp::crypto::{hash::HashAlgorithm, sym::SymmetricKeyAlgorithm};
 use pgp::packet::PublicKey as PublicKeyPacket;
@@ -716,8 +716,19 @@ pub extern "C" fn imailpgp_decrypt(
         }
 
         let mut decrypted = match parse_message(message_bytes).and_then(|message| {
+            // GnuPG 2.4+ nutzt bei passendem Schlüssel standardmäßig sein
+            // propietäres AEAD-Paket (Typ 20, OCB). rpgp erlaubt es nur
+            // explizit. OCB prüft die Integrität, daher ist das sicher — das
+            // alte, manipulierbare SED-Paket (Typ 9) bleibt abgelehnt.
+            let ring = TheRing {
+                secret_keys: vec![&secret],
+                key_passwords: vec![&password],
+                decrypt_options: DecryptionOptions::new().enable_gnupg_aead(),
+                ..Default::default()
+            };
             message
-                .decrypt(&password, &secret)
+                .decrypt_the_ring(ring, true)
+                .map(|(message, _)| message)
                 .map_err(|error| error.to_string())
         }) {
             Ok(message) => message,
