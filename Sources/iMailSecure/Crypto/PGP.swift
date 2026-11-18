@@ -23,6 +23,7 @@ private enum PGPStatus {
     static let parseError: Int32 = -2
     static let panic: Int32 = -3
     static let wrongPassword: Int32 = -4
+    static let decryptError: Int32 = -5
 }
 
 // MARK: – Fehler
@@ -35,6 +36,9 @@ enum PGPError: LocalizedError, Equatable {
     case unreadableSignature(detail: String?)
     /// Die Passphrase passt nicht zum geheimen Schlüssel.
     case wrongPassphrase(detail: String?)
+    /// Die Nachricht konnte nicht entschlüsselt werden: kein passender
+    /// Schlüssel oder beschädigte Daten.
+    case decryptionFailed(detail: String?)
     /// Alles andere aus der Bibliothek (Panic, zu kleiner Puffer …).
     case library(detail: String)
 
@@ -46,6 +50,8 @@ enum PGPError: LocalizedError, Equatable {
             return String(localized: "Die Signatur konnte nicht gelesen werden.")
         case .wrongPassphrase:
             return String(localized: "Die Passphrase passt nicht zum geheimen Schlüssel.")
+        case .decryptionFailed:
+            return String(localized: "Die Nachricht konnte nicht entschlüsselt werden.")
         case .library:
             return String(localized: "Die Kryptographie-Bibliothek meldet einen Fehler.")
         }
@@ -53,10 +59,28 @@ enum PGPError: LocalizedError, Equatable {
 
     var failureReason: String? {
         switch self {
-        case let .invalidKey(detail), let .unreadableSignature(detail), let .wrongPassphrase(detail):
+        case let .invalidKey(detail), let .unreadableSignature(detail),
+             let .wrongPassphrase(detail), let .decryptionFailed(detail):
             return detail.flatMap { $0.isEmpty ? nil : $0 }
         case let .library(detail):
             return detail.isEmpty ? nil : detail
+        }
+    }
+}
+
+/// Verschlüsseln setzt für **jeden** Empfänger einen geprüften öffentlichen
+/// Schlüssel voraus. Fehlt einer, wird nichts verschlückt und die Mail geht
+/// unverschlüsselt raus — sondern der Versand bricht ab.
+enum PGPEncryptionError: LocalizedError, Equatable {
+    case missingKey(String)
+
+    var errorDescription: String? {
+        switch self {
+        case let .missingKey(address):
+            return String(
+                format: String(localized: "Für %@ ist kein öffentlicher Schlüssel hinterlegt. Die Nachricht kann nicht verschlüsselt werden."),
+                address
+            )
         }
     }
 }
@@ -308,6 +332,82 @@ enum PGP {
                 throw PGPError.wrongPassphrase(detail: lastError)
             }
             throw PGPError.library(detail: lastError)
+        }
+        return Data(output[0..<Int(length)])
+    }
+
+    /// Verschlüsselt `data` für alle Empfänger. Jeder Schlüssel bekommt in
+    /// Rust denselben Session-Schlüssel; die Nachricht bleibt also klein, auch
+    /// bei mehreren Empfängern. Die Schlüssel werden in dem von der FFI
+    /// festgelegten Format übergeben: `UInt32` little-endian Länge, dann die
+    /// Schlüsselbytes.
+    static func encrypt(_ data: Data, publicKeys: [Data]) throws -> Data {
+        guard !publicKeys.isEmpty else {
+            throw PGPError.invalidKey(detail: nil)
+        }
+        var bundle = Data()
+        for key in publicKeys {
+            var length = UInt32(key.count).littleEndian
+            withUnsafeBytes(of: &length) { bundle.append(contentsOf: $0) }
+            bundle.append(key)
+        }
+
+        // Armor und PKESK-Pakete blähen die Ausgabe auf; das Doppelte plus
+        // Reserve reicht auch für viele Empfänger. Die FFI meldet einen
+        // zu kleinen Puffer, statt ihn zu überlaufen.
+        let capacity = max(64 * 1024, data.count * 2 + 64 * 1024)
+        var output = [UInt8](repeating: 0, count: capacity)
+        let length = withBytes(data) { dataBytes, dataCount in
+            withBytes(bundle) { keyBytes, keyCount in
+                output.withUnsafeMutableBufferPointer { buffer in
+                    imailpgp_encrypt(
+                        dataBytes, dataCount,
+                        keyBytes, keyCount,
+                        buffer.baseAddress, buffer.count
+                    )
+                }
+            }
+        }
+        guard length > 0 else {
+            throw PGPError.library(detail: lastError)
+        }
+        return Data(output[0..<Int(length)])
+    }
+
+    /// Entschlüsselt einen PGP-MESSAGE-Block. Geliefert werden die inneren
+    /// Bytes; bei PGP/MIME ist das eine MIME-Einheit. Ein falscher Status
+    /// bleibt unterscheidbar, damit die Oberfläche „Passphrase falsch“ nicht
+    /// mit „falscher Schlüssel“ verwechselt.
+    static func decrypt(
+        _ data: Data,
+        secretKey: Data,
+        passphrase: String
+    ) throws -> Data {
+        let password = Data(passphrase.utf8)
+        var output = [UInt8](repeating: 0, count: max(64 * 1024, data.count))
+        let length = withBytes(data) { messageBytes, messageCount in
+            withBytes(secretKey) { keyBytes, keyCount in
+                withBytes(password) { passwordBytes, passwordCount in
+                    output.withUnsafeMutableBufferPointer { buffer in
+                        imailpgp_decrypt(
+                            messageBytes, messageCount,
+                            keyBytes, keyCount,
+                            passwordBytes, passwordCount,
+                            buffer.baseAddress, buffer.count
+                        )
+                    }
+                }
+            }
+        }
+        guard length > 0 else {
+            switch length {
+            case PGPStatus.wrongPassword:
+                throw PGPError.wrongPassphrase(detail: lastError)
+            case PGPStatus.decryptError:
+                throw PGPError.decryptionFailed(detail: lastError)
+            default:
+                throw PGPError.library(detail: lastError)
+            }
         }
         return Data(output[0..<Int(length)])
     }

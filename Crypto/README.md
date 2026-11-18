@@ -46,7 +46,9 @@ cd Crypto/pgp-ffi && cargo test --release
 Deckt ab: Schlüsselerzeugung (auch passphrasegeschützt), abgetrennte Signatur
 (gültig, manipuliert, leere Nutzdaten), Passphrase-Prüfung, armierte Schlüssel
 und Signaturen, Parsen von Müll, Fingerprint, User-ID, Signaturaussteller und
-Armierung. Die Kryptographie ist
+Armierung, Verschlüsselung (ein und mehrere Empfänger, Session-Schlüssel,
+Subkey-Wahl) und Entschlüsselung (armoriert und binär, Manipulation, fremder
+Schlüssel, Passphrase). 13 Rust-Tests sind grün. Die Kryptographie ist
 plattformunabhängig; der iOS-Build wird
 zusätzlich mit `Crypto/pgp-ffi/smoke.c` gegen die Simulator-Slice geprüft
 (ABI, Symbole, Rückgabewerte):
@@ -59,10 +61,11 @@ clang -target arm64-apple-ios18.0-simulator -isysroot "$SDK" \
 xcrun simctl spawn booted /tmp/imailpgp-smoke
 ```
 
-Die Swift-Seite prüft `PGPTests.swift` (10), `PGPKeyStoreTests.swift` (6),
-`PGPSignatureTests.swift` (13), `PGPKeyDiscoveryTests.swift` (8),
-`PGPOutgoingTests.swift` (6) und `PGPPrivateKeyStoreTests.swift` (5) gegen
-dieselbe Bibliothek. Die Testdaten liegen in
+Die Swift-Seite prüft `PGPTests.swift`, `PGPKeyStoreTests.swift`,
+`PGPSignatureTests.swift`, `PGPKeyDiscoveryTests.swift`, `PGPOutgoingTests.swift`,
+`PGPPrivateKeyStoreTests.swift` und `PGPDecryptorTests.swift` gegen dieselbe
+Bibliothek (191 Unit-Tests gesamt, 4 StoreKit-Tests opt-in übersprungen). Die
+Testdaten liegen in
 `Tests/iMailSecureTests/Fixtures/PGPFixtures.swift` und werden erzeugt mit:
 
 ```bash
@@ -82,13 +85,16 @@ cd Crypto/pgp-ffi && cargo run --release --example make_fixtures
 | `imailpgp_armor_public_key` | fertig |
 | `imailpgp_secret_key_info` (Passphrase, Fingerprint, User-ID) | fertig |
 | `imailpgp_sign_detached` (SHA-256, armoriert) | fertig |
-| Swift-Wrapper `PGP.swift` | fertig |
+| `imailpgp_encrypt` (AES-256, mehrere Empfänger) | fertig |
+| `imailpgp_decrypt` (eigener Fehlercode `-5`) | fertig |
+| Swift-Wrapper `PGP.swift` (sign, encrypt, decrypt) | fertig |
 | Schlüsselbund `PGPKeyStore` (Keychain) + Import-UI | fertig |
 | Eingehende Signaturprüfung (`PGPSignature.swift`) | fertig |
 | WKD (`WKDLookup.swift`) und Autocrypt (`AutocryptHeader.swift`) | fertig |
 | Geheime Schlüssel `PGPPrivateKeyStore` + Import-UI | fertig |
 | Signieren ausgehend (`PGPMIMEBuilder`, `multipart/signed`) | fertig |
-| Ent-/Verschlüsseln (`MessageBuilder`, `Message`) | offen |
+| Verschlüsseln ausgehend (`PGPMIMEBuilder`, `multipart/encrypted`) | fertig |
+| Entschlüsseln eingehend (`PGPDecryptor`, Klartext nie gespeichert) | fertig |
 | Passphrase-Schutz des geheimen Schlüssels (Keychain `ThisDeviceOnly`) | fertig |
 
 Die Secure Enclave speichert nur P-256-Schlüssel; OpenPGP-Schlüssel bleiben
@@ -123,6 +129,28 @@ die SMTP-Zeilengrenzen.
 Fehler werden als negative Int32 gemeldet, nie als Panic über die Grenze:
 Jede Funktion fängt Panics ab und legt eine thread-lokale Meldung in
 `imailpgp_last_error` ab.
+
+## Ver- und Entschlüsselung
+
+`PGPMIMEBuilder` baut `multipart/encrypted` nach RFC 3156. AES-256 ist fest
+verdrahtet; mehrere Empfänger teilen einen Session-Schlüssel, damit die Mail
+nur einmal verschlüsselt wird. Verschlüsselt wird an den
+Verschlüsselungs-Subkey (ECDH), nicht an den primären Signaturschlüssel. Der
+Schlüsselbund wird als `[UInt32 little-endian Länge][Schlüsselbytes]…` an die
+FFI übergeben. Fehlt für auch nur einen Empfänger — BCC eingeschlossen — ein
+öffentlicher Schlüssel, bricht der Versand mit `PGPEncryptionError.missingKey`
+ab; es geht keine halb verschlüsselte Mail raus.
+
+Sind Signieren und Verschlüsseln beide aktiv, gilt sign-then-encrypt: Der
+`multipart/signed`-Block wird ohne RFC-822-Kopf als Ganzes verschlüsselt. Der
+Empfänger entschlüsselt mit `PGPDecryptor` aus den rohen MIME-Bytes, die
+`MailSyncEngine` ohne `\Seen` holt, prüft die innere Signatur mit demselben
+Verifier und sieht Text, Anhänge und Status im Banner. Der Klartext wird nie
+gespeichert — die Anzeige ist bei jedem Öffnen eine frische Prüfung.
+
+`PGPDecryptorTests` prüft den Rundlauf durch den eingehenden Parser:
+verschlüsselt, signiert plus verschlüsselt, Anhänge (auch `text/plain`),
+fremder Schlüssel, Klartext-Mail und fehlender lokaler Schlüssel.
 
 ## Einbindung in Xcode
 

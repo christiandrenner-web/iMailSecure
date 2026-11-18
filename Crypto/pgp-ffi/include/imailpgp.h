@@ -22,6 +22,7 @@ extern "C" {
 #define IMAILPGP_PARSE_ERROR -2
 #define IMAILPGP_PANIC -3
 #define IMAILPGP_WRONG_PASSWORD -4
+#define IMAILPGP_DECRYPT_ERROR -5
 
 /// Version als statischer C-String, z. B. "imailpgp 0.1.0 / rpgp 0.21.1".
 const char *imailpgp_version(void);
@@ -72,6 +73,22 @@ int32_t imailpgp_sign_detached(const uint8_t *key, size_t key_len,
                                const uint8_t *passphrase, size_t passphrase_len,
                                const uint8_t *data, size_t data_len,
                                uint8_t *out, size_t out_len);
+
+/// Verschlüsselt `data` für alle Empfänger. `keys` ist eine Folge von
+/// `[uint32 little-endian Länge][Schlüssel-Bytes]`; armierte und binäre
+/// Schlüssel sind erlaubt. Ausgabe ist ein armoriertes PGP-MESSAGE-Block.
+/// Rückgabe: Länge (>0) oder negativ bei Fehlern.
+int32_t imailpgp_encrypt(const uint8_t *data, size_t data_len,
+                         const uint8_t *keys, size_t keys_len,
+                         uint8_t *out, size_t out_len);
+
+/// Entschlüsselt einen armorierten oder binären PGP-MESSAGE-Block mit dem
+/// geheimen Schlüssel. Rückgabe: Länge der Klartext-Bytes (>0),
+/// IMAILPGP_WRONG_PASSWORD oder negativ bei Fehlern.
+int32_t imailpgp_decrypt(const uint8_t *message, size_t message_len,
+                         const uint8_t *key, size_t key_len,
+                         const uint8_t *passphrase, size_t passphrase_len,
+                         uint8_t *out, size_t out_len);
 
 #ifdef __cplusplus
 }

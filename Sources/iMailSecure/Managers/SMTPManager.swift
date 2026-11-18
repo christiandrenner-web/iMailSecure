@@ -5,9 +5,15 @@ import SwiftMail
 
 enum SMTPError: LocalizedError {
     case noPassword
+    case invalidPGPConfiguration
     var errorDescription: String? {
-        String(localized: "error.smtp.noPassword",
-               defaultValue: "Kein Passwort gespeichert. Bitte Konto bearbeiten.")
+        switch self {
+        case .noPassword:
+            return String(localized: "error.smtp.noPassword",
+                          defaultValue: "Kein Passwort gespeichert. Bitte Konto bearbeiten.")
+        case .invalidPGPConfiguration:
+            return String(localized: "Der PGP-Versand wurde falsch konfiguriert.")
+        }
     }
 }
 
@@ -17,11 +23,15 @@ final class SMTPManager {
 
     init(account: EmailAccount) { self.account = account }
 
-    /// Versendet einen Entwurf. Mit `sign: true` wird vor dem Verbinden
-    /// signiert und die vollständige RFC-822-Nachricht über `sendRawMessage`
-    /// übertragen — SwiftMail baut in diesem Fall kein MIME neu zusammen,
-    /// sonst wäre die Prüfsumme der Signatur hinfällig.
-    func sendEmail(draft: EmailDraft, sign: Bool = false) async throws {
+    /// Versendet einen Entwurf. Mit Signatur oder Verschlüsselung wird die
+    /// vollständige RFC-822-Nachricht selbst gebaut und über `sendRawMessage`
+    /// übertragen — SwiftMail baut sie sonst neu zusammen, womit sowohl
+    /// Signatur als auch PGP-Block hinfällig wären.
+    func sendEmail(
+        draft: EmailDraft,
+        sign: Bool = false,
+        encrypt: Bool = false
+    ) async throws {
         guard let password = account.password else { throw SMTPError.noPassword }
         #if DEBUG
         logger.debug("Sende Mail via \(account.smtpHost)")
@@ -32,28 +42,12 @@ final class SMTPManager {
         let cc = draft.cc.map { SwiftMail.EmailAddress(name: $0.name ?? "", address: $0.address) }
         let bcc = draft.bcc.map { SwiftMail.EmailAddress(name: $0.name ?? "", address: $0.address) }
 
-        if sign {
-            guard let privateKey = PGPPrivateKeyStore.shared.key(forEmail: account.email) else {
-                throw PGPPrivateKeyStoreError.notFound
-            }
-            let passphrase = try PGPPrivateKeyStore.shared.passphrase(forEmail: account.email)
-            let entity = PGPMIMEBuilder.signedEntity(for: draft)
-            let signature = try PGP.signDetached(
-                entity,
-                secretKey: Data(privateKey.armored.utf8),
-                passphrase: passphrase
-            )
-            let raw = PGPMIMEBuilder.message(
-                draft: draft,
-                account: account,
-                signedEntity: entity,
-                signature: signature
-            )
-
+        if sign || encrypt {
+            let raw = try pgpRawMessage(draft: draft, sign: sign, encrypt: encrypt)
             try await withServer(password: password) { server in
                 try await server.sendRawMessage(raw, from: sender, to: to + cc + bcc)
             }
-            logger.info("Signierte Mail versendet")
+            logger.info("PGP-Mail versendet (signiert: \(sign), verschlüsselt: \(encrypt))")
             return
         }
 
@@ -95,6 +89,72 @@ final class SMTPManager {
             try await server.sendEmail(email)
         }
         logger.info("Mail versendet (\(draft.attachments.count) Anhänge)")
+    }
+
+    // MARK: – PGP-Rohnachricht
+
+    /// Baut die Nachricht für den Rohversand. Bei `sign && encrypt` wird
+    /// zuerst signiert und dann die signierte MIME-Einheit verschlüsselt
+    /// (sign-then-encrypt nach RFC 3156). Der Empfänger kann nach dem
+    /// Entschlüsseln also dieselbe Signaturprüfung wie bei einer nur
+    /// signierten Mail benutzen.
+    func pgpRawMessage(
+        draft: EmailDraft,
+        sign: Bool,
+        encrypt: Bool
+    ) throws -> Data {
+        let entity = PGPMIMEBuilder.signedEntity(for: draft)
+        var payload = entity
+
+        if sign {
+            guard let privateKey = PGPPrivateKeyStore.shared.key(forEmail: account.email) else {
+                throw PGPPrivateKeyStoreError.notFound
+            }
+            let passphrase = try PGPPrivateKeyStore.shared.passphrase(forEmail: account.email)
+            let signature = try PGP.signDetached(
+                entity,
+                secretKey: Data(privateKey.armored.utf8),
+                passphrase: passphrase
+            )
+            if encrypt {
+                // Kein RFC-822-Kopf: verschlüsselt wird die MIME-Einheit.
+                payload = PGPMIMEBuilder.signedBlockForEncryption(
+                    signedEntity: entity,
+                    signature: signature
+                )
+            } else {
+                return PGPMIMEBuilder.message(
+                    draft: draft,
+                    account: account,
+                    signedEntity: entity,
+                    signature: signature
+                )
+            }
+        }
+
+        guard encrypt else {
+            // Nur signiert ist oben zurückgekehrt; ohne beides ruft man diese
+            // Methode nicht auf.
+            throw SMTPError.invalidPGPConfiguration
+        }
+
+        // Auch Blindkopien müssen einen Schlüssel haben: Sie erhalten dieselbe
+        // Nachricht und sollen sie lesen können.
+        let recipients = draft.to + draft.cc + draft.bcc
+        var publicKeys: [Data] = []
+        publicKeys.reserveCapacity(recipients.count)
+        for recipient in recipients {
+            guard let key = PGPKeyStore.shared.key(forEmail: recipient.address) else {
+                throw PGPEncryptionError.missingKey(recipient.address)
+            }
+            publicKeys.append(Data(key.armored.utf8))
+        }
+        let encrypted = try PGP.encrypt(payload, publicKeys: publicKeys)
+        return PGPMIMEBuilder.encryptedMessage(
+            draft: draft,
+            account: account,
+            encryptedEntity: encrypted
+        )
     }
 
     // MARK: – Verbindung

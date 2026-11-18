@@ -1,5 +1,5 @@
 # STATE — iMail Secure
-Stand: 2026-11-18 · Branch: `main` · Letzter Code-Commit: `57b1e40` · Build: **SUCCEEDED** (iOS + macOS) · Tests: **178 Unit-Tests (4 übersprungen) + 3 UI-Tests grün** · PGP: FFI, Schlüsselbund, Signaturprüfung ein- und ausgehend, WKD/Autocrypt, 10 Rust- und 48 Swift-Tests grün
+Stand: 2026-11-18 · Branch: `main` · Letzter Code-Commit: `104380f` · Build: **SUCCEEDED** (iOS + macOS) · Tests: **191 Unit-Tests (4 übersprungen) + 3 UI-Tests grün** · PGP: FFI, Schlüsselbund, Signaturprüfung, Ver-/Entschlüsselung, WKD/Autocrypt, 13 Rust- und 69 Swift-Tests grün
 
 ## Ziel
 App-Store-fähige Version: echte IMAP-Ordner, Datenschutz nach D2, Free/Pro ohne
@@ -34,6 +34,17 @@ beschnittene Schutzfunktionen. Keine offenen Code-Fehler bekannt.
 - L1 Lizenz: entschieden (PolyForm Noncommercial 1.0.0), juristische Prüfung steht aus
 
 ## Zuletzt erledigt
+- 2026-11-18 PGP-Verschlüsselung und Entschlüsselung: Neue FFI `imailpgp_encrypt`
+  (AES-256 fest verdrahtet, mehrere Empfänger über einen Session-Schlüssel,
+  Schlüsselbund `[UInt32 LE][Bytes]`) und `imailpgp_decrypt` (armoriert oder
+  binär, eigener Status `IMAILPGP_DECRYPT_ERROR`). Verschlüsselt wird an den
+  Verschlüsselungs-Subkey, nicht an den primären Signaturschlüssel. `PGPMIMEBuilder`
+  baut `multipart/encrypted`; bei beiden Schaltern sign-then-encrypt. Fehlt auch
+  nur einem Empfänger (inkl. BCC) der Schlüssel, bricht der Versand ab. Der
+  Empfänger entschlüsselt mit `PGPDecryptor` aus dem Roh-MIME, prüft die innere
+  Signatur mit demselben Verifier und sieht Text, Anhänge und Status im Banner;
+  der Klartext wird nicht gespeichert. 14 neue Übersetzungen (331 Einträge),
+  13 Rust-, 7 Swift-Tests, C-Smoke erweitert. 191 Unit-Tests grün
 - 2026-11-18 Ausgehendes PGP-Signieren: Der Nutzer importiert seinen eigenen
   geheimen Schlüssel in `PGPPrivateKeyStore` — Keychain
   (`WhenUnlockedThisDeviceOnly`, kein iCloud-Sync), Schlüssel und Passphrase in
@@ -200,12 +211,10 @@ beschnittene Schutzfunktionen. Keine offenen Code-Fehler bekannt.
    oder Gmail öffnen und das Banner mit einem externen Verifier vergleichen.
 2. WKD gegen einen echten Anbieter testen (z. B. eine Adresse bei Posteo),
    inklusive Rückfall von der erweiterten auf die direkte Methode.
-3. Ausgehende Verschlüsselung mit den öffentlichen Schlüsseln aus
-   `PGPKeyStore`: `multipart/encrypted` mit Session-Schlüssel, nur auf
-   ausdrückliche Nutzeraktion und nur, wenn für jeden Empfänger ein geprüfter
-   Schlüssel vorliegt. Das Signieren steht (siehe oben).
-4. Entschlüsselung von `multipart/encrypted`: derzeit zeigt die App ehrlich an,
-   dass der Inhalt nicht entschlüsselt wird.
+3. Ausgehende Verschlüsselung: jetzt umgesetzt (siehe „Zuletzt erledigt").
+4. Entschlüsselung von `multipart/encrypted`: jetzt umgesetzt; Rohbytes werden
+   beim Öffnen geholt, nie gespeichert. Offen: Gegenprobe mit einer echten
+   fremdsignierten Mail.
 5. Push-Relay: Zielumgebung mit dem Nutzer festlegen (Domain, NAS oder VPS),
    dann IMAP-IDLE-Worker, APNs-Provider, Geräteregistrierung per QR und
    Docker-Deployment entwerfen.

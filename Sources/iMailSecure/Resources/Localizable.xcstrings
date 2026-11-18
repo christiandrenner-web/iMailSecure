@@ -1837,6 +1837,40 @@
         }
       }
     },
+    "Der PGP-Versand wurde falsch konfiguriert.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The PGP configuration is invalid."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La configuración de PGP no es válida."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La configuration PGP est invalide."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Неверная конфигурация PGP."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "PGP yapılandırması geçersiz."
+          }
+        }
+      }
+    },
     "Der Schlüssel für %@ und die zugehörige Passphrase werden von diesem Gerät gelöscht.": {
       "localizations": {
         "en": {
@@ -2313,6 +2347,40 @@
         }
       }
     },
+    "Die Nachricht konnte nicht entschlüsselt werden.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The message could not be decrypted."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo descifrar el mensaje."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le message n'a pas pu être déchiffré."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не удалось расшифровать сообщение."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mesajın şifresi çözülemedi."
+          }
+        }
+      }
+    },
     "Die Nachricht wurde nach dem Signieren verändert, oder die Signatur stammt nicht von dem Schlüssel, den sie beansprucht. Behandle den Inhalt als unzuverlässig.": {
       "localizations": {
         "en": {
@@ -2343,6 +2411,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "İleti imzalandıktan sonra değiştirilmiş veya imza iddia ettiği anahtara ait değil. İçeriği güvenilmez kabul edin."
+          }
+        }
+      }
+    },
+    "Die Nachricht wurde nach dem Signieren verändert. Behandle den Inhalt als unzuverlässig.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Changed after signing. Treat content as unreliable."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modificado tras firmar. Contenido no fiable."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modifié après signature. Contenu non fiable."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Изменено после подписи. Считайте содержимое ненадёжным."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İmzalandıktan sonra değişti. İçeriğe güvenmeyin."
           }
         }
       }
@@ -2483,6 +2585,40 @@
         }
       }
     },
+    "Die verschlüsselte Nachricht ist beschädigt oder hat ein unbekanntes Format.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The encrypted message is damaged or uses an unknown format."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El mensaje cifrado está dañado o tiene un formato desconocido."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le message chiffré est endommagé ou utilise un format inconnu."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зашифрованное сообщение повреждено или имеет неизвестный формат."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Şifreli mesaj bozuk veya bilinmeyen bir biçimde."
+          }
+        }
+      }
+    },
     "Diese Nachricht enthält einen Autocrypt-Header. Der Schlüssel stammt aus dem Kopf der Nachricht, nicht von einem Server.": {
       "localizations": {
         "en": {
@@ -2513,6 +2649,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bu ileti bir Autocrypt başlığı içeriyor. Anahtar bir sunucudan değil, iletinin başlığından geliyor."
+          }
+        }
+      }
+    },
+    "Diese Nachricht ist nicht verschlüsselt.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This message is not encrypted."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Este mensaje no está cifrado."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ce message n'est pas chiffré."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Это сообщение не зашифровано."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu mesaj şifreli değil."
           }
         }
       }
@@ -2959,6 +3129,176 @@
         }
       }
     },
+    "Entschlüsselt und signiert": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Decrypted and signed"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descifrado y firmado"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Déchiffré et signé"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Расшифровано и подписано"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Şifresi çözüldü ve imzalandı"
+          }
+        }
+      }
+    },
+    "Entschlüsselt – Prüfung nicht möglich": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Decrypted – check unavailable"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descifrado – verificación no disponible"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Déchiffré – vérification impossible"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Расшифровано – проверка недоступна"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Şifresi çözüldü – doğrulama yok"
+          }
+        }
+      }
+    },
+    "Entschlüsselt – Schlüssel nicht hinterlegt": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Decrypted – key not stored"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descifrado – clave no guardada"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Déchiffré – clé non enregistrée"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Расшифровано – ключ не сохранён"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Şifresi çözüldü – anahtar yok"
+          }
+        }
+      }
+    },
+    "Entschlüsselt – Signatur ungültig": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Decrypted – invalid signature"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descifrado – firma no válida"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Déchiffré – signature invalide"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Расшифровано – неверная подпись"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Şifresi çözüldü – imza geçersiz"
+          }
+        }
+      }
+    },
+    "Entschlüsselung fehlgeschlagen": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Decryption failed"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Error al descifrar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Échec du déchiffrement"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ошибка расшифровки"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Şifre çözme başarısız"
+          }
+        }
+      }
+    },
     "Erneut laden": {
       "localizations": {
         "en": {
@@ -3367,6 +3707,40 @@
         }
       }
     },
+    "Für %@ ist kein öffentlicher Schlüssel hinterlegt. Die Nachricht kann nicht verschlüsselt werden.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No public key is stored for %@. The message cannot be encrypted."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay ninguna clave pública guardada para %@. El mensaje no se puede cifrar."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune clé publique n'est enregistrée pour %@. Le message ne peut pas être chiffré."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Для %@ не сохранён открытый ключ. Сообщение нельзя зашифровать."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ için açık anahtar kayıtlı değil. Mesaj şifrelenemiyor."
+          }
+        }
+      }
+    },
     "Für %@ ist kein öffentlicher Schlüssel hinterlegt. Die Signatur lässt sich deshalb nicht prüfen.": {
       "localizations": {
         "en": {
@@ -3465,6 +3839,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Etki alanı bu adres için WKD üzerinden bir anahtar yayımlamıyor."
+          }
+        }
+      }
+    },
+    "Für diese Nachricht ist kein passender privater Schlüssel hinterlegt.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No matching private key"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay clave privada coincidente"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune clé privée correspondante"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нет подходящего ключа"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uygun özel anahtar yok"
           }
         }
       }
@@ -4863,6 +5271,40 @@
         }
       }
     },
+    "Mit OpenPGP entschlüsselt": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Decrypted with OpenPGP"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descifrado con OpenPGP"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Déchiffré avec OpenPGP"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Расшифровано с OpenPGP"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenPGP ile şifresi çözüldü"
+          }
+        }
+      }
+    },
     "Mit OpenPGP verschlüsselt": {
       "localizations": {
         "en": {
@@ -4893,6 +5335,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "OpenPGP ile şifrelenmiş"
+          }
+        }
+      }
+    },
+    "Mit dem privaten Schlüssel von %@ entschlüsselt. Der Klartext wird nicht gespeichert.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Decrypted with private key %@. Plaintext is not stored."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descifrado con clave %@. No se guarda el texto."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Déchiffré avec %@. Le clair n'est pas enregistré."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Расшифровано ключом %@. Открытый текст не сохраняется."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ ile çözüldü. Düz metin saklanmaz."
           }
         }
       }
@@ -6668,6 +7144,40 @@
         }
       }
     },
+    "Signatur gültig, signiert mit dem Schlüssel von %@.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Valid signature, signed by %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Firma válida, firmada por %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Signature valide, signée par %@."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подпись действительна, подписано %@."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geçerli imza, %@ tarafından imzalandı."
+          }
+        }
+      }
+    },
     "Signatur ungültig": {
       "localizations": {
         "en": {
@@ -6732,6 +7242,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "İmza kontrol ediliyor…"
+          }
+        }
+      }
+    },
+    "Signiert und verschlüsselt: Die Nachricht wird zuerst digital signiert und dann verschlüsselt.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Signed and encrypted: the message is digitally signed first, then encrypted."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Firmado y cifrado: el mensaje se firma digitalmente primero y luego se cifra."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Signé et chiffré : le message est d'abord signé numériquement, puis chiffré."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подпись и шифрование: сообщение сначала подписывается, затем шифруется."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İmzalı ve şifreli: mesaj önce dijital olarak imzalanır, sonra şifrelenir."
           }
         }
       }
@@ -6940,6 +7484,40 @@
         }
       }
     },
+    "Verschlüsseln": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Encrypt"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cifrar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chiffrer"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Шифровать"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Şifrele"
+          }
+        }
+      }
+    },
     "Version": {
       "localizations": {
         "en": {
@@ -7140,6 +7718,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Web Anahtar Dizini"
+          }
+        }
+      }
+    },
+    "Wird entschlüsselt …": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Decrypting…"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Descifrando…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Déchiffrement…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Расшифровка…"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Şifre çözülüyor…"
           }
         }
       }
@@ -10806,6 +11418,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Satın alma geri yüklendi."
+          }
+        }
+      }
+    },
+    "unbekannt": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "unknown"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "desconocido"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "inconnu"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "неизвестно"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "bilinmiyor"
           }
         }
       }

@@ -15,6 +15,9 @@ struct EmailDraft: Identifiable {
     /// der Versand unsigniert. Standardmäßig aus, damit Empfänger nicht mit
     /// einer unerwarteten Signatur konfrontiert werden.
     var pgpSign:        Bool = false
+    /// Verschlüsseln nur, wenn für jeden Empfänger ein öffentlicher Schlüssel
+    /// lokal geprüft wurde. Sonst bricht der Versand mit einem klaren Fehler ab.
+    var pgpEncrypt:     Bool = false
     var attachments: [EmailAttachment] = []
     var lastModified: Date = Date()
 

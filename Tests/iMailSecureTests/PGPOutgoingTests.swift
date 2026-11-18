@@ -190,4 +190,174 @@ final class PGPOutgoingTests: XCTestCase {
             }
         }
     }
+
+    // MARK: – Verschlüsselung
+
+    private func armoredMessage(in raw: Data) -> Data? {
+        let text = String(decoding: raw, as: UTF8.self)
+        guard let start = text.range(of: "-----BEGIN PGP MESSAGE-----"),
+              let end = text.range(
+                of: "-----END PGP MESSAGE-----",
+                range: start.upperBound..<text.endIndex
+              )
+        else { return nil }
+        return Data(text[start.lowerBound..<end.upperBound].utf8)
+    }
+
+    func testEncryptDecryptRoundtrip() throws {
+        let secret = Data(PGPFixtures.privateKey.utf8)
+        let publicKeyData = Data(PGPFixtures.privateKeyPublicKey.utf8)
+        let plain = Data("Vertraulich – Grüße mit Ümlauten.\r\n".utf8)
+
+        let encrypted = try PGP.encrypt(plain, publicKeys: [publicKeyData])
+        XCTAssertTrue(String(decoding: encrypted, as: UTF8.self)
+            .hasPrefix("-----BEGIN PGP MESSAGE-----"))
+        XCTAssertNotEqual(encrypted, plain)
+
+        let decrypted = try PGP.decrypt(
+            encrypted,
+            secretKey: secret,
+            passphrase: PGPFixtures.privateKeyPassphrase
+        )
+        XCTAssertEqual(decrypted, plain)
+    }
+
+    func testEncryptToSeveralRecipientsUsesOneSessionKey() throws {
+        // Zwei verschiedene öffentliche Schlüssel, aber nur ein geheimer
+        // liegt in den Fixtures. Der Session-Schlüssel muss für beide in der
+        // Nachricht stecken, damit genau dieser eine Empfänger lesen kann.
+        let plain = Data("Für zwei Empfänger".utf8)
+        let encrypted = try PGP.encrypt(plain, publicKeys: [
+            Data(PGPFixtures.publicKey.utf8),
+            Data(PGPFixtures.privateKeyPublicKey.utf8)
+        ])
+        let decrypted = try PGP.decrypt(
+            encrypted,
+            secretKey: Data(PGPFixtures.privateKey.utf8),
+            passphrase: PGPFixtures.privateKeyPassphrase
+        )
+        XCTAssertEqual(decrypted, plain)
+    }
+
+    func testEncryptWithoutRecipientsIsRejected() {
+        XCTAssertThrowsError(
+            try PGP.encrypt(Data("Test".utf8), publicKeys: [])
+        ) { error in
+            guard case PGPError.invalidKey = error else {
+                return XCTFail("erwartet invalidKey, war \(error)")
+            }
+        }
+    }
+
+    func testWrongPassphraseCannotDecrypt() throws {
+        let encrypted = try PGP.encrypt(
+            Data("Geheim".utf8),
+            publicKeys: [Data(PGPFixtures.privateKeyPublicKey.utf8)]
+        )
+        XCTAssertThrowsError(
+            try PGP.decrypt(
+                encrypted,
+                secretKey: Data(PGPFixtures.privateKey.utf8),
+                passphrase: "falsch"
+            )
+        ) { error in
+            guard case PGPError.wrongPassphrase = error else {
+                return XCTFail("erwartet wrongPassphrase, war \(error)")
+            }
+        }
+    }
+
+    func testForeignSecretKeyCannotDecrypt() throws {
+        // Verschlüsselt an den ersten Fixture-Schlüssel, dessen geheimer Teil
+        // nicht in den Fixtures liegt — der Signing-Schlüssel darf nicht lesen.
+        let encrypted = try PGP.encrypt(
+            Data("Nur für den anderen".utf8),
+            publicKeys: [Data(PGPFixtures.publicKey.utf8)]
+        )
+        XCTAssertThrowsError(
+            try PGP.decrypt(
+                encrypted,
+                secretKey: Data(PGPFixtures.privateKey.utf8),
+                passphrase: PGPFixtures.privateKeyPassphrase
+            )
+        ) { error in
+            guard case PGPError.decryptionFailed = error else {
+                return XCTFail("erwartet decryptionFailed, war \(error)")
+            }
+        }
+    }
+
+    /// Der komplette ausgehende Pfad: Schlüssel aus den Stores, Nachricht
+    /// bauen, PGP-Block wieder herauslösen, entschlüsseln und dieinnere
+    /// Signatur mit demselben Leser prüfen wie eine eingehende Mail.
+    func testSignThenEncryptRoundtrip() throws {
+        let address = senderEmail
+        try PGPPrivateKeyStore.shared.importKey(
+            armored: Data(PGPFixtures.privateKey.utf8),
+            passphrase: PGPFixtures.privateKeyPassphrase,
+            email: address
+        )
+        try PGPKeyStore.shared.importKey(
+            armored: Data(PGPFixtures.privateKeyPublicKey.utf8),
+            email: address
+        )
+        defer {
+            try? PGPPrivateKeyStore.shared.remove(email: address)
+            try? PGPKeyStore.shared.remove(email: address)
+        }
+
+        var encryptedDraft = draft()
+        encryptedDraft.toText = address
+        encryptedDraft.pgpSign = true
+        let raw = try SMTPManager(account: account).pgpRawMessage(
+            draft: encryptedDraft,
+            sign: true,
+            encrypt: true
+        )
+        let text = String(decoding: raw, as: UTF8.self)
+        XCTAssertTrue(text.contains("multipart/encrypted"))
+        XCTAssertTrue(text.contains("protocol=\"application/pgp-encrypted\""))
+        XCTAssertFalse(text.contains("multipart/signed; micalg"),
+                       "Die Signatur darf nicht außen liegen")
+
+        let block = try XCTUnwrap(armoredMessage(in: raw))
+        let inner = try PGP.decrypt(
+            block,
+            secretKey: Data(PGPFixtures.privateKey.utf8),
+            passphrase: PGPFixtures.privateKeyPassphrase
+        )
+        let innerText = String(decoding: inner, as: UTF8.self)
+        XCTAssertTrue(innerText.hasPrefix("Content-Type: multipart/signed"))
+        XCTAssertFalse(innerText.contains("From:"),
+                       "Verschlüsselt wurde die MIME-Einheit, keine RFC-822-Nachricht")
+
+        XCTAssertNotNil(PGPMIMEParser.signedEntity(in: inner))
+
+        let status = PGPSignatureVerifier.analyze(
+            raw: inner,
+            senderEmail: address,
+            keys: [publicKeyRecord]
+        )
+        guard case .valid = status else {
+            return XCTFail("Innere Signatur müsste gültig sein, war \(status)")
+        }
+    }
+
+    func testMissingRecipientKeyStopsEncryption() throws {
+        // Empfänger ohne öffentlichen Schlüssel — der Versand muss abbrechen,
+        // statt still eine nur für manche Empfänger lesbare Mail zu erzeugen.
+        let encryptedDraft = draft()
+        XCTAssertThrowsError(
+            try SMTPManager(account: account).pgpRawMessage(
+                draft: encryptedDraft,
+                sign: false,
+                encrypt: true
+            )
+        ) { error in
+            guard case PGPEncryptionError.missingKey(let address) = error else {
+                return XCTFail("erwartet missingKey, war \(error)")
+            }
+            XCTAssertEqual(address, "empfaenger@example.org")
+        }
+    }
 }

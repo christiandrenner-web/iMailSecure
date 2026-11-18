@@ -265,6 +265,43 @@ final class MailSyncEngine {
         }
     }
 
+    /// Lädt die Rohbytes und entschlüsselt `multipart/encrypted` mit den
+    /// lokalen geheimen Schlüsseln. Es wird nichts gespeichert: Bei jedem
+    /// Öffnen wird der aktuelle Stand auf dem Server benutzt. Die Rohbytes
+    /// setzen kein `\Seen` — die Mail bleibt ungelesen, bis sie wirklich
+    /// geöffnet wird.
+    func decryptMessage(
+        for message: EmailMessage
+    ) async -> Result<PGPDecryptedContent, PGPDecryptError> {
+        do {
+            let raw = try await withServer { server -> Data in
+                try await server.selectMailbox(message.folder)
+                return try await server.fetchRawMessage(identifier: UID(message.uid))
+            }
+            let store = PGPPrivateKeyStore.shared
+            var secrets: [PGPDecryptor.SecretCandidate] = []
+            for record in store.keys() {
+                guard let passphrase = try? store.passphrase(forEmail: record.email) else {
+                    continue
+                }
+                secrets.append(PGPDecryptor.SecretCandidate(
+                    key: Data(record.armored.utf8),
+                    passphrase: passphrase,
+                    fingerprint: record.fingerprint
+                ))
+            }
+            return PGPDecryptor.decrypt(
+                raw: raw,
+                secrets: secrets,
+                senderEmail: message.from.address,
+                publicKeys: PGPKeyStore.shared.keys()
+            )
+        } catch {
+            logger.error("Entschlüsselung fehlgeschlagen: \(error.localizedDescription)")
+            return .failure(.failure(error.localizedDescription))
+        }
+    }
+
     // MARK: – Verbindung
 
     /// Eine Verbindung pro Operation. Konto-Passwort, TLS-Pinning und

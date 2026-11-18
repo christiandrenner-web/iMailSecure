@@ -13,8 +13,12 @@ use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::ptr;
 use std::slice;
 
-use pgp::composed::{Deserializable, DetachedSignature, SignedPublicKey, SignedSecretKey};
-use pgp::crypto::hash::HashAlgorithm;
+use pgp::composed::{
+    Deserializable, DetachedSignature, Message, MessageBuilder, SignedPublicKey,
+    SignedPublicSubKey, SignedSecretKey,
+};
+use pgp::crypto::{hash::HashAlgorithm, sym::SymmetricKeyAlgorithm};
+use pgp::packet::PublicKey as PublicKeyPacket;
 use pgp::types::{KeyDetails, Password};
 
 /// Rückgabewerte. Bewusst klein und stabil, damit Swift sie als Int32 sieht.
@@ -25,6 +29,8 @@ pub const PARSE_ERROR: i32 = -2;
 pub const PANIC: i32 = -3;
 /// Der geheime Schlüssel ist lesbar, aber die Passphrase passt nicht.
 pub const WRONG_PASSWORD: i32 = -4;
+/// Entschlüsseln ging nicht: kein passender Schlüssel oder kaputte Nachricht.
+pub const DECRYPT_ERROR: i32 = -5;
 
 thread_local! {
     static LAST_ERROR: std::cell::RefCell<CString> =
@@ -89,6 +95,19 @@ fn password_from(bytes: Option<&[u8]>) -> Password {
     }
 }
 
+/// `Message::from_bytes` liest nur Binärpakete. Unsere Ausgabe ist armoriert
+/// (und eingehende Mails sind es meist auch), deshalb hier dieselbe
+/// Kopfzeilen-Prüfung wie bei Schlüsseln und Signaturen.
+fn parse_message(bytes: &[u8]) -> Result<Message<'_>, String> {
+    if looks_armored(bytes) {
+        let text = std::str::from_utf8(bytes).map_err(|error| error.to_string())?;
+        Message::from_string(text).map(|(message, _headers)| message)
+    } else {
+        Message::from_bytes(bytes)
+    }
+    .map_err(|error| error.to_string())
+}
+
 fn parse_detached_signature(bytes: &[u8]) -> Result<DetachedSignature, String> {
     if looks_armored(bytes) {
         let text = std::str::from_utf8(bytes).map_err(|error| error.to_string())?;
@@ -98,6 +117,61 @@ fn parse_detached_signature(bytes: &[u8]) -> Result<DetachedSignature, String> {
     } else {
         DetachedSignature::from_bytes(bytes).map_err(|error| error.to_string())
     }
+}
+
+/// Empfänger-Schlüssel kommen als ein Puffer: auf jeden Schlüssel folgt eine
+/// `u32` in Little-Endian mit seiner Länge. So bleibt die C-Schnittstelle bei
+/// zwei Zeigern, auch wenn eine Mail an mehrere Empfänger geht. Swift baut
+/// den Puffer; hier wird er streng gelesen — ein abgeschnittener Eintrag ist
+/// ein Fehler, kein still ignoriertes Ende.
+fn read_key_bundle(bytes: &[u8]) -> Result<Vec<SignedPublicKey>, String> {
+    let mut index = 0;
+    let mut keys = Vec::new();
+    while index < bytes.len() {
+        if index + 4 > bytes.len() {
+            return Err("Schlüsselbund abgeschnitten".into());
+        }
+        let length = u32::from_le_bytes(
+            bytes[index..index + 4]
+                .try_into()
+                .expect("vier Bytes"),
+        ) as usize;
+        index += 4;
+        if length == 0 || index + length > bytes.len() {
+            return Err("Schlüssellänge im Bund ungültig".into());
+        }
+        keys.push(parse_public_key(&bytes[index..index + length])?);
+        index += length;
+    }
+    if keys.is_empty() {
+        return Err("keine Empfänger im Schlüsselbund".into());
+    }
+    Ok(keys)
+}
+
+/// Wählt den Verschlüsselungsschlüssel eines Zertifikats. Bei modernen
+/// Ed25519/Curve25519-Schlüsseln ist das der ECDH-Subkey, nicht der Primär-
+/// schlüssel — `SignedPublicKey::encrypt` würde sonst den Primärschlüssel
+/// nehmen und an einer Signatur-Kapazität scheitern.
+/// `EncryptionKey` hat eine generische `encrypt`-Methode und ist deshalb
+/// nicht als Trait-Objekt nutzbar — daher zwei konkrete Fälle im enum.
+enum EncryptionTarget<'a> {
+    Subkey(&'a SignedPublicSubKey),
+    Primary(&'a PublicKeyPacket),
+}
+
+fn encryption_target(key: &SignedPublicKey) -> Option<EncryptionTarget<'_>> {
+    if let Some(subkey) = key
+        .public_subkeys
+        .iter()
+        .find(|subkey| subkey.algorithm().can_encrypt())
+    {
+        return Some(EncryptionTarget::Subkey(subkey));
+    }
+    if key.primary_key.algorithm().can_encrypt() {
+        return Some(EncryptionTarget::Primary(&key.primary_key));
+    }
+    None
 }
 
 /// Version der Bibliothek als NUL-terminierter String. Statisch, muss nicht
@@ -513,6 +587,176 @@ pub extern "C" fn imailpgp_sign_detached(
     })
 }
 
+/// Verschlüsselt `data` für alle Empfänger im Schlüsselbund (siehe
+/// `read_key_bundle`). Ausgegeben wird ein armoriertes OpenPGP-Message-Block,
+/// wie er im zweiten Teil von `multipart/encrypted` steht. AES-256 ist fest
+/// verdrahtet; es gibt keine Passphrase-Verschlüsselung ohne Empfänger.
+///
+/// Rückgabe: Länge der armorierten Nachricht (>0), negativ = Fehler.
+#[no_mangle]
+pub extern "C" fn imailpgp_encrypt(
+    data: *const u8,
+    data_len: usize,
+    keys: *const u8,
+    keys_len: usize,
+    out: *mut u8,
+    out_len: usize,
+) -> i32 {
+    let result = catch_unwind(AssertUnwindSafe(|| {
+        let (Some(data_bytes), Some(key_bytes)) = (
+            bytes_from(data, data_len),
+            bytes_from(keys, keys_len),
+        ) else {
+            set_error("leeres Argument");
+            return BAD_ARGUMENT;
+        };
+        if out.is_null() || out_len == 0 {
+            set_error("Ausgabepuffer fehlt");
+            return BAD_ARGUMENT;
+        }
+
+        let recipients = match read_key_bundle(key_bytes) {
+            Ok(keys) => keys,
+            Err(error) => {
+                set_error(format!("Empfänger nicht lesbar: {error}"));
+                return BAD_ARGUMENT;
+            }
+        };
+        let mut targets: Vec<EncryptionTarget<'_>> = Vec::with_capacity(recipients.len());
+        for recipient in &recipients {
+            match encryption_target(recipient) {
+                Some(target) => targets.push(target),
+                None => {
+                    set_error("Ein Empfänger hat keinen Verschlüsselungsschlüssel");
+                    return BAD_ARGUMENT;
+                }
+            }
+        }
+
+        let mut rng = rand::thread_rng();
+        let mut builder = MessageBuilder::from_bytes("message.mime", data_bytes)
+            .seipd_v1(&mut rng, SymmetricKeyAlgorithm::AES256);
+        for target in targets {
+            let result = match target {
+                EncryptionTarget::Subkey(subkey) => builder.encrypt_to_key(&mut rng, subkey),
+                EncryptionTarget::Primary(primary) => builder.encrypt_to_key(&mut rng, primary),
+            };
+            if let Err(error) = result {
+                set_error(format!("Verschlüsseln fehlgeschlagen: {error}"));
+                return PARSE_ERROR;
+            }
+        }
+        let armored = match builder.to_armored_string(&mut rng, Default::default()) {
+            Ok(armored) => armored,
+            Err(error) => {
+                set_error(format!("Nachricht nicht armierbar: {error}"));
+                return PARSE_ERROR;
+            }
+        };
+        let bytes = armored.as_bytes();
+        if bytes.len() > out_len {
+            set_error("Ausgabepuffer zu klein");
+            return BAD_ARGUMENT;
+        }
+        // SAFETY: Der Aufrufer garantiert die angegebene Puffergröße.
+        unsafe { ptr::copy_nonoverlapping(bytes.as_ptr(), out, bytes.len()) };
+        set_error("");
+        bytes.len() as i32
+    }));
+    result.unwrap_or_else(|_| {
+        set_error("Panic beim Verschlüsseln");
+        PANIC
+    })
+}
+
+/// Entschlüsselt ein armoriertes oder binäres OpenPGP-Message-Block mit dem
+/// geheimen Schlüssel. Geliefert werden die inneren Bytes — bei PGP/MIME eine
+/// MIME-Einheit, die der Aufrufer weiter liest. Es wird nichts gespeichert.
+///
+/// Rückgabe: Länge der Klartext-Bytes (>0), WRONG_PASSWORD oder negativ.
+#[no_mangle]
+pub extern "C" fn imailpgp_decrypt(
+    message: *const u8,
+    message_len: usize,
+    key: *const u8,
+    key_len: usize,
+    passphrase: *const u8,
+    passphrase_len: usize,
+    out: *mut u8,
+    out_len: usize,
+) -> i32 {
+    let result = catch_unwind(AssertUnwindSafe(|| {
+        let (Some(message_bytes), Some(key_bytes)) = (
+            bytes_from(message, message_len),
+            bytes_from(key, key_len),
+        ) else {
+            set_error("leeres Argument");
+            return BAD_ARGUMENT;
+        };
+        let passphrase = bytes_from(passphrase, passphrase_len);
+        if out.is_null() || out_len == 0 {
+            set_error("Ausgabepuffer fehlt");
+            return BAD_ARGUMENT;
+        }
+        let secret = match parse_secret_key(key_bytes) {
+            Ok(secret) => secret,
+            Err(error) => {
+                set_error(format!("Geheimer Schlüssel nicht lesbar: {error}"));
+                return PARSE_ERROR;
+            }
+        };
+        let password = password_from(passphrase);
+        if let Err(error) = secret
+            .primary_key
+            .unlock(&password, |_, _| Ok(()))
+            .and_then(|inner| inner)
+        {
+            set_error(format!("Passphrase passt nicht: {error}"));
+            return WRONG_PASSWORD;
+        }
+
+        let mut decrypted = match parse_message(message_bytes).and_then(|message| {
+            message
+                .decrypt(&password, &secret)
+                .map_err(|error| error.to_string())
+        }) {
+            Ok(message) => message,
+            Err(error) => {
+                set_error(format!("Entschlüsseln fehlgeschlagen: {error}"));
+                return DECRYPT_ERROR;
+            }
+        };
+        if decrypted.is_compressed() {
+            match decrypted.decompress() {
+                Ok(message) => decrypted = message,
+                Err(error) => {
+                    set_error(format!("Dekomprimieren fehlgeschlagen: {error}"));
+                    return DECRYPT_ERROR;
+                }
+            }
+        }
+        let plain = match decrypted.as_data_vec() {
+            Ok(data) => data,
+            Err(error) => {
+                set_error(format!("Klartext nicht lesbar: {error}"));
+                return DECRYPT_ERROR;
+            }
+        };
+        if plain.len() > out_len {
+            set_error("Ausgabepuffer zu klein");
+            return BAD_ARGUMENT;
+        }
+        // SAFETY: Der Aufrufer garantiert die angegebene Puffergröße.
+        unsafe { ptr::copy_nonoverlapping(plain.as_ptr(), out, plain.len()) };
+        set_error("");
+        plain.len() as i32
+    }));
+    result.unwrap_or_else(|_| {
+        set_error("Panic beim Entschlüsseln");
+        PANIC
+    })
+}
+
 /// Hexadezimal, Großbuchstaben — für Key IDs, die rpgp nicht selbst als
 /// String ausgibt.
 fn hex_upper(bytes: &[u8]) -> String {
@@ -581,7 +825,7 @@ pub extern "C" fn imailpgp_signature_issuer(
 mod tests {
     use super::*;
     use pgp::composed::{
-        KeyType, SecretKeyParamsBuilder, SignedSecretKey, SubkeyParamsBuilder,
+        EncryptionCaps, KeyType, SecretKeyParamsBuilder, SignedSecretKey, SubkeyParamsBuilder,
     };
     use pgp::crypto::ecc_curve::ECCCurve;
     use pgp::crypto::hash::HashAlgorithm;
@@ -598,6 +842,7 @@ mod tests {
             .passphrase(passphrase.map(str::to_string))
             .subkeys(vec![SubkeyParamsBuilder::default()
                 .key_type(KeyType::ECDH(ECCCurve::Curve25519Legacy))
+                .can_encrypt(EncryptionCaps::All)
                 .build()
                 .expect("Subkey")])
             .build()
@@ -933,5 +1178,143 @@ mod tests {
         assert!(len > 0);
         let hex = std::str::from_utf8(&out[..len as usize]).expect("ASCII");
         assert!(hex.chars().all(|c| c.is_ascii_hexdigit()));
+    }
+
+    /// Der Bund wird von Swift gebaut: `[u32 LE][Schlüssel]`, zwei Empfänger.
+    fn bundle(keys: &[Vec<u8>]) -> Vec<u8> {
+        let mut out = Vec::new();
+        for key in keys {
+            out.extend_from_slice(&(key.len() as u32).to_le_bytes());
+            out.extend_from_slice(key);
+        }
+        out
+    }
+
+    #[test]
+    fn encrypts_to_multiple_recipients_and_decrypts_with_each() {
+        let first = generate_key_with_passphrase(Some("eins"));
+        let second = generate_key_with_passphrase(Some("zwei"));
+        let bundle = bundle(&[
+            first.to_public_key().to_bytes().expect("öffentlich 1"),
+            second
+                .to_public_key()
+                .to_armored_bytes(Default::default())
+                .expect("öffentlich 2"),
+        ]);
+        let plain = b"Content-Type: text/plain\r\n\r\nGeheim mit Umlauten: \xc3\xbc\r\n";
+
+        let mut encrypted = vec![0u8; 64 * 1024];
+        let len = imailpgp_encrypt(
+            plain.as_ptr(),
+            plain.len(),
+            bundle.as_ptr(),
+            bundle.len(),
+            encrypted.as_mut_ptr(),
+            encrypted.len(),
+        );
+        assert!(len > 0);
+        let encrypted = &encrypted[..len as usize];
+        assert!(encrypted.starts_with(b"-----BEGIN PGP MESSAGE-----"));
+
+        for (secret, password) in [(&first, b"eins"), (&second, b"zwei")] {
+            let key = secret.to_armored_bytes(Default::default()).expect("geheim");
+            let mut out = vec![0u8; 64 * 1024];
+            let out_len = imailpgp_decrypt(
+                encrypted.as_ptr(),
+                encrypted.len(),
+                key.as_ptr(),
+                key.len(),
+                password.as_ptr(),
+                password.len(),
+                out.as_mut_ptr(),
+                out.len(),
+            );
+            assert_eq!(
+                out_len,
+                plain.len() as i32,
+                "Entschlüsseln scheiterte: {}",
+                unsafe {
+                    std::ffi::CStr::from_ptr(imailpgp_last_error())
+                        .to_string_lossy()
+                }
+            );
+            assert_eq!(&out[..out_len as usize], plain);
+        }
+    }
+
+    #[test]
+    fn decrypt_rejects_wrong_passphrase_and_foreign_key() {
+        let secret = generate_key_with_passphrase(Some("richtig"));
+        let bundle = bundle(&[secret
+            .to_public_key()
+            .to_bytes()
+            .expect("öffentlich")]);
+        let plain = b"nur fr dich";
+        let mut encrypted = vec![0u8; 64 * 1024];
+        let len = imailpgp_encrypt(
+            plain.as_ptr(),
+            plain.len(),
+            bundle.as_ptr(),
+            bundle.len(),
+            encrypted.as_mut_ptr(),
+            encrypted.len(),
+        );
+        assert!(len > 0);
+
+        let key = secret
+            .to_armored_bytes(Default::default())
+            .expect("geheim");
+        let mut out = vec![0u8; 64 * 1024];
+        let wrong = b"falsch";
+        assert_eq!(
+            imailpgp_decrypt(
+                encrypted.as_ptr(),
+                len as usize,
+                key.as_ptr(),
+                key.len(),
+                wrong.as_ptr(),
+                wrong.len(),
+                out.as_mut_ptr(),
+                out.len(),
+            ),
+            WRONG_PASSWORD
+        );
+
+        // Ein anderer Schlüssel darf den Session Key nicht lesen, auch mit
+        // korrekter Passphrase nicht.
+        let foreign = generate_key_with_passphrase(Some("richtig"));
+        let foreign_key = foreign
+            .to_armored_bytes(Default::default())
+            .expect("geheim");
+        let status = imailpgp_decrypt(
+            encrypted.as_ptr(),
+            len as usize,
+            foreign_key.as_ptr(),
+            foreign_key.len(),
+            wrong.as_ptr(),
+            wrong.len(),
+            out.as_mut_ptr(),
+            out.len(),
+        );
+        assert!(status < 0, "fremder Schlüssel darf nicht entschlüsseln");
+    }
+
+    #[test]
+    fn encrypt_rejects_a_broken_recipient_bundle() {
+        let plain = b"test";
+        let mut out = vec![0u8; 1024];
+        // Länge 4, aber nur zwei Bytes Schlüssel — darf nicht still enden.
+        let broken = [4u8, 0, 0, 0, b'a', b'b'];
+        assert_eq!(
+            imailpgp_encrypt(
+                plain.as_ptr(),
+                plain.len(),
+                broken.as_ptr(),
+                broken.len(),
+                out.as_mut_ptr(),
+                out.len(),
+            ),
+            BAD_ARGUMENT
+        );
     }
 }

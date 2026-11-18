@@ -61,8 +61,57 @@ enum PGPMIMEBuilder {
         signature: Data
     ) -> Data {
         let boundary = "imailsecure-signed-\(UUID().uuidString)"
-        var raw = ""
+        let raw = headers(draft: draft, account: account)
+            + signedBlock(signedEntity: signedEntity, signature: signature, boundary: boundary)
+        return Data(raw.utf8)
+    }
 
+    /// Dieselbe `multipart/signed`-Einheit ohne die RFC-822-Kopfzeilen. Wird
+    /// gebraucht, wenn zusätzlich verschlüsselt wird: sign-then-encrypt
+    /// verschlüsselt die signierte MIME-Einheit als Ganzes.
+    static func signedBlockForEncryption(signedEntity: Data, signature: Data) -> Data {
+        let boundary = "imailsecure-signed-\(UUID().uuidString)"
+        let block = signedBlock(
+            signedEntity: signedEntity,
+            signature: signature,
+            boundary: boundary
+        )
+        return Data(block.utf8)
+    }
+
+    /// Umhüllt eine bereits verschlüsselte MIME-Einheit als
+    /// `multipart/encrypted` (RFC 3156). Der erste Teil ist nur die
+    /// Versionsangabe, der zweite der armierte PGP-Block.
+    static func encryptedMessage(
+        draft: EmailDraft,
+        account: EmailAccount,
+        encryptedEntity: Data
+    ) -> Data {
+        let boundary = "imailsecure-encrypted-\(UUID().uuidString)"
+        var raw = headers(draft: draft, account: account)
+        raw += "Content-Type: multipart/encrypted; "
+        raw += "protocol=\"application/pgp-encrypted\"; boundary=\"\(boundary)\"\r\n"
+        raw += "\r\n"
+        raw += "This is an OpenPGP/MIME encrypted message (RFC 3156)\r\n"
+        raw += "--\(boundary)\r\n"
+        raw += "Content-Type: application/pgp-encrypted\r\n"
+        raw += "Content-Description: PGP definitions\r\n"
+        raw += "\r\n"
+        raw += "Version: 1\r\n"
+        raw += "\r\n--\(boundary)\r\n"
+        raw += "Content-Type: application/octet-stream; name=\"encrypted.asc\"\r\n"
+        raw += "Content-Description: OpenPGP encrypted message\r\n"
+        raw += "Content-Disposition: inline; filename=\"encrypted.asc\"\r\n"
+        raw += "\r\n"
+        raw += crlfArmor(encryptedEntity)
+        raw += "--\(boundary)--\r\n"
+        return Data(raw.utf8)
+    }
+
+    // MARK: – Aufbau
+
+    private static func headers(draft: EmailDraft, account: EmailAccount) -> String {
+        var raw = ""
         raw += "From: \(fromHeader(account: account))\r\n"
         raw += "To: \(addressList(draft.to))\r\n"
         if !draft.cc.isEmpty {
@@ -82,21 +131,28 @@ enum PGPMIMEBuilder {
             raw += "Return-Receipt-To: \(clean(account.email))\r\n"
         }
         raw += "MIME-Version: 1.0\r\n"
-        raw += "Content-Type: multipart/signed; micalg=pgp-sha256; "
-        raw += "protocol=\"application/pgp-signature\"; boundary=\"\(boundary)\"\r\n"
-        raw += "\r\n"
-        raw += "This is an OpenPGP/MIME signed message (RFC 3156)\r\n"
-        raw += "--\(boundary)\r\n"
-        raw += String(decoding: signedEntity, as: UTF8.self)
-        raw += "\r\n--\(boundary)\r\n"
-        raw += "Content-Type: application/pgp-signature; name=\"signature.asc\"\r\n"
-        raw += "Content-Description: OpenPGP digital signature\r\n"
-        raw += "Content-Disposition: attachment; filename=\"signature.asc\"\r\n"
-        raw += "\r\n"
-        raw += crlfArmor(signature)
-        raw += "--\(boundary)--\r\n"
+        return raw
+    }
 
-        return Data(raw.utf8)
+    private static func signedBlock(
+        signedEntity: Data,
+        signature: Data,
+        boundary: String
+    ) -> String {
+        var block = "Content-Type: multipart/signed; micalg=pgp-sha256; "
+        block += "protocol=\"application/pgp-signature\"; boundary=\"\(boundary)\"\r\n"
+        block += "\r\n"
+        block += "This is an OpenPGP/MIME signed message (RFC 3156)\r\n"
+        block += "--\(boundary)\r\n"
+        block += String(decoding: signedEntity, as: UTF8.self)
+        block += "\r\n--\(boundary)\r\n"
+        block += "Content-Type: application/pgp-signature; name=\"signature.asc\"\r\n"
+        block += "Content-Description: OpenPGP digital signature\r\n"
+        block += "Content-Disposition: attachment; filename=\"signature.asc\"\r\n"
+        block += "\r\n"
+        block += crlfArmor(signature)
+        block += "--\(boundary)--\r\n"
+        return block
     }
 
     // MARK: – MIME-Teile

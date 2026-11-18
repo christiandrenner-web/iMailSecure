@@ -275,7 +275,19 @@ Konzept gut, Umsetzung unvollständig. Viele Schutzfunktionen existieren als UI-
 - Opt-in pro Entwurf, nur sichtbar, wenn ein privater Schlüssel für das Konto
   hinterlegt ist. Ohne Schlüssel wird unsigniert versendet — kein wirkungsloser
   Datenschutzschalter.
-- Offen: ausgehende Verschlüsselung, Entschlüsselung und S/MIME.
+**Stand 2026-11-18 — Ver- und Entschlüsselung ergänzt:**
+- Neue FFI `imailpgp_encrypt` und `imailpgp_decrypt`. AES-256 ist fest
+  verdrahtet, mehrere Empfänger teilen einen Session-Schlüssel. Verschlüsselt
+  wird an den Verschlüsselungs-Subkey, nicht an den Signatur-Primärschlüssel.
+  Ein Empfänger ohne öffentlichen Schlüssel (auch BCC) lässt den Versand
+  abbrechen — keine halb verschlüsselte Mail.
+- Ausgehend `multipart/encrypted` nach RFC 3156; bei aktiver Signatur
+  sign-then-encrypt ohne RFC-822-Kopf. Der innere `multipart/signed`-Block wird
+  als Ganzes verschlüsselt und nach dem Öffnen vom selben Verifier geprüft.
+- Eingehend holt `MailSyncEngine` die Rohbytes ohne `\Seen`, probt die lokalen
+  geheimen Schlüssel und zeigt Klartext, Anhänge und Status. Nichts davon wird
+  gespeichert; die Anzeige bleibt bei jedem Öffnen eine frische Prüfung.
+- Offen: S/MIME und Gegenprobe mit echter fremder PGP-Mail.
 
 ---
 
@@ -335,7 +347,7 @@ Konzept gut, Umsetzung unvollständig. Viele Schutzfunktionen existieren als UI-
 | S4 | ✅ erledigt | Blur-Overlay bei willResignActive; Schloss-Icon im App-Umschalter |
 | S5 | 🔴 offen | OAuth 2.0 – Entscheid ausstehend |
 | S6 | 🔴 offen | Entwürfe werden nicht gespeichert |
-| C1 | 🟡 in Arbeit | PGP: entschieden für rpgp (Apache-2.0/MIT, reines Rust). FFI, Swift-Wrapper, Schlüsselbund (Keychain, Import-UI), Signaturprüfung mit Statusbanner, WKD/Autocrypt nur auf ausdrückliche Aktion und ausgehendes Signieren (PGP/MIME, Passphrase im Keychain) stehen (2026-11-18); offen: Verschlüsseln und Entschlüsseln ausgehend/eingehend. S/MIME nicht entschieden |
+| C1 | 🟢 umgesetzt | PGP: rpgp (Apache-2.0/MIT, reines Rust). FFI, Swift-Wrapper, Schlüsselbund (Keychain, Import-UI), Signaturprüfung mit Statusbanner, WKD/Autocrypt nur auf ausdrückliche Aktion, ausgehendes Signieren und Ver-/Entschlüsselung (RFC 3156, AES-256, sign-then-encrypt, Klartext nie gespeichert) stehen (2026-11-18). Offen: Gegenprobe mit echter fremder PGP-Mail; S/MIME nicht entschieden |
 | L1 | ✅ entschieden | **Dual Licensing** (PolyForm Noncommercial + Commercial License); juristische Prüfung von `LICENSE-NONCOMMERCIAL.md`, `LICENSE-COMMERCIAL.md`, `CLA.md` und AGB steht aus |
 
 ---

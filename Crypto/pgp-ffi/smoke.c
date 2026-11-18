@@ -61,6 +61,21 @@ int main(void) {
            sign < 0 ? "ok" : "FEHLER");
     if (sign >= 0) return 1;
 
+    int32_t enc = imailpgp_encrypt(garbage, sizeof(garbage) - 1,
+                                   garbage, sizeof(garbage) - 1,
+                                   out, sizeof(out));
+    printf("encrypt(garbage): %d (erwartet negativ) %s\n", enc,
+           enc < 0 ? "ok" : "FEHLER");
+    if (enc >= 0) return 1;
+
+    int32_t dec = imailpgp_decrypt(garbage, sizeof(garbage) - 1,
+                                   garbage, sizeof(garbage) - 1,
+                                   (const uint8_t *)"", 0,
+                                   out, sizeof(out));
+    printf("decrypt(garbage): %d (erwartet negativ) %s\n", dec,
+           dec < 0 ? "ok" : "FEHLER");
+    if (dec >= 0) return 1;
+
     printf("Fehlermeldung: %s\n", imailpgp_last_error());
     return 0;
 }

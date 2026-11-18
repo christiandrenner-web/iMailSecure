@@ -33,9 +33,26 @@ struct MessageDetailView: View {
     @State private var showRemoteContentDialog = false
     @ObservedObject private var remotePolicy = RemoteContentPolicy.shared
 
-    // PGP – Signatur wird beim Öffnen gegen die Rohbytes geprüft
+    // PGP – Signatur wird beim Öffnen gegen die Rohbytes geprüft,
+    // Verschlüsselung ebenfalls nur auf Knopfdruck beim Öffnen entschlüsselt.
     @State private var pgpStatus: PGPSignatureStatus?
+    @State private var decryptedContent: PGPDecryptedContent?
+    @State private var decryptError: PGPDecryptError?
     @State private var showKeyLookup = false
+
+    /// Anhänge der entschlüsselten Einheit, sonst die des Server-Teils.
+    private var visibleAttachments: [EmailAttachment] {
+        decryptedContent?.attachments ?? message.attachments
+    }
+
+    /// Klartext aus der Entschlüsselung oder — bei unverschlüsselten Mails —
+    /// der Text aus dem Sync. Bei verschlüsselten Mails wird der undurchsichtige
+    /// Hilfetext des Servers nie angezeigt, sondern ein eigener Hinweis im
+    /// PGP-Banner.
+    private var displayedBody: String {
+        if let decryptedContent { return decryptedContent.body }
+        return message.body
+    }
 
     var body: some View {
         ScrollView {
@@ -64,7 +81,7 @@ struct MessageDetailView: View {
                 messageBodySection
 
                 // Anhänge
-                if !message.attachments.isEmpty {
+                if !visibleAttachments.isEmpty {
                     attachmentsSection
                 }
             }
@@ -89,7 +106,7 @@ struct MessageDetailView: View {
         // Signatur erst prüfen, wenn die Ansicht steht; nur bei signierten
         // Mails, damit nicht jede Nachricht ein zweites Mal geladen wird.
         .task(id: message.listID) {
-            await checkSignature()
+            await loadPGP()
         }
         .sheet(isPresented: $showKeyLookup) {
             PGPKeyLookupView(
@@ -98,7 +115,7 @@ struct MessageDetailView: View {
             ) { _ in
                 // Nach der Übernahme sofort neu prüfen: Der Schlüssel liegt
                 // jetzt lokal, die Rohbytes müssen nicht gespeichert werden.
-                Task { await checkSignature() }
+                Task { await loadPGP() }
             }
         }
         // MDN-Bestätigungs-Dialog
@@ -295,12 +312,12 @@ struct MessageDetailView: View {
                         .foregroundStyle(.orange)
                 }
 
-                if message.body.isEmpty {
+                if displayedBody.isEmpty {
                     Text("Keine Textfassung vorhanden.")
                         .font(.body)
                         .foregroundStyle(.secondary)
                 } else {
-                    Text(message.body)
+                    Text(displayedBody)
                         .font(.body)
                         .textSelection(.enabled)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -410,6 +427,8 @@ struct MessageDetailView: View {
 
     private var isUnknownKey: Bool {
         if case .unknownKey = pgpStatus { return true }
+        if let status = decryptedContent?.signatureStatus,
+           case .unknownKey = status { return true }
         return false
     }
 
@@ -427,12 +446,7 @@ struct MessageDetailView: View {
 
     private var pgpBanner: PGPBanner {
         if message.pgpState == .encrypted {
-            return PGPBanner(
-                icon: "lock.fill",
-                tint: .secondary,
-                title: String(localized: "Mit OpenPGP verschlüsselt"),
-                detail: String(localized: "Der Inhalt dieser Nachricht ist verschlüsselt und wird in dieser Version nicht entschlüsselt angezeigt.")
-            )
+            return decryptionBanner
         }
 
         guard let pgpStatus else {
@@ -504,15 +518,106 @@ struct MessageDetailView: View {
         }
     }
 
+    /// Banner für entschlüsselte Mails: Erst der Entschlüsselungsstatus, dann
+    /// — falls die innere Einheit signiert war — deren Prüfergebnis. Beides
+    /// gehört zusammen; eine gültige Signatur über eine nicht entschlüsselte
+    /// Mail wäre wertlos.
+    private var decryptionBanner: PGPBanner {
+        if let decryptError {
+            return PGPBanner(
+                icon: "xmark.seal.fill",
+                tint: .red,
+                title: String(localized: "Entschlüsselung fehlgeschlagen"),
+                detail: decryptError.errorDescription
+            )
+        }
+        guard let decryptedContent else {
+            return PGPBanner(
+                icon: "hourglass",
+                tint: .secondary,
+                title: String(localized: "Wird entschlüsselt …"),
+                detail: nil
+            )
+        }
+
+        let detail = String(
+            format: String(localized: "Mit dem privaten Schlüssel von %@ entschlüsselt. Der Klartext wird nicht gespeichert."),
+            decryptedContent.keyFingerprint
+                ?? String(localized: "unbekannt")
+        )
+        switch decryptedContent.signatureStatus {
+        case .valid(let key):
+            return PGPBanner(
+                icon: "checkmark.seal.fill",
+                tint: .green,
+                title: String(localized: "Entschlüsselt und signiert"),
+                detail: detail + " " + String(
+                    format: String(localized: "Signatur gültig, signiert mit dem Schlüssel von %@."),
+                    key.email
+                ),
+                fingerprint: key.formattedFingerprint
+            )
+        case .invalid:
+            return PGPBanner(
+                icon: "xmark.seal.fill",
+                tint: .red,
+                title: String(localized: "Entschlüsselt – Signatur ungültig"),
+                detail: detail + " " + String(localized: "Die Nachricht wurde nach dem Signieren verändert. Behandle den Inhalt als unzuverlässig.")
+            )
+        case .unknownKey(let issuer, let email):
+            var text = detail + " " + String(
+                format: String(localized: "Für %@ ist kein öffentlicher Schlüssel hinterlegt. Die Signatur lässt sich deshalb nicht prüfen."),
+                email.isEmpty ? String(localized: "diese Adresse") : email
+            )
+            if let issuer, !issuer.isEmpty {
+                text += " " + String(format: String(localized: "Aussteller: %@"), issuer)
+            }
+            return PGPBanner(
+                icon: "questionmark.circle.fill",
+                tint: .orange,
+                title: String(localized: "Entschlüsselt – Schlüssel nicht hinterlegt"),
+                detail: text
+            )
+        case .failed(let reason):
+            return PGPBanner(
+                icon: "exclamationmark.triangle.fill",
+                tint: .orange,
+                title: String(localized: "Entschlüsselt – Prüfung nicht möglich"),
+                detail: detail + " " + reason
+            )
+        case .notSigned, .encrypted:
+            return PGPBanner(
+                icon: "lock.fill",
+                tint: .green,
+                title: String(localized: "Mit OpenPGP entschlüsselt"),
+                detail: detail
+            )
+        }
+    }
+
     @MainActor
-    private func checkSignature() async {
-        guard message.pgpState == .signed else { return }
+    private func loadPGP() async {
+        guard message.pgpState != .none else { return }
         guard let account = accountStore.accounts.first(where: { $0.id == message.accountID }) else {
             return
         }
-        pgpStatus = nil
         let engine = MailSyncEngine(account: account, mailStore: mailStore)
-        pgpStatus = await engine.verifySignature(for: message)
+        switch message.pgpState {
+        case .none:
+            return
+        case .signed:
+            pgpStatus = nil
+            pgpStatus = await engine.verifySignature(for: message)
+        case .encrypted:
+            decryptedContent = nil
+            decryptError = nil
+            switch await engine.decryptMessage(for: message) {
+            case .success(let content):
+                decryptedContent = content
+            case .failure(let error):
+                decryptError = error
+            }
+        }
     }
 
     // MARK: – Kopf
@@ -600,11 +705,11 @@ struct MessageDetailView: View {
 
     private var attachmentsSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Label("Anhänge (\(message.attachments.count))", systemImage: "paperclip")
+            Label("Anhänge (\(visibleAttachments.count))", systemImage: "paperclip")
                 .font(.caption.bold())
                 .foregroundStyle(.secondary)
 
-            ForEach(message.attachments) { att in
+            ForEach(visibleAttachments) { att in
                 Button {
                     selectedAttachment = att
                     showAttachmentSheet = true

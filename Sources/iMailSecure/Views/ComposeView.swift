@@ -89,7 +89,7 @@ struct ComposeView: View {
                     Text("MDN (RFC 8098): Benachrichtigung wenn die Mail geöffnet wird.")
                 }
 
-                // OpenPGP – Signieren nur, wenn wirklich ein Schlüssel da ist
+                // OpenPGP – nur anbieten, wenn wirklich Schlüssel da sind
                 Section {
                     if viewModel.canSign {
                         Toggle(isOn: $viewModel.draft.pgpSign) {
@@ -98,6 +98,33 @@ struct ComposeView: View {
                         .tint(.blue)
                     } else {
                         Text("Für dieses Konto ist kein privater Schlüssel hinterlegt. Die Mail wird unsigniert versendet.")
+                            .foregroundStyle(.secondary)
+                    }
+
+                    if viewModel.canEncrypt {
+                        Toggle(isOn: $viewModel.draft.pgpEncrypt) {
+                            Label("Verschlüsseln", systemImage: "lock")
+                        }
+                        .tint(.green)
+                    } else if !viewModel.missingEncryptionKeys.isEmpty {
+                        VStack(alignment: .leading, spacing: 6) {
+                            ForEach(viewModel.missingEncryptionKeys, id: \.self) { address in
+                                Label(
+                                    String(
+                                        format: String(localized: "Für %@ ist kein öffentlicher Schlüssel hinterlegt. Die Nachricht kann nicht verschlüsselt werden."),
+                                        address
+                                    ),
+                                    systemImage: "key.slash"
+                                )
+                                .font(.caption)
+                                .foregroundStyle(.orange)
+                            }
+                        }
+                    }
+
+                    if viewModel.draft.pgpSign && viewModel.draft.pgpEncrypt {
+                        Text("Signiert und verschlüsselt: Die Nachricht wird zuerst digital signiert und dann verschlüsselt.")
+                            .font(.caption)
                             .foregroundStyle(.secondary)
                     }
                 } header: {

@@ -23,6 +23,19 @@ final class ComposeViewModel: ObservableObject {
         PGPPrivateKeyStore.shared.hasKey(forEmail: account.email)
     }
 
+    /// Empfänger, für die kein geprüfter öffentlicher Schlüssel vorliegt.
+    /// Verschlüsseln darf nur angeboten werden, wenn diese Liste leer ist —
+    /// sonst würde eine Mail an einen Empfänger unlesbar oder halb verschlüsselt.
+    var missingEncryptionKeys: [String] {
+        (draft.to + draft.cc + draft.bcc)
+            .map(\.address)
+            .filter { !PGPKeyStore.shared.hasKey(forEmail: $0) }
+    }
+
+    var canEncrypt: Bool {
+        !draft.to.isEmpty && missingEncryptionKeys.isEmpty
+    }
+
     init(account: EmailAccount, defaults: UserDefaults = .standard) {
         self.account     = account
         self.smtpManager = SMTPManager(account: account)
@@ -70,7 +83,11 @@ final class ComposeViewModel: ObservableObject {
 
         Task {
             do {
-                try await smtpManager.sendEmail(draft: draft, sign: draft.pgpSign && canSign)
+                try await smtpManager.sendEmail(
+                    draft: draft,
+                    sign: draft.pgpSign && canSign,
+                    encrypt: draft.pgpEncrypt && canEncrypt
+                )
                 let sentDraft = draft
                 isLoading      = false
                 successMessage = String(localized: "compose.success.sent",
