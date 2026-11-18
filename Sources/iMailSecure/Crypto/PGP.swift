@@ -183,6 +183,26 @@ enum PGP {
         }
     }
 
+    /// Liest den Aussteller einer abgetrennten Signatur: den Fingerprint, oder
+    /// ersatzweise die Key ID (16 Hexzeichen). Nur ein Hinweis darauf, welchen
+    /// Schlüssel man zur Prüfung heranziehen sollte — die Prüfung selbst
+    /// bleibt `verifyDetached`.
+    static func signatureIssuer(in signature: Data) throws -> String? {
+        var output = [UInt8](repeating: 0, count: 128)
+        let length = withBytes(signature) { bytes, count in
+            output.withUnsafeMutableBufferPointer { buffer in
+                imailpgp_signature_issuer(bytes, count, buffer.baseAddress, buffer.count)
+            }
+        }
+        if length == 0 {
+            return nil
+        }
+        guard length > 0 else {
+            throw PGPError.unreadableSignature(detail: lastError)
+        }
+        return String(decoding: output[0..<Int(length)], as: UTF8.self)
+    }
+
     // MARK: – Intern
 
     /// Letzte Fehlermeldung des aktuellen Threads. Leer, wenn kein Fehler.

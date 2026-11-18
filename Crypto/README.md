@@ -45,7 +45,8 @@ cd Crypto/pgp-ffi && cargo test --release
 
 Deckt ab: Schlüsselerzeugung, abgetrennte Signatur (gültig, manipuliert,
 leere Nutzdaten), armierte Schlüssel und Signaturen, Parsen von Müll,
-Fingerprint. Die Kryptographie ist plattformunabhängig; der iOS-Build wird
+Fingerprint, User-ID und Signaturaussteller. Die Kryptographie ist
+plattformunabhängig; der iOS-Build wird
 zusätzlich mit `Crypto/pgp-ffi/smoke.c` gegen die Simulator-Slice geprüft
 (ABI, Symbole, Rückgabewerte):
 
@@ -57,8 +58,8 @@ clang -target arm64-apple-ios18.0-simulator -isysroot "$SDK" \
 xcrun simctl spawn booted /tmp/imailpgp-smoke
 ```
 
-Die Swift-Seite prüft `Tests/iMailSecureTests/PGPTests.swift` (10 Tests) gegen
-dieselbe Bibliothek. Die Testdaten liegen in
+Die Swift-Seite prüft `PGPTests.swift` (10), `PGPKeyStoreTests.swift` (6) und
+`PGPSignatureTests.swift` (13) gegen dieselbe Bibliothek. Die Testdaten liegen in
 `Tests/iMailSecureTests/Fixtures/PGPFixtures.swift` und werden erzeugt mit:
 
 ```bash
@@ -74,11 +75,16 @@ cd Crypto/pgp-ffi && cargo run --release --example make_fixtures
 | `imailpgp_verify_detached` | fertig |
 | `imailpgp_primary_fingerprint` | fertig |
 | `imailpgp_primary_user_id` | fertig |
+| `imailpgp_signature_issuer` | fertig |
 | Swift-Wrapper `PGP.swift` | fertig |
 | Schlüsselbund `PGPKeyStore` (Keychain) + Import-UI | fertig |
+| Eingehende Signaturprüfung (`PGPSignature.swift`) | fertig |
 | Signieren ausgehend | offen |
 | Ent-/Verschlüsseln (`MessageBuilder`, `Message`) | offen |
-| Passphrase-Schutz (Secure Enclave) | offen |
+| Passphrase-Schutz des geheimen Schlüssels (Keychain `ThisDeviceOnly`) | offen |
+
+Die Secure Enclave speichert nur P-256-Schlüssel; OpenPGP-Schlüssel bleiben
+deshalb im Keychain mit `ThisDeviceOnly`-Zugriff und ohne iCloud-Synchronisation.
 
 Fehler werden als negative Int32 gemeldet, nie als Panic über die Grenze:
 Jede Funktion fängt Panics ab und legt eine thread-lokale Meldung in

@@ -1,5 +1,5 @@
 # STATE — iMail Secure
-Stand: 2026-11-17 · Branch: `main` · Letzter Code-Commit: `4f2a6a8` · Build: **SUCCEEDED** (iOS + macOS) · Tests: **146 Unit-Tests (4 übersprungen) + 3 UI-Tests grün** · PGP: FFI eingebunden, Swift-Wrapper, Schlüsselbund im Keychain, 6 Rust- und 16 Swift-Tests grün
+Stand: 2026-11-18 · Branch: `main` · Letzter Code-Commit: `ec03d26` · Build: **SUCCEEDED** (iOS + macOS) · Tests: **159 Unit-Tests (4 übersprungen) + 3 UI-Tests grün** · PGP: FFI, Swift-Wrapper, Schlüsselbund und eingehende Signaturprüfung, 7 Rust- und 29 Swift-Tests grün
 
 ## Ziel
 App-Store-fähige Version: echte IMAP-Ordner, Datenschutz nach D2, Free/Pro ohne
@@ -34,6 +34,21 @@ beschnittene Schutzfunktionen. Keine offenen Code-Fehler bekannt.
 - L1 Lizenz: entschieden (PolyForm Noncommercial 1.0.0), juristische Prüfung steht aus
 
 ## Zuletzt erledigt
+- 2026-11-18 Eingehende PGP-Signaturprüfung: `MailSyncEngine` erkennt
+  `multipart/signed` und `multipart/encrypted` an den MIME-Teilen; die
+  Detailansicht lädt beim Öffnen einer signierten Mail die Rohbytes per
+  `fetchRawMessage` (setzt kein `\Seen`) und zeigt ein Banner: gültig mit
+  Fingerprint, ungültig, Schlüssel nicht hinterlegt (mit Aussteller) oder
+  Prüfung nicht möglich. Verschlüsselte Mails werden ehrlich als solche
+  markiert, nicht entschlüsselt.
+  Neue Datei `Crypto/PGPSignature.swift`: RFC-3156-Parser, Prüfung über die
+  Rohbytes des ersten Teils, Schlüsselwahl über den Signaturaussteller
+  (`imailpgp_signature_issuer`, Fingerprint oder Key ID), Toleranz für
+  CRLF/LF und das umstrittene abschließende Zeilenende. Keine Speicherung
+  des Roh-MIME, keine stillen Netzwerkabfragen außer dem einen Abruf beim
+  Öffnen. 13 neue Swift-Tests mit echt signierten Fixtures (CRLF, LF,
+  manipuliert, fremder Schlüssel, S/MIME, Erkennung im Sync); 7 Rust-Tests,
+  159 Unit-Tests gesamt (4 StoreKit opt-in), iOS- und macOS-Build grün
 - 2026-11-17 PGP-Schlüsselbund: `PGPKeyStore` legt importierte öffentliche
   Schlüssel als JSON im Keychain ab (`io.imailsecure.pgpkeys`,
   `AfterFirstUnlockThisDeviceOnly`, kein iCloud-Sync), ein Eintrag pro
@@ -146,12 +161,11 @@ beschnittene Schutzfunktionen. Keine offenen Code-Fehler bekannt.
 - 2026-11-02 `52f2d99` Free/Pro (StoreKit 2), Apple-Trial, Multi-Account-Fix
 
 ## Nächster Schritt
-1. PGP-Stufe 1c: Signaturprüfung eingehend verdrahten — `fetchRawMessage`
-   beim Öffnen einer Nachricht, Status (gültig / ungültig / Schlüssel
-   unbekannt) in `MessageDetailView`. Der Schlüsselbund und die Import-UI
-   stehen bereits.
-2. WKD-Lookup und Autocrypt-Header (nur auf ausdrückliche Aktion, keine
-   stillen Keyserver-Abfragen).
+1. PGP-Stufe 2a: WKD-Lookup und Autocrypt-Header (nur auf ausdrückliche
+   Aktion, keine stillen Keyserver-Abfragen). Gefundene Schlüssel landen im
+   bestehenden Schlüsselbund; die Import-UI bleibt der Kontrollpunkt.
+2. Signaturprüfung an echten Konten gegenprobe: Eine signierte Mail von GMX
+   oder Gmail öffnen und das Banner mit einem externen Verifier vergleichen.
 3. Verschlüsseln und Signieren ausgehend über `MessageBuilder`, inkl.
    Passphrase-Schutz des geheimen Schlüssels.
 4. Push-Relay: Zielumgebung mit dem Nutzer festlegen (Domain, NAS oder VPS),

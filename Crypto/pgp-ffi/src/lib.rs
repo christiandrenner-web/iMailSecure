@@ -274,6 +274,70 @@ pub extern "C" fn imailpgp_primary_user_id(
     })
 }
 
+/// Hexadezimal, Großbuchstaben — für Key IDs, die rpgp nicht selbst als
+/// String ausgibt.
+fn hex_upper(bytes: &[u8]) -> String {
+    bytes.iter().map(|b| format!("{b:02X}")).collect()
+}
+
+/// Schreibt den Aussteller einer abgetrennten Signatur als Hex in `out`:
+/// bevorzugt den Issuer-Fingerprint (v4/v6), sonst die 8-Byte-Key-ID
+/// (16 Hexzeichen). Nur ein Hinweis, welche Schlüssel zu prüfen sind —
+/// die eigentliche Prüfung macht `imailpgp_verify_detached`.
+/// Rückgabe: Länge (>0), 0 = kein Aussteller angegeben, negativ = Fehler.
+#[no_mangle]
+pub extern "C" fn imailpgp_signature_issuer(
+    signature: *const u8,
+    signature_len: usize,
+    out: *mut u8,
+    out_len: usize,
+) -> i32 {
+    let result = catch_unwind(AssertUnwindSafe(|| {
+        let Some(sig_bytes) = bytes_from(signature, signature_len) else {
+            set_error("leere Signatur");
+            return BAD_ARGUMENT;
+        };
+        if out.is_null() || out_len == 0 {
+            set_error("Ausgabepuffer fehlt");
+            return BAD_ARGUMENT;
+        }
+        let sig = match parse_detached_signature(sig_bytes) {
+            Ok(sig) => sig,
+            Err(error) => {
+                set_error(format!("Signatur nicht lesbar: {error}"));
+                return PARSE_ERROR;
+            }
+        };
+        let issuer = sig
+            .signature
+            .issuer_fingerprint()
+            .first()
+            .map(|fingerprint| fingerprint.to_string().to_uppercase())
+            .or_else(|| {
+                sig.signature
+                    .issuer_key_id()
+                    .first()
+                    .map(|key_id| hex_upper(key_id.as_ref()))
+            });
+        let Some(issuer) = issuer else {
+            set_error("");
+            return 0;
+        };
+        let bytes = issuer.as_bytes();
+        if bytes.len() > out_len {
+            set_error("Ausgabepuffer zu klein");
+            return BAD_ARGUMENT;
+        }
+        // SAFETY: `out` zeigt auf mindestens `out_len` beschreibbare Bytes.
+        unsafe { ptr::copy_nonoverlapping(bytes.as_ptr(), out, bytes.len()) };
+        bytes.len() as i32
+    }));
+    result.unwrap_or_else(|_| {
+        set_error("Panic beim Lesen des Ausstellers");
+        PANIC
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -421,6 +485,38 @@ mod tests {
         assert_eq!(
             imailpgp_parse_public_key(garbage.as_ptr(), garbage.len()),
             PARSE_ERROR
+        );
+    }
+
+    #[test]
+    fn reports_signature_issuer() {
+        // Der Aussteller ist der Hinweis, welchen Schlüssel die App zum
+        // Prüfen heranziehen muss. Fingerprint (v4) oder Key ID, nie leer.
+        let secret = generate_key();
+        let public = secret.to_public_key();
+        let signature = DetachedSignature::sign_binary_data(
+            &mut rand::thread_rng(),
+            &secret.primary_key,
+            &Password::empty(),
+            HashAlgorithm::Sha256,
+            &b"aussteller"[..],
+        )
+        .expect("signieren");
+        let sig_bytes = signature.to_bytes().expect("serialisieren");
+
+        let mut out = [0u8; 128];
+        let len = imailpgp_signature_issuer(
+            sig_bytes.as_ptr(),
+            sig_bytes.len(),
+            out.as_mut_ptr(),
+            out.len(),
+        );
+        assert!(len > 0);
+        let issuer = std::str::from_utf8(&out[..len as usize]).expect("UTF-8");
+        let fingerprint = public.fingerprint().to_string().to_uppercase();
+        assert!(
+            fingerprint.ends_with(issuer) || issuer == fingerprint,
+            "Aussteller {issuer} passt nicht zu {fingerprint}"
         );
     }
 

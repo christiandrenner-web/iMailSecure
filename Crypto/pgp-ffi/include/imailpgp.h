@@ -42,6 +42,11 @@ int32_t imailpgp_verify_detached(const uint8_t *signature, size_t signature_len,
 int32_t imailpgp_primary_user_id(const uint8_t *key, size_t key_len,
                                  uint8_t *out, size_t out_len);
 
+/// Schreibt den Aussteller der Signatur als Hex (Fingerprint, sonst Key ID)
+/// in `out`. Rückgabe: Länge, 0 = kein Aussteller angegeben, negativ = Fehler.
+int32_t imailpgp_signature_issuer(const uint8_t *signature, size_t signature_len,
+                                  uint8_t *out, size_t out_len);
+
 /// Schreibt den Fingerprint des primären Schlüssels als Hex in `out`
 /// (mindestens 40 Bytes, 64 für v6). Rückgabe: Länge oder negativ.
 int32_t imailpgp_primary_fingerprint(const uint8_t *key, size_t key_len,

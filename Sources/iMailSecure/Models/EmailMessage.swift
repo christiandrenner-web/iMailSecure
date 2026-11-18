@@ -32,6 +32,11 @@ struct EmailMessage: Identifiable, Equatable {
 
     var folder: String              = "INBOX"
 
+    /// PGP-Zustand, beim Sync aus der MIME-Struktur erkannt. Bestimmt, ob die
+    /// Detailansicht die Rohbytes nachlädt, um die Signatur zu prüfen — ohne
+    /// diesen Hinweis würde jede Mail einen zweiten Abruf auslösen.
+    var pgpState: PGPMessageState    = .none
+
     /// Eindeutig innerhalb von Konto und Ordner. Die Message-ID allein
     /// reicht nicht: Eine Mail kann auf dem Server in mehreren Ordnern
     /// liegen (Gmail-Labels, „Alle Nachrichten"). `id` bleibt die

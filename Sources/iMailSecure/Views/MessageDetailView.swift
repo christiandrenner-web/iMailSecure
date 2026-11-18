@@ -33,6 +33,9 @@ struct MessageDetailView: View {
     @State private var showRemoteContentDialog = false
     @ObservedObject private var remotePolicy = RemoteContentPolicy.shared
 
+    // PGP – Signatur wird beim Öffnen gegen die Rohbytes geprüft
+    @State private var pgpStatus: PGPSignatureStatus?
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
@@ -40,6 +43,11 @@ struct MessageDetailView: View {
                 headerSection
 
                 Divider()
+
+                // PGP-Status (nur bei signierten/verschlüsselten Mails)
+                if message.pgpState != .none {
+                    pgpStatusSection
+                }
 
                 // Lesebestätigungs-Banner (empfangen)
                 if message.receiptReceived {
@@ -76,6 +84,11 @@ struct MessageDetailView: View {
                     showMDNDialog = true
                 }
             }
+        }
+        // Signatur erst prüfen, wenn die Ansicht steht; nur bei signierten
+        // Mails, damit nicht jede Nachricht ein zweites Mal geladen wird.
+        .task(id: message.listID) {
+            await checkSignature()
         }
         // MDN-Bestätigungs-Dialog
         .confirmationDialog(
@@ -335,6 +348,140 @@ struct MessageDetailView: View {
     }
 
     // MARK: – Header
+
+    // MARK: – PGP-Status
+
+    /// Zeigt das Ergebnis der Signaturprüfung. Bewusst ein Banner direkt
+    /// unter dem Kopf: Wer eine Mail liest, soll sehen, ob sie unverändert
+    /// ist, ohne danach suchen zu müssen.
+    @ViewBuilder
+    private var pgpStatusSection: some View {
+        let banner = pgpBanner
+        VStack(alignment: .leading, spacing: 4) {
+            Label {
+                Text(banner.title)
+                    .font(.callout.bold())
+            } icon: {
+                Image(systemName: banner.icon)
+            }
+            .foregroundStyle(banner.tint)
+
+            if let detail = banner.detail {
+                Text(detail)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            if let fingerprint = banner.fingerprint {
+                Text(fingerprint)
+                    .font(.system(.caption2, design: .monospaced))
+                    .foregroundStyle(.secondary)
+                    .textSelection(.enabled)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(10)
+        .background(banner.tint.opacity(0.10), in: RoundedRectangle(cornerRadius: 10))
+    }
+
+    private struct PGPBanner {
+        let icon: String
+        let tint: Color
+        let title: String
+        let detail: String?
+        var fingerprint: String? = nil
+    }
+
+    private var pgpBanner: PGPBanner {
+        if message.pgpState == .encrypted {
+            return PGPBanner(
+                icon: "lock.fill",
+                tint: .secondary,
+                title: String(localized: "Mit OpenPGP verschlüsselt"),
+                detail: String(localized: "Der Inhalt dieser Nachricht ist verschlüsselt und wird in dieser Version nicht entschlüsselt angezeigt.")
+            )
+        }
+
+        guard let pgpStatus else {
+            return PGPBanner(
+                icon: "hourglass",
+                tint: .secondary,
+                title: String(localized: "Signatur wird geprüft …"),
+                detail: nil
+            )
+        }
+
+        switch pgpStatus {
+        case .valid(let key):
+            return PGPBanner(
+                icon: "checkmark.seal.fill",
+                tint: .green,
+                title: String(localized: "Signatur gültig"),
+                detail: String(
+                    format: String(localized: "Die Nachricht ist unverändert. Signiert mit dem Schlüssel von %@."),
+                    key.email
+                ),
+                fingerprint: key.formattedFingerprint
+            )
+        case .invalid:
+            return PGPBanner(
+                icon: "xmark.seal.fill",
+                tint: .red,
+                title: String(localized: "Signatur ungültig"),
+                detail: String(localized: "Die Nachricht wurde nach dem Signieren verändert, oder die Signatur stammt nicht von dem Schlüssel, den sie beansprucht. Behandle den Inhalt als unzuverlässig.")
+            )
+        case .unknownKey(let issuer, let email):
+            var detail = String(
+                format: String(localized: "Für %@ ist kein öffentlicher Schlüssel hinterlegt. Die Signatur lässt sich deshalb nicht prüfen."),
+                email.isEmpty ? String(localized: "diese Adresse") : email
+            )
+            if let issuer, !issuer.isEmpty {
+                detail += " " + String(
+                    format: String(localized: "Aussteller: %@"),
+                    issuer
+                )
+            }
+            return PGPBanner(
+                icon: "questionmark.circle.fill",
+                tint: .orange,
+                title: String(localized: "Schlüssel nicht hinterlegt"),
+                detail: detail
+            )
+        case .failed(let reason):
+            return PGPBanner(
+                icon: "exclamationmark.triangle.fill",
+                tint: .orange,
+                title: String(localized: "Prüfung nicht möglich"),
+                detail: reason.isEmpty ? nil : reason
+            )
+        case .encrypted:
+            return PGPBanner(
+                icon: "lock.fill",
+                tint: .secondary,
+                title: String(localized: "Mit OpenPGP verschlüsselt"),
+                detail: nil
+            )
+        case .notSigned:
+            return PGPBanner(
+                icon: "info.circle",
+                tint: .secondary,
+                title: String(localized: "Nicht signiert"),
+                detail: nil
+            )
+        }
+    }
+
+    @MainActor
+    private func checkSignature() async {
+        guard message.pgpState == .signed else { return }
+        guard let account = accountStore.accounts.first(where: { $0.id == message.accountID }) else {
+            return
+        }
+        pgpStatus = nil
+        let engine = MailSyncEngine(account: account, mailStore: mailStore)
+        pgpStatus = await engine.verifySignature(for: message)
+    }
+
+    // MARK: – Kopf
 
     private var headerSection: some View {
         VStack(alignment: .leading, spacing: 8) {

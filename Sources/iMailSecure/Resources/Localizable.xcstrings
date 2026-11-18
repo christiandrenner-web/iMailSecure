@@ -783,6 +783,40 @@
         }
       }
     },
+    "Aussteller: %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Issuer: %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emisor: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Émetteur : %@"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Издатель: %@"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Veren: %@"
+          }
+        }
+      }
+    },
     "BCC": {
       "localizations": {
         "en": {
@@ -1395,6 +1429,40 @@
         }
       }
     },
+    "Der Inhalt dieser Nachricht ist verschlüsselt und wird in dieser Version nicht entschlüsselt angezeigt.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The content of this message is encrypted and is not decrypted in this version."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El contenido de este mensaje está cifrado y no se descifra en esta versión."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le contenu de ce message est chiffré et n'est pas déchiffré dans cette version."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Содержимое этого сообщения зашифровано и в этой версии не расшифровывается."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bu iletinin içeriği şifrelenmiştir ve bu sürümde şifresi çözülmez."
+          }
+        }
+      }
+    },
     "Der Ordner und alle enthaltenen Nachrichten werden auf dem Server gelöscht. Das lässt sich nicht rückgängig machen.": {
       "localizations": {
         "en": {
@@ -1663,6 +1731,74 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kriptografi kitaplığı bir hata bildirdi."
+          }
+        }
+      }
+    },
+    "Die Nachricht ist unverändert. Signiert mit dem Schlüssel von %@.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The message is unchanged. Signed with the key of %@."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El mensaje no ha cambiado. Firmado con la clave de %@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le message est inchangé. Signé avec la clé de %@."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сообщение не изменено. Подписано ключом %@."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İleti değiştirilmemiş. %@ anahtarıyla imzalanmış."
+          }
+        }
+      }
+    },
+    "Die Nachricht wurde nach dem Signieren verändert, oder die Signatur stammt nicht von dem Schlüssel, den sie beansprucht. Behandle den Inhalt als unzuverlässig.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The message was altered after signing, or the signature does not come from the key it claims. Treat the content as unreliable."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El mensaje se modificó después de firmarse, o la firma no procede de la clave que afirma. Trata el contenido como poco fiable."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le message a été modifié après signature, ou la signature ne provient pas de la clé qu'elle revendique. Considérez le contenu comme non fiable."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сообщение изменено после подписания или подпись принадлежит не тому ключу, который заявлен. Считайте содержимое ненадёжным."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İleti imzalandıktan sonra değiştirilmiş veya imza iddia ettiği anahtara ait değil. İçeriği güvenilmez kabul edin."
           }
         }
       }
@@ -2445,6 +2581,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "İzin yalnızca bu e-posta için geçerlidir ve kapattığınızda sona erer."
+          }
+        }
+      }
+    },
+    "Für %@ ist kein öffentlicher Schlüssel hinterlegt. Die Signatur lässt sich deshalb nicht prüfen.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No public key is stored for %@. The signature therefore cannot be verified."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay ninguna clave pública guardada para %@. Por eso no se puede verificar la firma."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune clé publique n'est enregistrée pour %@. La signature ne peut donc pas être vérifiée."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Для %@ нет сохранённого открытого ключа. Поэтому подпись нельзя проверить."
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ için kayıtlı açık anahtar yok. Bu nedenle imza doğrulanamıyor."
           }
         }
       }
@@ -3741,6 +3911,40 @@
         }
       }
     },
+    "Mit OpenPGP verschlüsselt": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Encrypted with OpenPGP"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cifrado con OpenPGP"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chiffré avec OpenPGP"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Зашифровано с OpenPGP"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenPGP ile şifrelenmiş"
+          }
+        }
+      }
+    },
     "Nachricht": {
       "localizations": {
         "en": {
@@ -3907,6 +4111,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Yeni parola (boş = değişmez)"
+          }
+        }
+      }
+    },
+    "Nicht signiert": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not signed"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin firma"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Non signé"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Без подписи"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İmzasız"
           }
         }
       }
@@ -4628,6 +4866,40 @@
         }
       }
     },
+    "Prüfung nicht möglich": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verification not possible"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se puede verificar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vérification impossible"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Проверка невозможна"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Doğrulama mümkün değil"
+          }
+        }
+      }
+    },
     "Quellcode": {
       "localizations": {
         "en": {
@@ -4866,6 +5138,40 @@
         }
       }
     },
+    "Schlüssel nicht hinterlegt": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Key not available"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clave no disponible"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clé non disponible"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ключ не сохранён"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Anahtar yok"
+          }
+        }
+      }
+    },
     "Senden": {
       "localizations": {
         "en": {
@@ -5032,6 +5338,108 @@
           "stringUnit": {
             "state": "translated",
             "value": "Güvenlik"
+          }
+        }
+      }
+    },
+    "Signatur gültig": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Signature valid"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Firma válida"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Signature valide"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подпись действительна"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İmza geçerli"
+          }
+        }
+      }
+    },
+    "Signatur ungültig": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Invalid signature"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Firma no válida"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Signature invalide"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Подпись недействительна"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İmza geçersiz"
+          }
+        }
+      }
+    },
+    "Signatur wird geprüft …": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Checking signature…"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Comprobando la firma…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vérification de la signature…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Проверка подписи…"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "İmza kontrol ediliyor…"
           }
         }
       }
@@ -6132,6 +6540,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Görünen ad (“%@”) gönderen alan adıyla (%@) eşleşmiyor."
+          }
+        }
+      }
+    },
+    "diese Adresse": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "this address"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "esta dirección"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "cette adresse"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "этот адрес"
+          }
+        },
+        "tr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "bu adres"
           }
         }
       }

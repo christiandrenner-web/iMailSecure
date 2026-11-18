@@ -69,6 +69,60 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let armored_sig = String::from_utf8(signature.to_armored_bytes(Default::default())?)?;
     let fingerprint = public.fingerprint().to_string().to_uppercase();
 
+    // --- PGP/MIME (RFC 3156) ------------------------------------------------
+    // Eine echte Nachricht: die Signatur gilt über die Rohbytes des ersten
+    // Teils, inklusive seiner MIME-Kopfzeilen. Genau das muss der Parser
+    // extrahieren — deshalb wird hier nicht irgendetwas „vereinfacht".
+    let signed_entity = "Content-Type: text/plain; charset=utf-8\r\n\
+                         Content-Transfer-Encoding: 8bit\r\n\
+                         \r\n\
+                         Hallo PGP/MIME,\r\n\
+                         \r\n\
+                         dieser Text ist signiert.";
+
+    let mime_signature = DetachedSignature::sign_binary_data(
+        &mut rand::thread_rng(),
+        &secret.primary_key,
+        &Password::empty(),
+        HashAlgorithm::Sha256,
+        signed_entity.as_bytes(),
+    )?;
+    let mime_sig_armored = String::from_utf8(
+        mime_signature.to_armored_bytes(Default::default())?,
+    )?
+    .replace('\n', "\r\n");
+
+    let boundary = "imailsecure-test-boundary";
+    let signed_message = format!(
+        "From: iMail Secure Test <test@imailsecure.invalid>\r\n\
+         To: empfaenger@imailsecure.invalid\r\n\
+         Subject: Signierte Testnachricht\r\n\
+         Date: Tue, 17 Nov 2026 10:00:00 +0000\r\n\
+         MIME-Version: 1.0\r\n\
+         Content-Type: multipart/signed; micalg=pgp-sha256; protocol=\"application/pgp-signature\"; boundary=\"{boundary}\"\r\n\
+         \r\n\
+         This is an OpenPGP/MIME signed message (RFC 3156)\r\n\
+         --{boundary}\r\n\
+         {signed_entity}\r\n\
+         --{boundary}\r\n\
+         Content-Type: application/pgp-signature; name=\"signature.asc\"\r\n\
+         Content-Description: OpenPGP digital signature\r\n\
+         Content-Disposition: attachment; filename=\"signature.asc\"\r\n\
+         \r\n\
+         {mime_sig_armored}--{boundary}--\r\n"
+    );
+
+    // Dieselbe Nachricht mit LF-only-Zustellung und einer im Text veränderten
+    // Fassung: Beides muss der Parser unterscheiden können. Die Swift-Fixture
+    // hält LF fest; CRLF entsteht im Test per Ersetzung, weil Swift-
+    // Mehrzeilenliterale keine CRLF zuverlässig abbilden.
+    let tampered_message = signed_message.replace(
+        "dieser Text ist signiert.",
+        "dieser Text wurde verändert.",
+    );
+    let signed_message_lf = signed_message.replace("\r\n", "\n");
+    let tampered_message_lf = tampered_message.replace("\r\n", "\n");
+
     let swift = format!(
         r#"// PGPFixtures.swift — Testdaten, erzeugt mit
 // `cargo run --example make_fixtures` in Crypto/pgp-ffi.
@@ -95,6 +149,22 @@ enum PGPFixtures {{
     /// Armierte abgetrennte Signatur über `payload`.
     static let signature = """
 {armored_sig}"""
+
+    /// Vollständige PGP/MIME-Nachricht (RFC 3156): erster Teil signiert,
+    /// zweiter Teil die Signatur. Hier mit LF; `signedMessageCRLF` liefert
+    /// dieselbe Nachricht so, wie sie über SMTP läuft.
+    static let signedMessage = """
+{signed_message_lf}"""
+
+    /// Dieselbe Nachricht mit CRLF-Zeilenenden.
+    static var signedMessageCRLF: String {{
+        signedMessage.replacingOccurrences(of: "\n", with: "\r\n")
+    }}
+
+    /// Dieselbe Nachricht, ein Wort im Text verändert — die Signatur muss
+    /// dann als ungültig erkannt werden.
+    static let tamperedSignedMessage = """
+{tampered_message_lf}"""
 
     /// Fingerprint des primären Schlüssels, Großbuchstaben-Hex.
     static let fingerprint = "{fingerprint}"

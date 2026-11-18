@@ -241,6 +241,30 @@ final class MailSyncEngine {
         }
     }
 
+    // MARK: – PGP
+
+    /// Lädt die Rohbytes einer Nachricht und prüft eine PGP/MIME-Signatur.
+    ///
+    /// `fetchRawMessage` setzt kein `\Seen`; die Mail bleibt ungelesen, bis
+    /// der Nutzer sie wirklich liest. Es wird nichts zwischengespeichert: Die
+    /// Prüfung gilt immer dem, was gerade auf dem Server liegt.
+    func verifySignature(for message: EmailMessage) async -> PGPSignatureStatus {
+        do {
+            let raw = try await withServer { server -> Data in
+                try await server.selectMailbox(message.folder)
+                return try await server.fetchRawMessage(identifier: UID(message.uid))
+            }
+            return PGPSignatureVerifier.analyze(
+                raw: raw,
+                senderEmail: message.from.address,
+                keys: PGPKeyStore.shared.keys()
+            )
+        } catch {
+            logger.error("Signaturprüfung fehlgeschlagen: \(error.localizedDescription)")
+            return .failed(error.localizedDescription)
+        }
+    }
+
     // MARK: – Verbindung
 
     /// Eine Verbindung pro Operation. Konto-Passwort, TLS-Pinning und
@@ -357,6 +381,24 @@ final class MailSyncEngine {
             )
         }
 
+        // PGP am MIME erkennen, nicht raten: `multipart/encrypted` und
+        // `application/pgp-encrypted` bedeuten verschlüsselt, eine
+        // Signaturteil `application/pgp-signature` bedeutet signiert.
+        // Nur dann lohnt der zusätzliche Rohabruf beim Öffnen.
+        let contentTypes = msg.parts.map { $0.contentType.lowercased() }
+        let pgpState: PGPMessageState
+        if contentTypes.contains(where: {
+            $0.hasPrefix("multipart/encrypted") || $0.hasPrefix("application/pgp-encrypted")
+        }) {
+            pgpState = .encrypted
+        } else if contentTypes.contains(where: {
+            $0.hasPrefix("multipart/signed") || $0.hasPrefix("application/pgp-signature")
+        }) {
+            pgpState = .signed
+        } else {
+            pgpState = .none
+        }
+
         return EmailMessage(
             id: msgID,
             uid: uidValue,
@@ -373,7 +415,8 @@ final class MailSyncEngine {
             isRead: isRead,
             attachments: attachments,
             mdnRequested: mdnRequested,
-            folder: folder
+            folder: folder,
+            pgpState: pgpState
         )
     }
 }
